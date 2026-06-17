@@ -1,0 +1,107 @@
+/* === DESIGN TOKENS — Light + Pink (ChungĐôi style) ===
+   Giữ nguyên TÊN biến cũ, chỉ đổi GIÁ TRỊ → component cũ tự đổi theo. */
+:root {
+  /* Light Mode (Default) */
+  --bg-primary: #ffffff;          /* nền trắng */
+  --bg-secondary: #faf7f8;        /* hồng-trắng rất nhẹ */
+  --bg-tertiary: #f4eef0;         /* card nhạt */
+  --bg-elevated: #ffffff;
+  --bg-hover: #f4eef0;
+
+  /* Nền section tối — Footer LUÔN tối (không đổi theo theme) */
+  --bg-dark: #111014;
+  --bg-dark-2: #1a1820;
+
+  /* Section "xen kẽ" (testimonial, đa ngôn ngữ) — ĐỔI theo theme.
+     Light mode: nền sáng + chữ tối. Dark mode: nền tối + chữ sáng. */
+  --section-alt-bg: #faf7f8;
+  --section-alt-card: #ffffff;
+  --section-alt-text: #1a1620;
+  --section-alt-muted: #6b6470;
+
+  --text-primary: #1a1620;        /* gần đen */
+  --text-secondary: #6b6470;      /* xám tím */
+  --text-muted: #9a93a0;
+  --text-accent: #e6017e;
+  --text-on-dark: #fafafa;
+  --text-on-dark-muted: #a1a1aa;
+
+  --accent-primary: #e6017e;      /* hồng magenta */
+  --accent-secondary: #c0106e;
+  --accent-light: #ff4da6;
+  --accent-soft: #fde4f1;         /* hồng pastel nền badge */
+  --accent-glow: rgba(230, 1, 126, 0.15);
+  --accent-glow-strong: rgba(230, 1, 126, 0.25);
+
+  --border-default: #ece7ea;
+  --border-subtle: #f2eef0;
+  --border-accent: rgba(230, 1, 126, 0.3);
+  --border-hover: #ddd5da;
+  --border-dark: #2a2730;         /* border trên nền tối */
+
+  --gradient-gold: linear-gradient(135deg, #e6017e 0%, #ff4da6 100%);       /* alias cũ -> hồng */
+  --gradient-gold-text: linear-gradient(135deg, #e6017e 0%, #ff4da6 100%);
+  --gradient-pink: linear-gradient(135deg, #e6017e 0%, #ff4da6 100%);
+  --gradient-dark: linear-gradient(180deg, #111014 0%, #1a1820 100%);
+  --gradient-glow: radial-gradient(ellipse at center, rgba(230, 1, 126, 0.06) 0%, transparent 70%);
+  --gradient-hero: radial-gradient(ellipse at 70% 20%, rgba(230, 1, 126, 0.07) 0%, transparent 55%);
+
+  --shadow-sm: 0 1px 2px rgba(26, 22, 32, 0.06);
+  --shadow-md: 0 6px 18px rgba(26, 22, 32, 0.08);
+  --shadow-lg: 0 16px 48px rgba(26, 22, 32, 0.12);
+  --shadow-gold: 0 8px 30px rgba(230, 1, 126, 0.18);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  --container-max: 1200px;
+  --container-padding: 24px;
+
+  --header-height: 64px;
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --header-bg-blur: rgba(255, 255, 255, 0.8);
+}
+
+/* === DARK MODE === đảo nền sáng→tối, chữ→sáng, GIỮ accent hồng.
+   Áp khi <html data-theme="dark">. Section vốn đã tối (--bg-dark) chuyển nhẹ hơn để vẫn nổi. */
+[data-theme="dark"] {
+  --bg-primary: #0e0d12;
+  --bg-secondary: #15131a;
+  --bg-tertiary: #1c1922;
+  --bg-elevated: #1c1922;
+  --bg-hover: #242029;
+
+  --bg-dark: #0a090d;             /* footer -> đậm hơn nền chính để vẫn phân tầng */
+  --bg-dark-2: #15131a;
+
+  /* Dark mode: section xen kẽ thành tối + chữ sáng */
+  --section-alt-bg: #0a090d;
+  --section-alt-card: #15131a;
+  --section-alt-text: #f5f3f7;
+  --section-alt-muted: #b3aebb;
+
+  --text-primary: #f5f3f7;
+  --text-secondary: #b3aebb;
+  --text-muted: #7d7787;
+  --text-on-dark: #f5f3f7;
+  --text-on-dark-muted: #b3aebb;
+
+  --border-default: #2a2730;
+  --border-subtle: #221f29;
+  --border-hover: #38343f;
+  --border-dark: #2a2730;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --gradient-hero: radial-gradient(ellipse at 70% 20%, rgba(230, 1, 126, 0.10) 0%, transparent 55%);
+  --header-bg: rgba(14, 13, 18, 0.85);
+  --header-bg-blur: rgba(14, 13, 18, 0.8);
+}

@@ -1,0 +1,127 @@
+/* ===== FLORAL LAYOUT — xanh ô-liu + hoa mộc lan trắng ===== */
+:root {
+  --flr-olive: #5a6b3b;
+  --flr-olive-deep: #4a5a30;
+  --flr-cream: #f7f2ea;
+  --flr-text: #5c5848;
+}
+
+/* ---------- COVER GATE ---------- */
+.flr-gate {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 30%, #56683a 0%, var(--flr-olive-deep) 55%, #3c4a26 100%);
+  overflow: hidden;
+}
+
+/* Bìa floral render trong khung admin: bỏ fullscreen fixed. */
+.flr-gate--inline { position: relative; inset: auto; z-index: 1; padding: 24px; border-radius: 12px; }
+
+.flr-dot {
+  position: absolute; width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255, 200, 210, 0.5); filter: blur(0.5px); pointer-events: none;
+}
+.flr-dot--1 { top: 14%; left: 18%; }
+.flr-dot--2 { top: 28%; right: 16%; width: 5px; height: 5px; }
+.flr-dot--3 { bottom: 22%; left: 24%; width: 9px; height: 9px; }
+.flr-dot--4 { bottom: 16%; right: 22%; }
+
+.flr-gate-card {
+  position: relative;
+  width: min(620px, 100%);
+  background: var(--flr-cream);
+  border-radius: 22px;
+  padding: 72px 36px 56px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+/* Hoa góc nay là DECORATION trong .deco-layer — không còn <img> tĩnh. */
+
+.flr-badge {
+  position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--flr-olive);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(90, 107, 59, 0.4);
+}
+
+.flr-gate-content { position: relative; z-index: 30; }
+
+.flr-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 7vw, 3.2rem);
+  font-weight: 600; line-height: 1.05;
+  color: var(--flr-olive); margin: 4px 0;
+}
+.flr-amp {
+  display: block; font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; color: var(--flr-olive); opacity: 0.7; margin: 2px 0;
+}
+.flr-divider {
+  width: 56px; height: 1px; margin: 18px auto;
+  background: var(--flr-olive); opacity: 0.4;
+}
+.flr-date { color: var(--flr-text); font-size: 1rem; letter-spacing: 0.04em; }
+.flr-invite {
+  margin-top: 22px; font-size: 0.78rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--flr-text); opacity: 0.7;
+}
+.flr-guest {
+  font-family: 'Playfair Display', serif; font-size: 1.3rem;
+  color: var(--flr-olive); margin: 6px 0;
+}
+.flr-sub { font-size: 0.9rem; color: var(--flr-text); opacity: 0.8; }
+
+.flr-open-btn {
+  margin-top: 30px; padding: 13px 40px; border: none; cursor: pointer;
+  border-radius: 9999px; background: var(--flr-olive); color: #fff;
+  font-size: 0.95rem; letter-spacing: 0.06em;
+  box-shadow: 0 8px 22px rgba(90, 107, 59, 0.35);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.flr-open-btn:hover { transform: translateY(-2px); background: var(--flr-olive-deep); }
+
+/* ---------- HEADER ---------- */
+.flr-header {
+  position: relative;
+  padding: 48px 16px 24px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.flr-frame {
+  position: relative;
+  z-index: 30;
+  width: min(440px, 92vw);
+  aspect-ratio: 3 / 4;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  display: flex; justify-content: center;
+}
+
+.flr-frame-inner {
+  margin-top: 22%;
+  text-align: center;
+  padding: 0 14%;
+}
+.flr-frame-label {
+  display: block; font-size: 0.7rem; letter-spacing: 0.32em;
+  text-transform: uppercase; color: var(--flr-olive); opacity: 0.75;
+  margin-bottom: 12px;
+}
+.flr-frame-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.7rem, 6vw, 2.6rem);
+  font-weight: 600; line-height: 1.1; color: var(--flr-olive); margin: 2px 0;
+}
+.flr-frame-amp {
+  font-family: 'Playfair Display', serif; font-size: 1.3rem;
+  color: var(--flr-olive); opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .flr-gate-card { padding: 64px 22px 44px; }
+}

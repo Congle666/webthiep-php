@@ -1,0 +1,5 @@
+# Định tuyến mọi request vào index.php (Apache + mod_rewrite của XAMPP)
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

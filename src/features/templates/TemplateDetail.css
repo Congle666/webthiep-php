@@ -1,0 +1,207 @@
+.detail-page {
+  padding-top: calc(var(--header-height) + 40px);
+  min-height: 100vh;
+}
+
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  transition: color var(--transition-fast);
+}
+
+.detail-back:hover {
+  color: var(--text-primary);
+}
+
+.detail-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.detail-hero__image {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  background: var(--bg-tertiary);
+  overflow: hidden;
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+}
+
+.detail-hero__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+}
+
+.detail-hero__placeholder-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail-hero__placeholder-cat {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.detail-hero__badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.detail-badge {
+  padding: 4px 12px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-badge--hot { background: var(--accent-primary); color: #000; }
+.detail-badge--new { background: #22c55e; color: #000; }
+.detail-badge--cat { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-default); }
+
+.detail-hero__title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 12px;
+}
+
+.detail-hero__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.detail-hero__rating span {
+  margin-left: 8px;
+}
+
+.detail-hero__desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.detail-hero__price {
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-accent);
+  background: var(--accent-glow);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-hero__price-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.detail-hero__price-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detail-hero__features h3 {
+  font-size: 0.9375rem;
+  margin-bottom: 12px;
+}
+
+.detail-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.detail-features-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.detail-features-list li svg {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.detail-hero__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.detail-similar__title {
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+}
+
+.detail-similar__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.detail-back-btn {
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .detail-hero {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .detail-hero__image {
+    position: static;
+    aspect-ratio: 4 / 3;
+  }
+
+  .detail-similar__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-hero__actions {
+    flex-direction: column;
+  }
+}
+
+/* Nút xem demo thiệp (hồng) */
+.detail-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 28px;
+  height: 52px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  background: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.detail-demo-btn:hover { filter: brightness(1.08); transform: translateY(-2px); }

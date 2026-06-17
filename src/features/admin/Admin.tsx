@@ -1,0 +1,114 @@
+/** Trang quản trị /admin — login gate + dashboard quản lý đầy đủ. */
+import { useEffect, useState, FormEvent } from 'react';
+import {
+  LayoutDashboard, ShoppingBag, LayoutTemplate, Heart, Tag, MessageSquareQuote,
+  Users, Mail, Settings, LogOut, Loader2, Menu, Palette,
+} from 'lucide-react';
+import { authApi, AuthUser } from '../../api/client';
+import AdminDashboard from './AdminDashboard';
+import { AdminOrders, AdminContacts, AdminUsers } from './AdminTables';
+import AdminTemplates from './AdminTemplates';
+import AdminDesigner from './AdminDesigner';
+import AdminInvitations from './AdminInvitations';
+import { AdminPlans, AdminTestimonials, AdminSettings } from './AdminMisc';
+import './Admin.css';
+
+type Tab = 'dashboard' | 'orders' | 'templates' | 'designer' | 'invitations' | 'plans' | 'testimonials' | 'users' | 'contacts' | 'settings';
+
+const NAV: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
+  { id: 'orders', label: 'Đơn hàng', icon: ShoppingBag },
+  { id: 'templates', label: 'Mẫu thiệp', icon: LayoutTemplate },
+  { id: 'designer', label: 'Thiết kế mẫu', icon: Palette },
+  { id: 'invitations', label: 'Thiệp sống', icon: Heart },
+  { id: 'plans', label: 'Gói giá', icon: Tag },
+  { id: 'testimonials', label: 'Đánh giá', icon: MessageSquareQuote },
+  { id: 'users', label: 'Người dùng', icon: Users },
+  { id: 'contacts', label: 'Liên hệ', icon: Mail },
+  { id: 'settings', label: 'Cài đặt', icon: Settings },
+];
+
+export default function Admin() {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [checking, setChecking] = useState(true);
+  const [tab, setTab] = useState<Tab>('dashboard');
+  const [navOpen, setNavOpen] = useState(false);
+
+  useEffect(() => {
+    authApi.me().then((res) => {
+      if (res.success && res.data && res.data.role === 'admin') setUser(res.data);
+      setChecking(false);
+    }).catch(() => setChecking(false));
+  }, []);
+
+  if (checking) return <div className="adm-center"><Loader2 className="adm-spin" /> Đang tải...</div>;
+  if (!user) return <AdminLogin onLogin={setUser} />;
+
+  const current = NAV.find((n) => n.id === tab)!;
+
+  return (
+    <div className="adm-root">
+      <aside className={`adm-sidebar ${navOpen ? 'adm-sidebar--open' : ''}`}>
+        <div className="adm-brand">JunTech <span>Admin</span></div>
+        <nav className="adm-nav">
+          {NAV.map(({ id, label, icon: Icon }) => (
+            <button key={id} className={tab === id ? 'adm-active' : ''} onClick={() => { setTab(id); setNavOpen(false); }}>
+              <Icon size={18} /> {label}
+            </button>
+          ))}
+        </nav>
+        <button className="adm-logout" onClick={async () => { await authApi.logout(); setUser(null); }}>
+          <LogOut size={16} /> Đăng xuất
+        </button>
+      </aside>
+
+      <main className="adm-main">
+        <header className="adm-header">
+          <button className="adm-burger" onClick={() => setNavOpen((o) => !o)} aria-label="Menu"><Menu size={20} /></button>
+          <h1>{current.label}</h1>
+          <span className="adm-who">{user.fullName}</span>
+        </header>
+        {tab === 'dashboard' && <AdminDashboard />}
+        {tab === 'orders' && <AdminOrders />}
+        {tab === 'templates' && <AdminTemplates />}
+        {tab === 'designer' && <AdminDesigner />}
+        {tab === 'invitations' && <AdminInvitations />}
+        {tab === 'plans' && <AdminPlans />}
+        {tab === 'testimonials' && <AdminTestimonials />}
+        {tab === 'users' && <AdminUsers />}
+        {tab === 'contacts' && <AdminContacts />}
+        {tab === 'settings' && <AdminSettings />}
+      </main>
+    </div>
+  );
+}
+
+function AdminLogin({ onLogin }: { onLogin: (u: AuthUser) => void }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true); setErr('');
+    const res = await authApi.login({ email, password });
+    setLoading(false);
+    if (res.success && res.data) {
+      if (res.data.role !== 'admin') { setErr('Tài khoản không có quyền quản trị.'); return; }
+      onLogin(res.data);
+    } else setErr(res.message ?? 'Đăng nhập thất bại.');
+  };
+
+  return (
+    <div className="adm-login-wrap">
+      <form className="adm-login" onSubmit={submit}>
+        <div className="adm-brand adm-brand--lg">JunTech <span>Admin</span></div>
+        <input className="adm-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input className="adm-input" type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
+        {err && <p className="adm-err">{err}</p>}
+        <button className="adm-btn" disabled={loading}>{loading ? 'Đang đăng nhập...' : 'Đăng nhập'}</button>
+      </form>
+    </div>
+  );
+}

@@ -1,0 +1,13 @@
+/* Lớp trang trí + đường gióng (edit mode) */
+.deco-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.deco-layer--edit { pointer-events: none; }
+.deco-img { user-select: none; -webkit-user-drag: none; }
+.deco-img--edit { outline: 1px dashed transparent; transition: outline-color 0.15s; pointer-events: auto; }
+.deco-img--edit:hover { outline-color: rgba(158,43,37,0.6); }
+.deco-img--sel { outline: 2px solid #9e2b25 !important; }
+
+/* Đường gióng căn giữa (Canva-style) — hồng/đỏ nét đứt, hiện khi kéo & hút */
+.deco-guide { position: absolute; pointer-events: none; z-index: 60; }
+.deco-guide--v { top: 0; bottom: 0; left: 50%; width: 0; border-left: 1px dashed #ff2d7e; transform: translateX(-0.5px); }
+.deco-guide--h { left: 0; right: 0; top: 50%; height: 0; border-top: 1px dashed #ff2d7e; transform: translateY(-0.5px); }
+/* Panel chỉnh slider đã chuyển sang cột trái AdminDesigner (.dsn-edit). */
