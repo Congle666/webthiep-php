@@ -114,6 +114,7 @@ class CustomerController
             'gallery'        => isset($b['gallery'])   ? json_encode($b['gallery'], JSON_UNESCAPED_UNICODE)   : $inv['gallery'],
             'love_story'     => isset($b['loveStory']) ? json_encode($b['loveStory'], JSON_UNESCAPED_UNICODE) : $inv['love_story'],
             'settings'       => isset($b['settings'])  ? json_encode($b['settings'], JSON_UNESCAPED_UNICODE)  : $inv['settings'],
+            'extra'          => isset($b['extra'])     ? json_encode($b['extra'], JSON_UNESCAPED_UNICODE)     : $inv['extra'],
             'groom_family'   => isset($b['groomFamily']) ? json_encode($b['groomFamily'], JSON_UNESCAPED_UNICODE) : $inv['groom_family'],
             'bride_family'   => isset($b['brideFamily']) ? json_encode($b['brideFamily'], JSON_UNESCAPED_UNICODE) : $inv['bride_family'],
             'gift_qr_groom'  => $b['giftQrGroom'] ?? $inv['gift_qr_groom'],
@@ -126,7 +127,7 @@ class CustomerController
         Database::run(
             "UPDATE invitations SET groom_name=?, bride_name=?, wedding_date=?, venue_name=?,
                 venue_address=?, map_url=?, cover_photo=?, music_url=?, invite_message=?,
-                gallery=?, love_story=?, settings=?,
+                gallery=?, love_story=?, settings=?, extra=?,
                 groom_family=?, bride_family=?, gift_qr_groom=?, gift_qr_bride=?,
                 reception_time=?, bank_groom=?, bank_bride=? WHERE id=?",
             [...array_values($fields), $inv['id']]
@@ -168,10 +169,93 @@ class CustomerController
         Response::ok(['slug' => $newSlug, 'url' => "/thiep/$newSlug"], 'Đã đăng thiệp!');
     }
 
+    /** POST /api/my/upload/image — khách upload ảnh (ảnh đôi, album, QR). Trả { url }. */
+    public static function uploadImage(): void
+    {
+        Auth::require();
+        self::handleUpload(
+            ['webp','png','jpg','jpeg','gif'],
+            8 * 1024 * 1024,
+            'invitation/uploads',
+            'Định dạng ảnh không hỗ trợ (webp/png/jpg/gif).',
+            'Ảnh quá lớn (tối đa 8MB).'
+        );
+    }
+
+    /** POST /api/my/upload/music — khách upload nhạc nền (mp3/m4a/ogg). Trả { url }. */
+    public static function uploadMusic(): void
+    {
+        Auth::require();
+        self::handleUpload(
+            ['mp3','m4a','ogg','wav'],
+            15 * 1024 * 1024,
+            'music/uploads',
+            'Định dạng nhạc không hỗ trợ (mp3/m4a/ogg/wav).',
+            'File nhạc quá lớn (tối đa 15MB).'
+        );
+    }
+
+    /** GET /api/music — thư viện nhạc nền có sẵn (public/music, không gồm uploads riêng). */
+    public static function musicLibrary(): void
+    {
+        $cfg = require __DIR__ . '/../config/config.php';
+        $base = realpath($cfg['assets_dir'] . '/../music'); // public/music
+        $out = [];
+        if ($base && is_dir($base)) {
+            foreach (scandir($base) as $f) {
+                if (in_array(strtolower(pathinfo($f, PATHINFO_EXTENSION)), ['mp3','m4a','ogg','wav'], true)) {
+                    $out[] = [
+                        'url'  => '/music/' . $f,
+                        'name' => self::prettyName(pathinfo($f, PATHINFO_FILENAME)),
+                    ];
+                }
+            }
+        }
+        usort($out, fn($a, $b) => strcmp($a['name'], $b['name']));
+        Response::ok($out);
+    }
+
+    /** Xử lý upload chung (ảnh/nhạc). $sub = thư mục con trong public. */
+    private static function handleUpload(array $exts, int $maxSize, string $sub, string $errType, string $errSize): void
+    {
+        if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            Response::error('Không nhận được file. Vui lòng chọn lại.', 422);
+        }
+        $f = $_FILES['file'];
+        $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $exts, true)) Response::error($errType, 422);
+        if ($f['size'] > $maxSize) Response::error($errSize, 422);
+
+        $cfg = require __DIR__ . '/../config/config.php';
+        // assets_dir = public/invitation. public = parent. Ảnh -> public/invitation/uploads; nhạc -> public/music/uploads.
+        $publicDir = dirname($cfg['assets_dir']);
+        $dir = $publicDir . '/' . $sub;
+        if (!is_dir($dir)) @mkdir($dir, 0777, true);
+
+        $safe = preg_replace('/[^a-z0-9._-]/i', '-', pathinfo($f['name'], PATHINFO_FILENAME));
+        $fname = $safe . '-' . substr(bin2hex(random_bytes(4)), 0, 6) . '.' . $ext;
+        if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $fname)) {
+            Response::error('Lưu file thất bại.', 500);
+        }
+        Response::created(['url' => '/' . $sub . '/' . $fname], 'Đã tải lên.');
+    }
+
+    /** "marry-you-piano" -> "Marry You Piano". */
+    private static function prettyName(string $s): string
+    {
+        return ucwords(trim(preg_replace('/[-_]+/', ' ', $s)));
+    }
+
     private static function ownInvitation(string $slug): array
     {
         $u = Auth::require();
-        $inv = Database::one("SELECT * FROM invitations WHERE slug = ? AND user_id = ?", [$slug, $u['id']]);
+        // JOIN template để có design + layout (cho preview đúng giao diện mẫu).
+        $inv = Database::one(
+            "SELECT i.*, t.slug AS template_slug, t.design AS template_design, t.layout AS template_layout
+             FROM invitations i JOIN templates t ON t.id = i.template_id
+             WHERE i.slug = ? AND i.user_id = ?",
+            [$slug, $u['id']]
+        );
         if (!$inv) Response::error('Không tìm thấy thiệp.', 404);
         return $inv;
     }

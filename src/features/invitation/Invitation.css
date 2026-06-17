@@ -11,6 +11,21 @@
   overflow-x: hidden;
   background: #f5ead7 url('/invitation/paper-bg.jpg');
   background-size: 480px;
+  /* Thiệp cưới online = khung dọc (như mobile). Trên desktop giới hạn bề ngang & căn giữa
+     để hoạ tiết (tính theo % bề ngang) không phình to/đè chữ. Hai bên là backdrop. */
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.18);
+}
+/* Backdrop full-viewport phía sau khung thiệp (vùng trống 2 bên trên desktop). */
+.inv-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #e7dcc6 url('/invitation/paper-bg.jpg');
+  background-size: 480px;
 }
 .inv-root h1, .inv-root h2, .inv-root h3 { color: var(--heading); font-family: 'Playfair Display', serif; }
 
@@ -221,3 +236,31 @@
 .inv-deco-root .deco-layer--edit { z-index: 50; }
 /* nâng cả container lớp trang trí khi edit (đè lên frame/banner để click trúng ảnh) */
 .inv-deco-root:has(.deco-layer--edit) { z-index: 50; }
+
+/* ===== Section mới: ảnh đôi, lời mở đầu, dress code, lịch trình, cảm ơn, phong bì ===== */
+.inv-couplephoto-grid { display: flex; gap: 28px; justify-content: center; flex-wrap: wrap; }
+.inv-cp-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.inv-cp-img {
+  width: 130px; height: 130px; border-radius: 50%;
+  background: rgba(0,0,0,.05) center/cover no-repeat;
+  border: 3px solid var(--red, #9e2b25); box-shadow: 0 4px 16px rgba(0,0,0,.12);
+}
+.inv-cp-cap { font-size: .8rem; letter-spacing: .12em; color: var(--muted, #8a6); }
+.inv-cp-name { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--heading, var(--red, #9e2b25)); }
+
+.inv-intro-text { max-width: 560px; margin: 0 auto; text-align: center; font-style: italic; line-height: 1.8; color: var(--text); }
+
+.inv-dress-note { text-align: center; line-height: 1.7; color: var(--text); }
+.inv-dress-colors { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
+.inv-dress-chip { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255,255,255,.7); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+
+.inv-schedule-list { list-style: none; padding: 0; margin: 8px auto 0; max-width: 380px; display: flex; flex-direction: column; gap: 0; }
+.inv-schedule-item { display: flex; align-items: baseline; gap: 16px; padding: 12px 0; border-bottom: 1px dashed rgba(0,0,0,.12); }
+.inv-schedule-item:last-child { border-bottom: none; }
+.inv-schedule-time { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--heading, var(--red, #9e2b25)); min-width: 64px; }
+.inv-schedule-title { color: var(--text); }
+
+.inv-thanks-text { max-width: 540px; margin: 0 auto; text-align: center; line-height: 1.8; font-style: italic; color: var(--text); }
+.inv-envelope-text { max-width: 540px; margin: 0 auto; text-align: center; line-height: 1.7; color: var(--text); }
+
+.inv-family-title { font-weight: 600; color: var(--heading, var(--red, #9e2b25)); margin-bottom: 2px; }

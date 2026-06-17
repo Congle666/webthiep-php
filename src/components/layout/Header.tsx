@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Heart, Sun, Moon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 const navLinks = [
@@ -15,7 +17,9 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, openLogin, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -51,9 +55,15 @@ export default function Header() {
             </Link>
           ))}
           <div className="header__nav-actions-mobile">
-            <Button variant="primary" size="md" href="/lien-he">
-              Đăng nhập
-            </Button>
+            {user ? (
+              <Button variant="primary" size="md" onClick={() => navigate('/tai-khoan')}>
+                {user.fullName.split(' ').slice(-1)[0]}
+              </Button>
+            ) : (
+              <Button variant="primary" size="md" onClick={() => openLogin()}>
+                Đăng nhập
+              </Button>
+            )}
           </div>
         </nav>
 
@@ -65,9 +75,15 @@ export default function Header() {
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <Button variant="primary" size="sm" href="/lien-he" className="header__cta">
-            Đăng nhập
-          </Button>
+          {user ? (
+            <Button variant="secondary" size="sm" onClick={logout} className="header__cta">
+              Đăng xuất
+            </Button>
+          ) : (
+            <Button variant="primary" size="sm" onClick={() => openLogin()} className="header__cta">
+              Đăng nhập
+            </Button>
+          )}
           <button
             className="header__menu-toggle"
             onClick={() => setMobileOpen(!mobileOpen)}

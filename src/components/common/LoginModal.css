@@ -1,0 +1,25 @@
+.lm-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.lm {
+  position: relative; width: 100%; max-width: 420px;
+  background: var(--bg-primary, #fff); border: 1px solid var(--border-default, #ece6e8);
+  border-radius: 18px; padding: 32px; box-shadow: 0 24px 60px rgba(0,0,0,.25);
+  font-family: 'Inter', sans-serif;
+}
+.lm__close { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 34px; height: 34px; border: none; background: var(--bg-tertiary, #f4eef0); border-radius: 8px; cursor: pointer; color: var(--text-secondary, #6b6168); }
+.lm__close:hover { background: var(--accent-soft, #fde4f1); color: var(--accent-primary); }
+.lm__title { font-family: 'Playfair Display', serif; font-size: 1.55rem; margin: 0 0 4px; color: var(--text-primary, #1a1a1a); }
+.lm__sub { margin: 0 0 18px; color: var(--text-secondary, #6b6168); font-size: .9rem; }
+.lm__tabs { display: flex; gap: 8px; background: var(--bg-tertiary, #f4eef0); padding: 4px; border-radius: 10px; margin-bottom: 16px; }
+.lm__tabs button { flex: 1; padding: 9px; border: none; background: none; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--text-secondary, #6b6168); }
+.lm__tabs button.is-active { background: var(--bg-primary, #fff); color: var(--accent-primary); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.lm form { display: flex; flex-direction: column; gap: 12px; }
+.lm__in { padding: 11px 14px; border: 1px solid var(--border-default, #e3dade); border-radius: 9px; font-size: .92rem; font-family: inherit; background: var(--bg-secondary, #fff); color: var(--text-primary, #1a1a1a); }
+.lm__in:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(230,1,126,.12); }
+.lm__err { padding: 9px 12px; background: #fdecef; color: #b00046; border-radius: 8px; font-size: .85rem; }
+.lm__submit { margin-top: 4px; padding: 12px; border: none; border-radius: 9px; background: var(--accent-primary); color: #fff; font-weight: 700; font-size: .95rem; cursor: pointer; }
+.lm__submit:hover { filter: brightness(1.08); }
+.lm__submit:disabled { opacity: .6; cursor: not-allowed; }

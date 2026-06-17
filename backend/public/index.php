@@ -29,6 +29,7 @@ $routes = [
     ['GET',  '/demo/{slug}',               ['CatalogController', 'demo']],
     ['GET',  '/plans',                     ['CatalogController', 'plans']],
     ['GET',  '/testimonials',              ['CatalogController', 'testimonials']],
+    ['GET',  '/music',                     ['CustomerController', 'musicLibrary']],
     ['POST', '/contact',                   ['ContactController', 'create']],
 
     // ---- Public invitation (thiệp sống) ----
@@ -49,12 +50,15 @@ $routes = [
     ['GET',  '/my/invitations/{slug}',     ['CustomerController', 'getInvitation']],
     ['PUT',  '/my/invitations/{slug}',     ['CustomerController', 'updateInvitation']],
     ['POST', '/my/invitations/{slug}/publish', ['CustomerController', 'publish']],
+    ['POST', '/my/upload/image',           ['CustomerController', 'uploadImage']],
+    ['POST', '/my/upload/music',           ['CustomerController', 'uploadMusic']],
 
     // ---- Admin ----
     ['GET',    '/admin/stats',             ['AdminController', 'stats']],
     ['POST',   '/admin/templates',         ['AdminController', 'createTemplate']],
     ['GET',    '/admin/templates/{id}',    ['AdminController', 'templateDetail']],
     ['PUT',    '/admin/templates/{id}/design', ['AdminController', 'updateDesign']],
+    ['POST',   '/admin/templates/{id}/preview', ['AdminController', 'regenPreview']],
     ['PUT',    '/admin/templates/{id}',    ['AdminController', 'updateTemplate']],
     ['DELETE', '/admin/templates/{id}',    ['AdminController', 'deleteTemplate']],
     ['GET',    '/admin/orders',            ['AdminController', 'orders']],

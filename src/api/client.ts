@@ -93,6 +93,33 @@ export const authApi = {
   me: () => api.get<AuthUser>('/auth/me'),
 };
 
+export interface CreateOrderResult {
+  orderCode: string;
+  orderId: number;
+  invitationSlug: string;
+  amount: number;
+  paymentStatus: string;
+}
+
+export const customerApi = {
+  createOrder: (template_id: number, plan_code: string) =>
+    api.post<CreateOrderResult>('/orders', { template_id, plan_code }),
+  myOrders: () => api.get<any[]>('/orders'),
+  myInvitations: () => api.get<Invitation[]>('/my/invitations'),
+  getInvitation: (slug: string) => api.get<Invitation>(`/my/invitations/${slug}`),
+  updateInvitation: (slug: string, data: Partial<Invitation>) =>
+    api.put<Invitation>(`/my/invitations/${slug}`, data),
+  publish: (slug: string, newSlug?: string) =>
+    api.post<{ slug: string; url: string }>(`/my/invitations/${slug}/publish`, newSlug ? { slug: newSlug } : {}),
+  uploadImage: (file: File) => api.upload<{ url: string }>('/my/upload/image', file),
+  uploadMusic: (file: File) => api.upload<{ url: string }>('/my/upload/music', file),
+};
+
+export interface MusicTrack { url: string; name: string; }
+export const musicApi = {
+  library: () => api.get<MusicTrack[]>('/music'),
+};
+
 export interface AdminStats {
   templates: number; orders: number; invitations: number;
   customers: number; newContacts: number; revenuePaid: number;
@@ -121,6 +148,9 @@ export const adminApi = {
   templateDetail: (id: number) => api.get<any>(`/admin/templates/${id}`),
   updateDesign: (id: number, data: { theme: any; decorations: any[] }) =>
     api.put(`/admin/templates/${id}/design`, data),
+  // Chụp lại ảnh preview coverflow (id số = 1 mẫu, 'all' = tất cả). Trả về { log }.
+  regenPreview: (id: number | 'all') =>
+    api.post<{ log: string }>(`/admin/templates/${id}/preview`, {}),
 
   // Invitations (thiệp sống)
   invitations: () => api.get<any[]>('/admin/invitations'),

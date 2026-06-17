@@ -9,6 +9,7 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;   /* chặn cuộn ngang cấp trang -> mobile không lệch, modal không trông tràn */
 }
 
 body {

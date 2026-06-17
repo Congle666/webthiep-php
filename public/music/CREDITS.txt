@@ -1,0 +1,12 @@
+Nhạc nền mẫu — Royalty-free, giấy phép Creative Commons BY 4.0
+Tác giả: Kevin MacLeod (incompetech.com)
+Yêu cầu ghi công khi dùng công khai (https://creativecommons.org/licenses/by/4.0/):
+
+- relent-piano.mp3      — "Relent" by Kevin MacLeod
+- bittersweet.mp3       — "Bittersweet" by Kevin MacLeod
+- heartwarming.mp3      — "Heartwarming" by Kevin MacLeod
+- i-knew-a-guy.mp3      — "I Knew a Guy" by Kevin MacLeod
+- love-song.mp3         — "Love Song" by Kevin MacLeod
+
+Nhạc có bản quyền (Perfect, Marry You...): KHÔNG đưa vào repo. Khách tự upload qua editor
+hoặc bỏ file mp3 vào thư mục này (public/music/).

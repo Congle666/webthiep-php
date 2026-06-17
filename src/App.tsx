@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
+import LoginModal from './components/common/LoginModal';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Home from './features/home/Home';
@@ -10,6 +12,7 @@ import Pricing from './features/pricing/Pricing';
 import Contact from './features/contact/Contact';
 import Invitation from './features/invitation/Invitation';
 import Admin from './features/admin/Admin';
+import CreateInvitation from './features/create/CreateInvitation';
 
 // Helper to scroll to top on route change
 function ScrollToTop() {
@@ -36,13 +39,16 @@ function SiteLayout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ThemeProvider>
+      <AuthProvider>
       <Router>
         <ScrollToTop />
+        <LoginModal />
         <Routes>
           {/* Trang độc lập, KHÔNG Header/Footer site */}
           <Route path="/thiep/demo/:slug" element={<Invitation />} />
           <Route path="/thiep/:slug" element={<Invitation />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/tao-thiep/:templateSlug" element={<CreateInvitation />} />
 
           {/* Các trang marketing — dùng layout chung */}
           <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />
@@ -53,6 +59,7 @@ export default function App() {
           <Route path="*" element={<SiteLayout><Home /></SiteLayout>} />
         </Routes>
       </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

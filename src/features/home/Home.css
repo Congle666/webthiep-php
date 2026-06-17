@@ -381,43 +381,44 @@
 }
 
 /* ============ INSPIRATION ============ */
-.inspiration__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
+/* ===== Cảm hứng cặp đôi — dải NGANG NHẢY từng nấc mỗi ~4.5s ===== */
+.insp-viewport { width: 100%; overflow: hidden; padding: 34px 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); }
+.insp-row { display: flex; gap: 22px; width: max-content; padding-left: 24px; align-items: center; will-change: transform; }
+
 .insp-card {
-  position: relative;
-  display: block;
-  aspect-ratio: 3 / 4;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  text-decoration: none;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  position: relative; flex: 0 0 auto;
+  width: 240px; height: 380px;
+  border-radius: var(--radius-xl); overflow: hidden;
+  text-decoration: none; background: #e7dcc6;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.5s cubic-bezier(.25,.8,.4,1), box-shadow 0.5s;
+  /* dùng làm <button>: reset */
+  padding: 0; border: none; cursor: pointer; font: inherit; display: block;
 }
+/* Thẻ "chính" (ngoài cùng trái sau mỗi nấc) phóng to tạo điểm nhấn. */
+.insp-card.is-active { transform: scale(1.12); box-shadow: 0 24px 50px rgba(0,0,0,0.28); z-index: 2; }
 .insp-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.insp-card__img {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-primary);
-  background: var(--accent-soft);
+.insp-card.is-active:hover { transform: scale(1.12) translateY(-4px); }
+.insp-card__viewport { width: 100%; height: 100%; overflow: hidden; }
+.insp-card__shot { width: 100%; height: auto; display: block; transition: transform 0.2s; }
+/* Hover 1 thiệp -> ảnh cuộn dọc xuống xem nội dung (rồi về). */
+.insp-card:hover .insp-card__shot { animation: insp-card-scroll 6s ease-in-out forwards; }
+@keyframes insp-card-scroll {
+  0%   { transform: translateY(0); }
+  85%  { transform: translateY(calc(-100% + 380px)); }
+  100% { transform: translateY(calc(-100% + 380px)); }
 }
-.insp-card__overlay {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 20px 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: linear-gradient(180deg, transparent, rgba(26, 22, 32, 0.78));
-  color: #fff;
+.insp-card__name {
+  position: absolute; inset: auto 0 0 0; padding: 22px 14px 12px;
+  font-family: 'Playfair Display', serif; font-size: 1rem; color: #fff; text-align: center;
+  background: linear-gradient(180deg, transparent, rgba(26, 22, 32, 0.82));
 }
-.insp-card__couple { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
-.insp-card__cat { font-size: 0.78rem; opacity: 0.85; text-transform: capitalize; }
+
+/* Thanh chấm chỉ vị trí (như chungdoi) */
+.insp-dots { display: flex; justify-content: center; gap: 8px; margin-top: 22px; flex-wrap: wrap; max-width: 520px; margin-left: auto; margin-right: auto; }
+.insp-dot { width: 9px; height: 9px; border-radius: 9999px; border: none; background: var(--border-hover, #555); cursor: pointer; transition: all 0.3s; padding: 0; }
+.insp-dot.on { background: var(--accent-primary); width: 26px; }
+.insp-dot:hover { background: var(--accent-light, var(--accent-primary)); }
 
 /* ============ BLOG ============ */
 .blog__grid {
@@ -500,7 +501,6 @@
   .hero__inner,
   .steps__grid,
   .multilang__grid { grid-template-columns: 1fr; }
-  .inspiration__grid { grid-template-columns: repeat(2, 1fr); }
   .blog__grid { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -514,8 +514,8 @@
 }
 
 @media (max-width: 640px) {
-  .inspiration__grid,
   .blog__grid { grid-template-columns: 1fr; }
+  .insp-card { width: 200px; height: 320px; }
   .stats-banner__row { gap: 36px; }
   .carousel { gap: 6px; }
   .carousel__stage { height: 380px; }
@@ -527,4 +527,91 @@
   .phone--tilt-r { transform: rotate(8deg) translate(72px, 10px) scale(0.7); }
   .phone--front { transform: scale(0.9); }
   .bubble { max-width: 88%; }
+}
+
+/* Card giữa showcase: thiệp THẬT trong iframe, tự cuộn (preview) */
+.carousel__live { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: var(--radius-xl); background: #f5ead7; }
+.carousel__frame {
+  /* iframe render ở bề rộng ~420px rồi thu nhỏ vừa khung card */
+  width: 420px; height: 760px; border: 0;
+  transform: scale(0.595);            /* 250/420 ~ vừa card 250px */
+  transform-origin: top left;
+  pointer-events: none;               /* chỉ xem, bấm card -> sang trang chi tiết */
+}
+.carousel__card--center .carousel__live { box-shadow: var(--shadow-lg); }
+.carousel__live-name {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  padding: 14px 10px 12px; text-align: center;
+  font-family: 'Playfair Display', serif; font-size: 1rem; color: #fff;
+  background: linear-gradient(to top, rgba(122,31,27,0.92), transparent);
+}
+
+/* ============ SHOWCASE COVERFLOW 3D ============ */
+/* overflow-x: clip -> cắt các card 3D lòi 2 bên mà KHÔNG tạo thanh cuộn ngang toàn trang
+   (nguyên nhân layout/modal lệch trên mobile). clip giữ được hiệu ứng 3D, không như hidden. */
+.cf { position: relative; display: flex; align-items: center; justify-content: center; overflow-x: clip; }
+.cf__stage {
+  position: relative; width: 100%; max-width: 1300px; height: 580px;
+  display: flex; align-items: center; justify-content: center;
+  perspective: 1600px; transform-style: preserve-3d;
+}
+.cf__card {
+  position: absolute; width: 310px; height: 540px;
+  border-radius: 20px; overflow: hidden; text-decoration: none;
+  background: #2a2730; border: 3px solid #2a2730;
+  box-shadow: 0 16px 44px rgba(0,0,0,0.28);
+  transition: transform 0.5s cubic-bezier(.25,.8,.4,1), opacity 0.5s, filter 0.5s;
+  transform-style: preserve-3d;
+}
+.cf__card--center { box-shadow: 0 30px 70px rgba(0,0,0,0.45); cursor: pointer; }
+/* Viewport clip ảnh full; ảnh cuộn dọc bằng CSS (không iframe -> mượt, nhẹ). */
+.cf__viewport { width: 100%; height: 100%; overflow: hidden; background: #e7dcc6; }
+.cf__shot {
+  width: 100%; height: auto; display: block; pointer-events: none;
+  object-fit: cover; object-position: top center;
+}
+/* Card giữa: cuộn XUỐNG rồi LÊN trong 1 vòng (~8.5s), khớp timer auto-nhảy mẫu kế.
+   0-45% xuống đáy, 55-100% lên lại đầu (dừng nhẹ ở đáy) -> xong về đầu rồi JS nhảy mẫu. */
+.cf__shot--scroll { animation: cf-scroll 8.5s ease-in-out infinite; }
+@keyframes cf-scroll {
+  0%   { transform: translateY(0); }
+  45%  { transform: translateY(calc(-100% + 540px)); }
+  55%  { transform: translateY(calc(-100% + 540px)); }
+  100% { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .cf__shot--scroll { animation: none; } }
+.cf__placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  color: var(--accent-primary); background: var(--accent-soft);
+}
+.cf__name {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+  padding: 16px 12px 14px; text-align: center;
+  font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+}
+.cf__arrow {
+  position: relative; z-index: 30; flex-shrink: 0;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid var(--border-default); background: var(--bg-primary);
+  color: var(--accent-primary); display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: var(--shadow-md); transition: all var(--transition-fast);
+}
+.cf__arrow:hover { background: var(--accent-primary); color: #fff; border-color: var(--accent-primary); }
+.cf__arrow--l { margin-right: -24px; }
+.cf__arrow--r { margin-left: -24px; }
+.cf__dots { display: flex; justify-content: center; gap: 7px; margin-top: 24px; flex-wrap: wrap; max-width: 500px; margin-left: auto; margin-right: auto; }
+.cf__dot { width: 8px; height: 8px; border-radius: 50%; border: none; background: var(--border-hover); cursor: pointer; transition: all var(--transition-fast); }
+.cf__dot.on { background: var(--accent-primary); width: 22px; border-radius: 9999px; }
+
+@media (max-width: 768px) {
+  .cf__stage { height: 500px; }
+  .cf__card { width: 250px; height: 440px; border-width: 3px; }
+  /* mobile: card thấp hơn -> chỉnh điểm cuối animation cho khớp */
+  @keyframes cf-scroll {
+    0%   { transform: translateY(0); }
+    45%  { transform: translateY(calc(-100% + 440px)); }
+    55%  { transform: translateY(calc(-100% + 440px)); }
+    100% { transform: translateY(0); }
+  }
 }

@@ -7,12 +7,13 @@ import { WeddingCalendar } from './WeddingCalendar';
 import { GiftQR } from './GiftQR';
 import { RsvpForm, GuestbookForm } from './InvitationForms';
 
-const reveal = {
+const revealAnim = {
   initial: { opacity: 0, y: 26 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: '-50px' },
   transition: { duration: 0.6, ease: 'easeOut' as const },
 };
+const revealNone = {}; // preview/iframe: không animation -> cuộn mượt, không giật
 
 function fmtDate(d: string | null) {
   if (!d) return { full: '', day: '', month: '', year: '', time: '', dow: '' };
@@ -48,9 +49,11 @@ function gcalUrl(inv: Inv): string {
 interface Props {
   inv: Inv;
   slug: string;
+  staticMode?: boolean; // preview/iframe: tắt animation cho cuộn mượt
 }
 
-export function InvitationBody({ inv, slug }: Props) {
+export function InvitationBody({ inv, slug, staticMode }: Props) {
+  const reveal = staticMode ? revealNone : revealAnim;
   const cd = useCountdown(inv.weddingDate ?? null);
   const date = fmtDate(inv.weddingDate);
   const s = inv.settings ?? {};
@@ -58,30 +61,62 @@ export function InvitationBody({ inv, slug }: Props) {
   const bf = inv.brideFamily ?? {};
   const gallery = inv.gallery ?? [];
   const hasQr = inv.bankGroom?.account || inv.bankBride?.account || inv.giftQrGroom || inv.giftQrBride;
+  const ex = inv.extra ?? {};
+  const vis = ex.visible ?? {};
+  const show = (k: keyof NonNullable<typeof vis>) => vis[k] !== false; // mặc định hiện
+  const schedule = ex.schedule ?? [];
+  const dress = ex.dressCode;
 
   return (
     <>
+      {/* ===== ẢNH ĐÔI ===== */}
+      {show('couplePhoto') && (ex.groomPhoto || ex.bridePhoto) && (
+        <motion.section className="inv-section inv-couplephoto" {...reveal}>
+          <div className="inv-couplephoto-grid">
+            <div className="inv-cp-item">
+              <div className="inv-cp-img" style={ex.groomPhoto ? { backgroundImage: `url('${ex.groomPhoto}')` } : undefined} role="img" aria-label="Chú rể" />
+              <span className="inv-cp-cap">{ex.groomTitle || 'Chú Rể'}</span>
+              <span className="inv-cp-name">{inv.groomName}</span>
+            </div>
+            <div className="inv-cp-item">
+              <div className="inv-cp-img" style={ex.bridePhoto ? { backgroundImage: `url('${ex.bridePhoto}')` } : undefined} role="img" aria-label="Cô dâu" />
+              <span className="inv-cp-cap">{ex.brideTitle || 'Cô Dâu'}</span>
+              <span className="inv-cp-name">{inv.brideName}</span>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
+      {/* ===== LỜI MỞ ĐẦU ===== */}
+      {show('intro') && ex.intro && (
+        <motion.section className="inv-section inv-intro" {...reveal}>
+          <p className="inv-intro-text">{ex.intro}</p>
+        </motion.section>
+      )}
+
       {/* ===== THÔNG TIN LỄ CƯỚI ===== */}
+      {show('family') && (
       <motion.section className="inv-section" {...reveal}>
         <h2 className="inv-h2">THÔNG TIN LỄ CƯỚI</h2>
         <div className="inv-mini-divider" />
         <div className="inv-family-grid">
           <div className="inv-family">
-            <span className="inv-family-label">Chú Rể</span>
-            <p className="inv-family-name">{inv.groomName}</p>
-            {gf.father && <p>Ông: {gf.father}</p>}
-            {gf.mother && <p>Bà: {gf.mother}</p>}
+            <span className="inv-family-label">Nhà Trai</span>
+            {gf.title && <p className="inv-family-title">{gf.title}</p>}
+            {gf.father && <p>{gf.father}</p>}
+            {gf.mother && <p>{gf.mother}</p>}
             {gf.address && <p className="inv-family-addr">{gf.address}</p>}
           </div>
           <div className="inv-family">
-            <span className="inv-family-label">Cô Dâu</span>
-            <p className="inv-family-name">{inv.brideName}</p>
-            {bf.father && <p>Ông: {bf.father}</p>}
-            {bf.mother && <p>Bà: {bf.mother}</p>}
+            <span className="inv-family-label">Nhà Gái</span>
+            {bf.title && <p className="inv-family-title">{bf.title}</p>}
+            {bf.father && <p>{bf.father}</p>}
+            {bf.mother && <p>{bf.mother}</p>}
             {bf.address && <p className="inv-family-addr">{bf.address}</p>}
           </div>
         </div>
       </motion.section>
+      )}
 
       {/* ===== TÊN CÔ DÂU CHÚ RỂ ===== */}
       <motion.section className="inv-section inv-couple" {...reveal}>
@@ -142,7 +177,7 @@ export function InvitationBody({ inv, slug }: Props) {
       </motion.section>
 
       {/* ===== ALBUM ===== */}
-      {gallery.length > 0 && (
+      {show('gallery') && gallery.length > 0 && (
         <motion.section className="inv-section inv-album" {...reveal}>
           <h2 className="inv-h2">ALBUM ẢNH CƯỚI</h2>
           <div className="inv-mini-divider" />
@@ -154,8 +189,38 @@ export function InvitationBody({ inv, slug }: Props) {
         </motion.section>
       )}
 
+      {/* ===== DRESS CODE ===== */}
+      {show('dressCode') && (dress?.note || (dress?.colors?.length ?? 0) > 0) && (
+        <motion.section className="inv-section inv-dresscode" {...reveal}>
+          <h2 className="inv-h2">DRESS CODE</h2>
+          <div className="inv-mini-divider" />
+          {dress?.note && <p className="inv-dress-note">{dress.note}</p>}
+          {!!dress?.colors?.length && (
+            <div className="inv-dress-colors">
+              {dress.colors.map((c, i) => <span key={i} className="inv-dress-chip" style={{ background: c }} title={c} />)}
+            </div>
+          )}
+        </motion.section>
+      )}
+
+      {/* ===== LỊCH TRÌNH NGÀY CƯỚI ===== */}
+      {show('schedule') && schedule.length > 0 && (
+        <motion.section className="inv-section inv-schedule" {...reveal}>
+          <h2 className="inv-h2">LỊCH TRÌNH NGÀY CƯỚI</h2>
+          <div className="inv-mini-divider" />
+          <ul className="inv-schedule-list">
+            {schedule.map((it, i) => (
+              <li key={i} className="inv-schedule-item">
+                <span className="inv-schedule-time">{it.time}</span>
+                <span className="inv-schedule-title">{it.title}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.section>
+      )}
+
       {/* ===== QR MỪNG CƯỚI ===== */}
-      {hasQr && (
+      {show('gift') && hasQr && (
         <motion.section className="inv-section" {...reveal}>
           <h2 className="inv-h2">QR MỪNG CƯỚI</h2>
           <div className="inv-mini-divider" />
@@ -184,9 +249,25 @@ export function InvitationBody({ inv, slug }: Props) {
         </motion.section>
       )}
 
+      {/* ===== LỜI CẢM ƠN ===== */}
+      {show('thanks') && ex.thanks && (
+        <motion.section className="inv-section inv-thanks" {...reveal}>
+          <h2 className="inv-h2">LỜI CẢM ƠN</h2>
+          <div className="inv-mini-divider" />
+          <p className="inv-thanks-text">{ex.thanks}</p>
+        </motion.section>
+      )}
+
+      {/* ===== PHONG BÌ / LỜI MỜI ===== */}
+      {show('envelope') && ex.envelope && (
+        <motion.section className="inv-section inv-envelope" {...reveal}>
+          <p className="inv-envelope-text">{ex.envelope}</p>
+        </motion.section>
+      )}
+
       {/* ===== FOOTER ===== */}
       <footer className="inv-footer">
-        <p>Sự hiện diện của quý khách là niềm vinh hạnh cho gia đình chúng tôi.</p>
+        <p>{ex.thanks || 'Sự hiện diện của quý khách là niềm vinh hạnh cho gia đình chúng tôi.'}</p>
         <p className="inv-footer-brand">Thiệp tạo bởi JunTech</p>
       </footer>
     </>

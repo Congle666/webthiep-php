@@ -80,6 +80,7 @@ function mapInvitation(array $i): array
         'musicUrl'      => $i['music_url'],
         'inviteMessage' => $i['invite_message'],
         'settings'      => jdec($i['settings'] ?? null),
+        'extra'         => jdec($i['extra'] ?? null),
         'isPublished'   => (bool) $i['is_published'],
         'templateSlug'  => $i['template_slug'] ?? null,
         'design'        => jdec($i['template_design'] ?? null),

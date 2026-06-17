@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, ChevronLeft, ChevronRight, MousePointerClick, Pencil, Send,
@@ -9,6 +8,7 @@ import ScrollReveal from '../../components/common/ScrollReveal';
 import Button from '../../components/common/Button';
 import { useTemplates, useTestimonials } from '../../hooks/useCatalog';
 import type { Template } from '../../data/types';
+import { TemplateModal } from './TemplateModal';
 import './Home.css';
 
 /* ===== Mini wedding card (CSS) dùng trong phone mockup ===== */
@@ -82,14 +82,25 @@ function Hero() {
   );
 }
 
-/* ===== SHOWCASE carousel 3D ===== */
+/* ===== SHOWCASE — coverflow 3D như chungdoi: 2 bên ẢNH TĨNH (nhẹ), giữa IFRAME sống (cuộn) ===== */
 function Showcase({ templates }: { templates: Template[] }) {
-  const items = templates.slice(0, 6);
   const [index, setIndex] = useState(0);
-  const total = items.length;
-  if (total === 0) return null;
+  const [modal, setModal] = useState<Template | null>(null);
+  const [paused, setPaused] = useState(false); // hover/modal -> dừng tự nhảy, để ảnh cuộn
+  const total = templates.length;
 
   const go = (dir: number) => setIndex((p) => (p + dir + total) % total);
+  const NEAR = 3;      // hiện nhiều thiệp 2 bên (ảnh tĩnh nhẹ -> show được nhiều)
+
+  // Card giữa cuộn ảnh xuống rồi lên (CSS), xong tự nhảy sang mẫu kế.
+  // Tạm dừng khi hover (di chuột vào -> để xem ảnh cuộn) hoặc khi mở modal.
+  useEffect(() => {
+    if (paused || modal || total <= 1) return;
+    const id = setTimeout(() => setIndex((p) => (p + 1) % total), 8500);
+    return () => clearTimeout(id);
+  }, [index, paused, modal, total]);
+
+  if (total === 0) return null;
 
   return (
     <section className="section showcase">
@@ -97,48 +108,60 @@ function Showcase({ templates }: { templates: Template[] }) {
         <ScrollReveal>
           <div className="section-head">
             <h2>Mẫu thiệp cưới online <span className="text-accent">đẹp nhất</span></h2>
-            <p>Bộ sưu tập được yêu thích nhất, thiết kế tinh tế cho ngày trọng đại.</p>
+            <p>Khám phá những mẫu thiệp cưới được thiết kế tinh tế và hiện đại.</p>
           </div>
         </ScrollReveal>
 
-        <div className="carousel">
-          <button className="carousel__arrow" onClick={() => go(-1)} aria-label="Mẫu trước">
+        <div className="cf">
+          <button className="cf__arrow cf__arrow--l" onClick={() => go(-1)} aria-label="Mẫu trước">
             <ChevronLeft size={22} />
           </button>
 
-          <div className="carousel__stage">
-            {items.map((t, i) => {
-              const offset = (i - index + total) % total;
-              const pos = offset > total / 2 ? offset - total : offset;
-              if (Math.abs(pos) > 1) return null;
+          <div className="cf__stage" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+            {templates.map((t, i) => {
+              let pos = i - index;
+              if (pos > total / 2) pos -= total;
+              if (pos < -total / 2) pos += total;
+              if (Math.abs(pos) > NEAR) return null;          // chỉ hiện các thiệp gần giữa
+              const center = pos === 0;
+              const style: React.CSSProperties = {
+                transform: `translateX(${pos * 240}px) translateZ(${-Math.abs(pos) * 120}px) rotateY(${pos * -30}deg) scale(${center ? 1 : 0.9})`,
+                zIndex: 20 - Math.abs(pos),
+                opacity: center ? 1 : Math.max(0.45, 0.85 - Math.abs(pos) * 0.18),
+                filter: center ? 'none' : 'brightness(0.92)',
+              };
               return (
-                <Link
-                  key={t.id}
-                  to={`/mau-thiep/${t.slug}`}
-                  className={`carousel__card carousel__card--${pos === 0 ? 'center' : pos < 0 ? 'left' : 'right'}`}
+                <button
+                  key={t.id} type="button"
+                  className={`cf__card ${center ? 'cf__card--center' : ''}`}
+                  style={style} aria-label={center ? `Xem chi tiết ${t.name}` : `Chọn ${t.name}`}
+                  // Card giữa: mở modal chi tiết. Card bên: trượt vào giữa.
+                  onClick={() => { center ? setModal(t) : setIndex(i); }}
                 >
-                  <div className="carousel__card-img">
-                    <Heart size={28} />
-                    <span>{t.name}</span>
+                  {/* KHÔNG dùng iframe (5 iframe = 5 React app -> lag). Card giữa: ảnh full cuộn dọc bằng CSS.
+                      Card bên: cũng ảnh full nhưng đứng yên (top-crop). Mượt 60fps, nhẹ. */}
+                  <div className="cf__viewport">
+                    <img
+                      className={`cf__shot ${center ? 'cf__shot--scroll' : ''}`}
+                      src={`/invitation/thumbs-full/${t.slug}.webp`}
+                      alt={t.name} loading="lazy" draggable={false}
+                    />
                   </div>
-                </Link>
+                  {center && <span className="cf__name">{t.name}</span>}
+                </button>
               );
             })}
           </div>
 
-          <button className="carousel__arrow" onClick={() => go(1)} aria-label="Mẫu sau">
+          <button className="cf__arrow cf__arrow--r" onClick={() => go(1)} aria-label="Mẫu sau">
             <ChevronRight size={22} />
           </button>
         </div>
 
-        <div className="carousel__dots">
-          {items.map((_, i) => (
-            <button
-              key={i}
-              className={`carousel__dot ${i === index ? 'carousel__dot--active' : ''}`}
-              onClick={() => setIndex(i)}
-              aria-label={`Mẫu ${i + 1}`}
-            />
+        <div className="cf__dots">
+          {templates.map((_, i) => (
+            <button key={i} className={`cf__dot ${i === index ? 'on' : ''}`}
+              onClick={() => setIndex(i)} aria-label={`Mẫu ${i + 1}`} />
           ))}
         </div>
 
@@ -150,6 +173,8 @@ function Showcase({ templates }: { templates: Template[] }) {
           </div>
         </ScrollReveal>
       </div>
+
+      {modal && <TemplateModal t={modal} onClose={() => setModal(null)} />}
     </section>
   );
 }
@@ -328,38 +353,80 @@ function MultiLang() {
 }
 
 /* ===== INSPIRATION grid ===== */
+/** Cảm hứng cặp đôi — dải NGANG NHẢY từng nấc mỗi ~4.5s (không lướt liên tục).
+ * Hover 1 thiệp -> ảnh cuộn dọc; hover toàn dải -> dừng nhảy. */
 function Inspiration({ templates }: { templates: Template[] }) {
-  const items = templates.slice(0, 6);
+  const [start, setStart] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [modal, setModal] = useState<Template | null>(null);
+  const total = templates.length;
+
+  useEffect(() => {
+    if (paused || modal || total === 0) return;
+    const id = setTimeout(() => setStart((s) => (s + 1) % total), 4500);
+    return () => clearTimeout(id);
+  }, [start, paused, modal, total]);
+
+  if (total === 0) return null;
+  // Nhân đôi để trượt qua hết rồi reset mượt. translateX theo `start` (mỗi nấc 1 thẻ).
+  const loop = [...templates, ...templates];
+  const STEP = 262; // bề rộng thẻ (240) + gap (22)
+
   return (
     <section className="section inspiration">
-      <div className="container">
-        <ScrollReveal>
-          <div className="section-head">
-            <h2>Cảm hứng từ những <span className="text-accent">cặp đôi</span></h2>
-            <p>Khám phá những mẫu thiệp đã được các cặp đôi tin chọn.</p>
-          </div>
-        </ScrollReveal>
-        <div className="inspiration__grid">
-          {items.map((t, i) => (
-            <ScrollReveal key={t.id} delay={i * 0.06}>
-              <Link to={`/mau-thiep/${t.slug}`} className="insp-card">
-                <div className="insp-card__img"><Heart size={26} /></div>
-                <div className="insp-card__overlay">
-                  <span className="insp-card__couple">{t.name}</span>
-                  <span className="insp-card__cat">{t.category}</span>
-                </div>
-              </Link>
-            </ScrollReveal>
+      <ScrollReveal>
+        <div className="section-head">
+          <h2>Cảm hứng từ những <span className="text-accent">cặp đôi</span></h2>
+          <p>Cùng xem thiệp cưới được tạo bởi người dùng.</p>
+        </div>
+      </ScrollReveal>
+
+      <div className="insp-viewport" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-label="Thiệp cưới của các cặp đôi">
+        <div
+          className="insp-row"
+          style={{
+            transform: `translateX(-${start * STEP}px)`,
+            transition: start === 0 ? 'none' : 'transform 0.7s cubic-bezier(.4,0,.2,1)', // reset về 0 không animate
+          }}
+        >
+          {loop.map((t, i) => (
+            <button
+              type="button"
+              key={`${t.id}-${i}`}
+              onClick={() => setModal(t)}
+              className={`insp-card ${i === start ? 'is-active' : ''}`}
+              title={t.name}
+            >
+              <div className="insp-card__viewport">
+                <img className="insp-card__shot" src={`/invitation/thumbs-full/${t.slug}.webp`} alt={t.name} loading="lazy" draggable={false} />
+              </div>
+              <span className="insp-card__name">{t.name}</span>
+            </button>
           ))}
         </div>
-        <ScrollReveal>
-          <div className="section-cta">
-            <Button variant="secondary" size="lg" href="/mau-thiep">
-              Xem tất cả mẫu thiệp <ChevronRight size={18} />
-            </Button>
-          </div>
-        </ScrollReveal>
       </div>
+
+      {/* Thanh chấm chỉ vị trí — click để nhảy tới mẫu đó. */}
+      <div className="insp-dots">
+        {templates.map((t, i) => (
+          <button
+            key={t.id}
+            className={`insp-dot ${i === start ? 'on' : ''}`}
+            onClick={() => setStart(i)}
+            aria-label={`Mẫu ${i + 1}: ${t.name}`}
+          />
+        ))}
+      </div>
+
+      <ScrollReveal>
+        <div className="section-cta">
+          <Button variant="secondary" size="lg" href="/mau-thiep">
+            Xem tất cả mẫu thiệp <ChevronRight size={18} />
+          </Button>
+        </div>
+      </ScrollReveal>
+
+      {modal && <TemplateModal t={modal} onClose={() => setModal(null)} />}
     </section>
   );
 }

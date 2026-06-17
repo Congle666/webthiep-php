@@ -353,6 +353,65 @@ class AdminController
         Response::created(['url' => $cfg['assets_url'] . '/uploads/' . $fname], 'Đã tải ảnh lên.');
     }
 
+    /**
+     * POST /api/admin/templates/{id}/preview — chụp lại ảnh coverflow cho 1 mẫu.
+     * POST /api/admin/templates/all/preview — chụp lại TẤT CẢ mẫu (id = "all").
+     * Chạy Node + Puppeteer (capture-preview.mjs). Cần dev server + API đang chạy.
+     */
+    public static function regenPreview(string $id): void
+    {
+        Auth::requireAdmin();
+        $cfg = require __DIR__ . '/../config/config.php';
+        $pv = $cfg['preview'] ?? null;
+        if (!$pv) Response::error('Chưa cấu hình preview trong config.', 500);
+
+        if (!function_exists('proc_open')) {
+            Response::error('Máy chủ không cho phép chạy tiến trình (proc_open bị tắt).', 500);
+        }
+
+        // id = "all" -> chụp tất cả; ngược lại lấy slug từ template.
+        $slug = null;
+        $slugArg = '';
+        if ($id !== 'all') {
+            $t = Database::one("SELECT slug FROM templates WHERE id=?", [(int)$id]);
+            if (!$t) Response::error('Không tìm thấy mẫu thiệp.', 404);
+            $slug = $t['slug'];
+            $slugArg = ' ' . escapeshellarg($slug);
+        }
+
+        // Ghi log ra file để theo dõi (vì chạy nền).
+        $logFile = sys_get_temp_dir() . '/juntech-preview.log';
+        $scriptPath = realpath($pv['script']) ?: $pv['script'];
+        $isWin = stripos(PHP_OS, 'WIN') === 0;
+
+        // CHẠY NỀN HOÀN TOÀN TÁCH KHỎI PHP. PHP dev server (Windows) đơn luồng + tiến trình con
+        // kế thừa handle của PHP làm trang headless không fetch được API -> render rỗng.
+        // Giải pháp chắc chắn: ghi 1 file .cmd tạm rồi `start` detached (cmd con độc lập env/handle).
+        if ($isWin) {
+            $bat = sys_get_temp_dir() . '\\juntech-preview-' . bin2hex(random_bytes(3)) . '.cmd';
+            $slugLine = $id === 'all' ? '' : (' "' . $slug . '"');
+            // chcp 65001 + BOM: cmd.exe đọc UTF-8 (đường dẫn dự án có ký tự tiếng Việt).
+            $content  = "\xEF\xBB\xBF@echo off\r\n"
+                      . "chcp 65001 >nul\r\n"
+                      . 'cd /d "' . $pv['project_dir'] . "\"\r\n"
+                      . '"' . $pv['node_bin'] . '" "' . $scriptPath . '"' . $slugLine . ' > "' . $logFile . '" 2>&1' . "\r\n";
+            file_put_contents($bat, $content);
+            // start /B chạy nền, tách hẳn khỏi tiến trình PHP.
+            pclose(popen('start "" /B cmd /c "' . $bat . '"', 'r'));
+        } else {
+            $cmd = escapeshellarg($pv['node_bin']) . ' ' . escapeshellarg($scriptPath) . $slugArg
+                 . ' > ' . escapeshellarg($logFile) . ' 2>&1 &';
+            exec('cd ' . escapeshellarg($pv['project_dir']) . ' && ' . $cmd);
+        }
+
+        Response::ok(
+            ['async' => true],
+            $id === 'all'
+                ? 'Đang tạo lại ảnh tất cả mẫu (chạy nền ~30–60s). Tải lại trang chủ sau khi xong.'
+                : 'Đang tạo lại ảnh cho mẫu (chạy nền ~10s). Tải lại trang chủ sau khi xong.'
+        );
+    }
+
     // ---------- SETTINGS ----------
     /** GET /api/admin/settings */
     public static function settings(): void

@@ -1,6 +1,6 @@
 /** Tab Mẫu thiệp — bảng + modal thêm/sửa. */
 import { useEffect, useState } from 'react';
-import { Loader2, Plus, X } from 'lucide-react';
+import { Loader2, Plus, X, Camera } from 'lucide-react';
 import { adminApi, catalogApi } from '../../api/client';
 import { formatPrice } from '../../data';
 import type { Template } from '../../data/types';
@@ -18,6 +18,17 @@ export default function AdminTemplates() {
   const [rows, setRows] = useState<Template[] | null>(null);
   const [form, setForm] = useState<Form | null>(null);
   const [saving, setSaving] = useState(false);
+  const [shooting, setShooting] = useState<string | null>(null); // id mẫu (hoặc 'all') đang chụp
+  const [msg, setMsg] = useState<string>('');
+
+  // Chụp lại ảnh preview coverflow. Cần dev server (5173) đang chạy.
+  const regen = async (id: number | 'all') => {
+    setShooting(String(id)); setMsg('');
+    const r = await adminApi.regenPreview(id);
+    setShooting(null);
+    setMsg(r.success ? (r.message ?? 'Đã tạo lại ảnh.') : (r.message ?? 'Tạo ảnh thất bại.'));
+    setTimeout(() => setMsg(''), 6000);
+  };
 
   const load = () => catalogApi.templates().then((r) => r.success && setRows(r.data ?? []));
   useEffect(() => { load(); }, []);
@@ -39,6 +50,10 @@ export default function AdminTemplates() {
     <>
       <div className="adm-toolbar">
         <button className="adm-mini-btn" onClick={() => setForm({ ...empty })}><Plus size={15} /> Thêm mẫu</button>
+        <button className="adm-mini-btn adm-mini-btn--ghost" disabled={shooting !== null} onClick={() => regen('all')} title="Chụp lại ảnh coverflow cho tất cả mẫu (cần dev server đang chạy)">
+          {shooting === 'all' ? <Loader2 size={15} className="adm-spin" /> : <Camera size={15} />} Tạo lại ảnh tất cả
+        </button>
+        {msg && <span className="adm-sub" style={{ marginLeft: 'auto' }}>{msg}</span>}
       </div>
       <div className="adm-table-wrap">
         <table className="adm-table">
@@ -53,6 +68,9 @@ export default function AdminTemplates() {
                 <td>{t.isNew && <span className="adm-badge adm-badge--new">MỚI</span>} {t.isHot && <span className="adm-badge adm-badge--hot">HOT</span>}</td>
                 <td>
                   <button className="adm-mini-btn adm-mini-btn--ghost" onClick={() => setForm({ id: t.id, name: t.name, slug: t.slug, category: t.category, priceFrom: t.priceFrom, description: t.description, isNew: t.isNew, isHot: t.isHot, isActive: true })}>Sửa</button>
+                  <button className="adm-mini-btn adm-mini-btn--ghost" disabled={shooting !== null} title="Tạo lại ảnh preview coverflow" onClick={() => regen(+t.id)}>
+                    {shooting === t.id ? <Loader2 size={13} className="adm-spin" /> : <Camera size={13} />} Ảnh
+                  </button>
                   <button className="adm-mini-btn adm-mini-btn--danger" onClick={() => hide(t.id)}>Ẩn</button>
                 </td>
               </tr>

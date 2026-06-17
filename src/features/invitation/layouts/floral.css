@@ -87,25 +87,25 @@
 /* ---------- HEADER ---------- */
 .flr-header {
   position: relative;
-  padding: 48px 16px 24px;
+  padding: 40px 16px 8px;
   display: flex; align-items: center; justify-content: center;
 }
 
 .flr-frame {
   position: relative;
   z-index: 30;
-  width: min(440px, 92vw);
-  aspect-ratio: 3 / 4;
+  width: min(400px, 90vw);
+  aspect-ratio: 3 / 3.1;          /* thấp hơn -> bớt khoảng trống dưới names */
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: center top;
   background-size: contain;
-  display: flex; justify-content: center;
+  display: flex; justify-content: center; align-items: center;
 }
 
 .flr-frame-inner {
-  margin-top: 22%;
   text-align: center;
-  padding: 0 14%;
+  padding: 0 16%;
+  margin-top: -6%;               /* canh names vào giữa vùng oval (không lệch trên) */
 }
 .flr-frame-label {
   display: block; font-size: 0.7rem; letter-spacing: 0.32em;
@@ -125,3 +125,7 @@
 @media (max-width: 640px) {
   .flr-gate-card { padding: 64px 22px 44px; }
 }
+
+/* Kéo nội dung lên sát header floral (bớt khoảng trống dưới khung hoa) */
+.inv-floral .flr-header { margin-bottom: -110px; }
+.inv-floral .inv-section:first-of-type { padding-top: 8px; }

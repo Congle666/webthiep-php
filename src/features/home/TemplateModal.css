@@ -1,0 +1,73 @@
+/* Modal chi tiết mẫu thiệp */
+.tm-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(20, 16, 20, 0.72); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  animation: tm-fade 0.2s ease;
+}
+@keyframes tm-fade { from { opacity: 0; } to { opacity: 1; } }
+.tm {
+  position: relative; display: grid; grid-template-columns: 360px 1fr;
+  width: 100%; max-width: 960px; max-height: 90vh;
+  background: #17151c; border: 1px solid #2a2730; border-radius: 18px;
+  overflow: hidden auto; box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+}
+/* min-width:0 cho grid children -> không bị tràn do nội dung dài (title/chữ) */
+.tm > * { min-width: 0; }
+.tm__close {
+  position: absolute; top: 14px; right: 14px; z-index: 5;
+  width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.08); color: #fff; display: inline-flex; align-items: center; justify-content: center;
+}
+.tm__close:hover { background: rgba(255,255,255,0.16); }
+
+/* Trái: ảnh full thiệp tự CUỘN DỌC trong khung (giống ChungĐôi). Ảnh rộng = khung,
+   cao tự nhiên (~3200px) -> dịch theo % CHÍNH ẢNH nên khớp mọi chiều cao khung. */
+.tm__preview { background: #e7dcc6; overflow: hidden; }
+.tm__shot {
+  width: 100%; height: auto; display: block; pointer-events: none;
+  animation: tm-scroll 22s ease-in-out infinite alternate;
+}
+@keyframes tm-scroll {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-82%); }   /* cuộn xem gần hết ảnh thiệp, image-relative */
+}
+@media (prefers-reduced-motion: reduce) { .tm__shot { animation: none; } }
+
+/* Phải: thông tin */
+.tm__info { padding: 40px 36px; overflow-y: auto; color: #d7d3dc; }
+.tm__name { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fafafa; margin-bottom: 8px; }
+.tm__desc { color: #a8a3b0; line-height: 1.6; margin-bottom: 16px; }
+.tm__tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.tm__tag { padding: 5px 14px; border-radius: 9999px; border: 1px solid #3a3640; font-size: 0.8rem; color: #c7c2cf; }
+.tm__feat-title { font-size: 1rem; color: #fafafa; margin-bottom: 12px; }
+.tm__feats { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; margin-bottom: 24px; }
+.tm__feats li { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #c7c2cf; }
+.tm__feats svg { color: var(--accent-primary); flex-shrink: 0; }
+.tm__note { font-size: 0.8rem; color: #7d7787; line-height: 1.6; margin-bottom: 22px; }
+.tm__actions { display: flex; gap: 12px; }
+.tm__btn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+  border: none; text-decoration: none; font-family: inherit; transition: filter 0.2s;
+}
+.tm__btn--primary { background: var(--accent-primary); color: #fff; }
+.tm__btn--primary:hover { filter: brightness(1.1); }
+.tm__btn--ghost { background: transparent; border: 1px solid #3a3640; color: #e0dce5; }
+.tm__btn--ghost:hover { border-color: var(--accent-primary); color: #fff; }
+
+/* ≤900px: gập 1 cột (ảnh trên, thông tin dưới). Preview VẪN cuộn ảnh dọc (giống ChungĐôi). */
+@media (max-width: 900px) {
+  .tm-overlay { padding: 16px; }
+  .tm { grid-template-columns: 1fr; max-height: 90vh; }
+  .tm__preview { height: 360px; }   /* khung cao hơn -> thấy nhiều thiệp khi cuộn */
+  .tm__info { padding: 24px; }
+}
+@media (max-width: 560px) {
+  .tm-overlay { padding: 12px; }
+  .tm__preview { height: 320px; }
+  .tm__info { padding: 20px; }
+  .tm__name { font-size: 1.5rem; word-break: break-word; }
+  .tm__feats { grid-template-columns: 1fr; }
+  .tm__actions { flex-direction: column; }
+}

@@ -1,33 +1,11 @@
 /** Thiệp cưới sống — orchestrator: fetch data, chọn layout từ registry, render cover + header + body. */
-import { useEffect, useState, useRef, CSSProperties } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Music, Volume2, VolumeX } from 'lucide-react';
-import { invitationApi } from '../../api/client';
+import { invitationApi, customerApi } from '../../api/client';
 import type { Invitation as Inv } from './types';
-import { InvitationBody } from './InvitationBody';
-import { LAYOUTS } from './layouts';
-import { decosByZone } from './decorations';
+import { InvitationView } from './InvitationView';
 import './Invitation.css';
-
-/** Map theme từ DB -> CSS variables + background của .inv-root. */
-function themeStyle(design?: Inv['design']): CSSProperties {
-  const t = design?.theme;
-  const style: Record<string, string> = {};
-  if (t) {
-    if (t.red) style['--red'] = t.red;
-    if (t.redDeep) style['--red-deep'] = t.redDeep;
-    if (t.redSoft) style['--red-soft'] = t.redSoft;
-    if (t.text) style['--text'] = t.text;
-    if (t.heading) style['--heading'] = t.heading;
-    if (t.muted) style['--muted'] = t.muted;
-    if (t.bg || t.paper) {
-      const bg = t.bg || '#f5ead7';
-      style.background = t.paper ? `${bg} url('${t.paper}')` : bg;
-    }
-  }
-  return style as CSSProperties;
-}
 
 export default function Invitation() {
   const { slug = '' } = useParams();
@@ -36,22 +14,55 @@ export default function Invitation() {
   const [params] = useSearchParams();
   const guestName = params.get('khach');
   const editMode = params.get('edit') !== null;
+  const previewMode = params.get('preview') !== null; // nhúng iframe trang chủ: bỏ gate
+  const autoScrollPreview = params.get('scroll') !== null; // chỉ card giữa: tự cuộn lặp
+  const draftMode = params.get('draft') !== null; // editor: xem thiệp nháp của chính chủ (chưa publish)
   const [inv, setInv] = useState<Inv | null>(null);
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const [errMsg, setErrMsg] = useState('');
-  const [opened, setOpened] = useState(false);
+  const [opened, setOpened] = useState(previewMode);
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const fetcher = isDemo ? invitationApi.demo(slug) : invitationApi.view(slug);
+    const fetcher: Promise<{ success: boolean; data?: Inv; message?: string }> =
+      draftMode ? customerApi.getInvitation(slug)
+      : isDemo ? invitationApi.demo(slug)
+      : invitationApi.view(slug);
     fetcher.then((res) => {
       if (res.success && res.data) {
         setInv(res.data); setStatus('ok');
         document.title = `Thiệp cưới ${res.data.groomName} & ${res.data.brideName}`;
       } else { setStatus('error'); setErrMsg(res.message ?? 'Không tìm thấy thiệp.'); }
     });
-  }, [slug, isDemo]);
+  }, [slug, isDemo, draftMode]);
+
+  // Chế độ preview (iframe trang chủ): tự cuộn xuống/lên.
+  // Bật/tắt qua postMessage từ trang cha (không đổi src -> không reload, không kẹt loading).
+  // Card đầu (?scroll) tự cuộn ngay; các card khác chờ message bật.
+  useEffect(() => {
+    if (!previewMode || status !== 'ok') return;
+    let raf = 0, last = 0, dir = 1, running = false;
+    const step = (t: number) => {
+      if (!last) last = t;
+      const dt = t - last; last = t;
+      const max = document.body.scrollHeight - window.innerHeight;
+      let y = window.scrollY + dir * 0.45 * dt;
+      if (y >= max) { y = max; dir = -1; }
+      if (y <= 0) { y = 0; dir = 1; }
+      window.scrollTo(0, y);
+      raf = requestAnimationFrame(step);
+    };
+    const start = () => { if (running) return; running = true; last = 0; raf = requestAnimationFrame(step); };
+    const stop = () => { running = false; cancelAnimationFrame(raf); };
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === 'inv-scroll') { e.data.on ? start() : stop(); }
+    };
+    window.addEventListener('message', onMsg);
+    let id: number | undefined;
+    if (autoScrollPreview) id = window.setTimeout(start, 1000);
+    return () => { window.removeEventListener('message', onMsg); if (id) clearTimeout(id); stop(); };
+  }, [previewMode, autoScrollPreview, status]);
 
   // Auto-scroll mượt 1 lần xuống cuối; chạm/cuộn tay là dừng.
   const autoScroll = () => {
@@ -87,30 +98,19 @@ export default function Invitation() {
   if (status === 'loading') return <div className="inv-loading"><span className="inv-songhy-load">囍</span><p>Đang mở thiệp...</p></div>;
   if (status === 'error' || !inv) return <div className="inv-error"><h1>404</h1><p>{errMsg}</p></div>;
 
-  const L = LAYOUTS[inv.layout ?? 'traditional'] ?? LAYOUTS.traditional;
-  const allDecos = inv.design?.decorations?.length ? inv.design.decorations : undefined;
-  const bodyDecos = decosByZone(allDecos, 'body');
-  const coverDecos = decosByZone(allDecos, 'cover');
-  const rootClass = `inv-root inv-${inv.layout ?? 'traditional'}`;
-
   return (
-    <div className={rootClass} style={themeStyle(inv.design)}>
+    <>
       {inv.musicUrl && <audio ref={audioRef} src={inv.musicUrl} loop />}
-
-      <AnimatePresence>
-        {!opened && !editMode && <L.Cover inv={inv} guestName={guestName} onOpen={handleOpen} decorations={coverDecos} />}
-      </AnimatePresence>
-
-      {inv.musicUrl && opened && (
+      {inv.musicUrl && opened && !previewMode && (
         <button className="inv-music-btn" onClick={toggleMusic} aria-label="Bật/tắt nhạc">
           {playing ? <Volume2 size={18} /> : <VolumeX size={18} />}
           <Music size={14} className={playing ? 'inv-music-spin' : ''} />
         </button>
       )}
-
-      <L.Header inv={inv} editMode={editMode} decorations={bodyDecos} />
-
-      <InvitationBody inv={inv} slug={slug} />
-    </div>
+      <InvitationView
+        inv={inv} slug={slug} opened={opened} onOpen={handleOpen}
+        guestName={guestName} editMode={editMode} staticMode={previewMode}
+      />
+    </>
   );
 }
