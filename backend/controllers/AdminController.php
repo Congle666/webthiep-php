@@ -412,6 +412,100 @@ class AdminController
         );
     }
 
+    // ---------- MUSIC LIBRARY ----------
+    /** GET /api/admin/music — liệt kê tất cả nhạc (thư mục public/music kể cả /uploads). */
+    public static function musicList(): void
+    {
+        Auth::requireAdmin();
+        $cfg  = require __DIR__ . '/../config/config.php';
+        $base = realpath(dirname($cfg['assets_dir']) . '/music');
+        $out  = [];
+        if ($base && is_dir($base)) {
+            $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($base, FilesystemIterator::SKIP_DOTS));
+            foreach ($rii as $file) {
+                if ($file->isDir()) continue;
+                $ext = strtolower($file->getExtension());
+                if (!in_array($ext, ['mp3','m4a','ogg','wav'], true)) continue;
+                $rel   = str_replace('\\', '/', substr($file->getPathname(), strlen($base)));
+                $fname = $file->getBasename('.' . $ext);
+                // pretty name: thay - / _ bằng space, ucwords
+                $pretty = ucwords(str_replace(['-','_'], ' ', $fname));
+                $out[] = ['url' => '/music' . $rel, 'name' => $pretty];
+            }
+        }
+        usort($out, fn($a, $b) => strcmp($a['name'], $b['name']));
+        Response::ok($out);
+    }
+
+    /** POST /api/admin/music/upload — upload nhạc vào public/music (thư mục gốc). */
+    public static function uploadMusic(): void
+    {
+        Auth::requireAdmin();
+        if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            Response::error('Không nhận được file.', 422);
+        }
+        $f   = $_FILES['file'];
+        $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, ['mp3','m4a','ogg','wav'], true)) {
+            Response::error('Định dạng không hỗ trợ (mp3/m4a/ogg/wav).', 422);
+        }
+        if ($f['size'] > 20 * 1024 * 1024) Response::error('File quá lớn (tối đa 20 MB).', 422);
+
+        $cfg = require __DIR__ . '/../config/config.php';
+        $dir = dirname($cfg['assets_dir']) . '/music';
+        if (!is_dir($dir)) @mkdir($dir, 0777, true);
+
+        $safe  = preg_replace('/[^a-z0-9._-]/i', '-', pathinfo($f['name'], PATHINFO_FILENAME));
+        $fname = $safe . '.' . $ext;
+        // tránh ghi đè
+        if (file_exists($dir . '/' . $fname)) {
+            $fname = $safe . '-' . substr(bin2hex(random_bytes(3)), 0, 5) . '.' . $ext;
+        }
+        if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $fname)) {
+            Response::error('Lưu file thất bại.', 500);
+        }
+        $pretty = ucwords(str_replace(['-','_'], ' ', $safe));
+        Response::created(['url' => '/music/' . $fname, 'name' => $pretty], 'Đã tải nhạc lên.');
+    }
+
+    /** PATCH /api/admin/music/rename — đổi tên hiển thị bằng cách rename file. */
+    public static function renameMusic(): void
+    {
+        Auth::requireAdmin();
+        $b        = Request::body();
+        $filename = basename($b['filename'] ?? '');
+        $newName  = trim($b['name'] ?? '');
+        if (!$filename || !$newName) Response::error('Thiếu filename hoặc name.', 422);
+
+        $cfg  = require __DIR__ . '/../config/config.php';
+        $base = dirname($cfg['assets_dir']) . '/music';
+        $old  = $base . '/' . $filename;
+        if (!file_exists($old)) Response::error('Không tìm thấy file nhạc.', 404);
+
+        $ext     = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $safeName = preg_replace('/[^a-z0-9._-]/i', '-', $newName);
+        $newFile  = $safeName . '.' . $ext;
+        if ($newFile === $filename) { Response::ok(null, 'Không thay đổi.'); return; }
+        if (file_exists($base . '/' . $newFile)) {
+            $newFile = $safeName . '-' . substr(bin2hex(random_bytes(3)), 0, 5) . '.' . $ext;
+        }
+        rename($old, $base . '/' . $newFile);
+        Response::ok(['url' => '/music/' . $newFile, 'name' => $newName], 'Đã đổi tên.');
+    }
+
+    /** DELETE /api/admin/music/{filename} — xóa file nhạc. */
+    public static function deleteMusic(string $filename): void
+    {
+        Auth::requireAdmin();
+        $filename = basename(rawurldecode($filename)); // ngăn path traversal
+        $cfg  = require __DIR__ . '/../config/config.php';
+        $base = dirname($cfg['assets_dir']) . '/music';
+        $path = $base . '/' . $filename;
+        if (!file_exists($path)) Response::error('Không tìm thấy file.', 404);
+        unlink($path);
+        Response::ok(null, 'Đã xóa bài nhạc.');
+    }
+
     // ---------- SETTINGS ----------
     /** GET /api/admin/settings */
     public static function settings(): void

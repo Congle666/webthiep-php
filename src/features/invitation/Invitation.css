@@ -10,13 +10,13 @@
   position: relative;
   overflow-x: hidden;
   background: #f5ead7 url('/invitation/paper-bg.jpg');
-  background-size: 480px;
+  background-size: 600px;
   /* Thiệp cưới online = khung dọc (như mobile). Trên desktop giới hạn bề ngang & căn giữa
      để hoạ tiết (tính theo % bề ngang) không phình to/đè chữ. Hai bên là backdrop. */
   width: 100%;
-  max-width: 520px;
+  max-width: 640px;
   margin-inline: auto;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.22);
 }
 /* Backdrop full-viewport phía sau khung thiệp (vùng trống 2 bên trên desktop). */
 .inv-root::before {
@@ -25,7 +25,7 @@
   inset: 0;
   z-index: -1;
   background: #e7dcc6 url('/invitation/paper-bg.jpg');
-  background-size: 480px;
+  background-size: 600px;
 }
 .inv-root h1, .inv-root h2, .inv-root h3 { color: var(--heading); font-family: 'Playfair Display', serif; }
 
@@ -46,7 +46,7 @@
 .gate--inline .gate-card { width: 100%; max-width: 100%; box-shadow: none; }
 
 .gate-card {
-  position: relative; width: min(92vw, 560px); aspect-ratio: 4/3;
+  position: relative; width: min(92vw, 680px); aspect-ratio: 4/3;
   background: #f5ead7 url('/invitation/paper-bg.jpg'); background-size: 420px;
   border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,0.5);
   overflow: hidden; display: flex; align-items: center; justify-content: center;
@@ -70,22 +70,82 @@
 .inv-music-spin { animation: inv-spin 5s linear infinite; }
 @keyframes inv-spin { to { transform: rotate(360deg); } }
 
+/* ── Language switcher ─────────────────────────────────────────────────────── */
+.inv-lang {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 50;
+}
+
+.inv-lang-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 11px; border-radius: 9999px;
+  background: rgba(245,234,215,0.88); backdrop-filter: blur(6px);
+  border: 1px solid var(--red); color: var(--red);
+  cursor: pointer; font-family: inherit; font-size: 0.75rem; font-weight: 600;
+  transition: background 0.15s;
+}
+.inv-lang-btn:hover { background: rgba(245,234,215,1); }
+
+.inv-lang-flag { font-size: 1rem; line-height: 1; }
+.inv-lang-code { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; }
+
+.inv-lang-dropdown {
+  position: absolute; top: calc(100% + 8px); left: 0;
+  min-width: 160px;
+  background: #fdf6ec; border: 1px solid var(--red);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  animation: inv-dd-in 0.15s ease;
+}
+@keyframes inv-dd-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.inv-lang-option {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 14px;
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 0.85rem; color: var(--text);
+  text-align: left; transition: background 0.12s;
+}
+.inv-lang-option:hover { background: rgba(158,43,37,0.07); color: var(--heading); }
+.inv-lang-option--active { background: rgba(158,43,37,0.1); color: var(--heading); font-weight: 600; }
+
+.inv-lang-primary-badge {
+  margin-left: auto; font-size: 0.65rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 9999px;
+  background: var(--red, #9e2b25); color: #fff;
+}
+.inv-lang-hint {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em;
+  color: var(--muted, #9c8b76); padding: 8px 14px 4px;
+  text-transform: uppercase; margin: 0;
+}
+
 /* Watermark phượng nền nay là DECORATION (zone body, opacity thấp) — không còn <img> tĩnh. */
 
 /* ===== HEADER (khớp chungdoi: phượng lớn 2 góc + Song Hỷ to trên banner đỏ) ===== */
-.inv-header { position: relative; z-index: 1; height: 360px; }
-.inv-phoenix { position: absolute; width: 240px; max-width: 42%; top: 0; z-index: 3; }
+.inv-header { position: relative; z-index: 1; height: 420px; }
+.inv-phoenix { position: absolute; width: 280px; max-width: 44%; top: 0; z-index: 3; }
 .inv-phoenix--l { left: -10px; top: 6px; }
 .inv-phoenix--r { right: -10px; transform: scaleX(-1); top: 40px; }
-.inv-songhy { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); width: 150px; max-width: 38%; z-index: 4; }
-.inv-banner { position: absolute; top: 150px; left: 0; right: 0; height: 70px; background: var(--red-deep); z-index: 1; }
-.inv-flower { position: absolute; top: 240px; right: 6%; width: 170px; max-width: 32%; z-index: 2; opacity: 0.85; }
+.inv-songhy { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 170px; max-width: 38%; z-index: 4; }
+.inv-banner { position: absolute; top: 178px; left: 0; right: 0; height: 76px; background: var(--red-deep); z-index: 1; }
+.inv-flower { position: absolute; top: 280px; right: 6%; width: 190px; max-width: 32%; z-index: 2; opacity: 0.85; }
 
 /* ===== SECTION ===== */
-.inv-section { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 40px 24px; text-align: center; }
-.inv-h2 { font-size: clamp(1.05rem, 3.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.1em; color: var(--red); margin-bottom: 6px; display: inline-flex; align-items: center; gap: 8px; }
+.inv-section { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 40px 32px; text-align: center; }
+.inv-h2 { font-size: clamp(1.05rem, 3.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.1em; color: var(--red); margin-bottom: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; text-align: center; }
 .inv-h2 svg { color: var(--red); }
 .inv-mini-divider { width: 70px; height: 1px; background: var(--red); opacity: 0.45; margin: 8px auto 22px; }
+
+/* ── BiLine: song ngữ 2 dòng (primary to + secondary nhỏ mờ) ── */
+.inv-biline { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; }
+.inv-biline__pri { display: block; }
+.inv-biline__sec { display: block; font-size: 0.78em; opacity: 0.52; letter-spacing: 0.03em; font-weight: 400; }
 
 /* Chú rể / cô dâu */
 .inv-family-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -98,7 +158,7 @@
 
 /* Tên cô dâu chú rể */
 .inv-couple-pre { font-size: 0.78rem; letter-spacing: 0.08em; color: var(--text); margin-bottom: 18px; line-height: 1.7; }
-.inv-couple-name { font-size: clamp(1.7rem, 6.5vw, 2.6rem); font-weight: 600; line-height: 1.15; }
+.inv-couple-name { font-size: clamp(1.9rem, 6vw, 3rem); font-weight: 600; line-height: 1.15; }
 .inv-couple-cap { display: block; font-size: 0.7rem; letter-spacing: 0.2em; color: var(--muted); margin: 4px 0 14px; }
 .inv-couple-amp { display: block; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.5rem; color: var(--red); margin: 2px 0; }
 
@@ -182,19 +242,26 @@
 .inv-footer-brand { opacity: 0.7; font-size: 0.72rem; letter-spacing: 0.1em; margin-top: 12px; }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 600px) {
+@media (max-width: 680px) {
   .inv-section { padding: 34px 20px; }
-  .inv-header { height: 280px; }
-  .inv-phoenix { width: 160px; }
-  .inv-phoenix--l { left: -16px; }
-  .inv-phoenix--r { right: -16px; top: 36px; }
-  .inv-songhy { width: 110px; top: 52px; }
-  .inv-banner { top: 118px; height: 56px; }
-  .inv-flower { width: 120px; top: 186px; right: 4%; }
+  .inv-header { height: 300px; }
+  .inv-phoenix { width: 170px; }
+  .inv-phoenix--l { left: -14px; }
+  .inv-phoenix--r { right: -14px; top: 36px; }
+  .inv-songhy { width: 120px; top: 58px; }
+  .inv-banner { top: 128px; height: 58px; }
+  .inv-flower { width: 130px; top: 200px; right: 4%; }
   .inv-qr img { width: 118px; height: 118px; }
   /* Gate trên mobile: cao hơn để chữ thoáng */
   .gate-card { aspect-ratio: 3/4.2; }
   .gate-content { width: 74%; padding-top: 76px; }
+}
+@media (max-width: 420px) {
+  .inv-header { height: 260px; }
+  .inv-phoenix { width: 140px; }
+  .inv-songhy { width: 100px; top: 48px; }
+  .inv-banner { top: 108px; height: 52px; }
+  .inv-flower { width: 110px; top: 170px; }
 }
 
 /* ===== ALBUM ẢNH CƯỚI ===== */
@@ -202,7 +269,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  max-width: 520px;
+  max-width: 640px;
   margin: 24px auto 0;
 }
 .inv-album-item {

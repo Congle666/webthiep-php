@@ -26,6 +26,8 @@
 .adm-header h1 { font-size: 1.5rem; color: #fafafa; font-family: 'Playfair Display', serif; flex: 1; }
 .adm-who { color: #888; font-size: 0.85rem; }
 .adm-burger { display: none; background: none; border: 1px solid #1f1f1f; color: #ccc; border-radius: 8px; padding: 8px; cursor: pointer; }
+.adm-theme-toggle { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #2a2a2a; background: none; color: #888; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.adm-theme-toggle:hover { border-color: #e6017e; color: #e6017e; }
 
 /* Cards (shared) */
 .adm-card { background: #111; border: 1px solid #1f1f1f; border-radius: 14px; padding: 20px; }
@@ -114,6 +116,71 @@
 .adm-tm-head { display: flex; align-items: center; gap: 10px; }
 .adm-tm-avatar { font-size: 1.4rem; }
 .adm-stars { display: inline-flex; gap: 2px; }
+
+/* Music Library */
+.adm-music { display: flex; flex-direction: column; gap: 16px; }
+.adm-music__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.adm-music__title { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 700; color: #fafafa; margin: 0; }
+.adm-music__sub { font-size: 0.8rem; color: #888; margin: 4px 0 0; }
+.adm-music__upload { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 8px; border: none; background: #e6017e; color: #fff; font-weight: 700; font-size: 0.85rem; cursor: pointer; flex-shrink: 0; }
+.adm-music__upload:hover { filter: brightness(1.1); }
+.adm-music__upload:disabled { opacity: 0.6; cursor: default; }
+.adm-music__msg { margin: 0; padding: 10px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; }
+.adm-music__msg.ok { background: rgba(0,180,80,0.12); border: 1px solid rgba(0,180,80,0.3); color: #00c45a; }
+.adm-music__msg.err { background: rgba(230,1,126,0.12); border: 1px solid rgba(230,1,126,0.35); color: #ff4da6; }
+.adm-music__empty { padding: 60px 20px; text-align: center; color: #666; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.adm-music__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.adm-music__item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #161616; border: 1px solid #222; border-radius: 10px; transition: border-color 0.15s; }
+.adm-music__item:hover { border-color: #333; }
+.adm-music__item.playing { border-color: rgba(230,1,126,0.5); background: rgba(230,1,126,0.05); }
+.adm-music__play { width: 36px; height: 36px; border-radius: 50%; border: none; background: #222; color: #e6017e; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s; }
+.adm-music__play:hover { background: #2a2a2a; }
+.adm-music__item.playing .adm-music__play { background: rgba(230,1,126,0.2); }
+.adm-music__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.adm-music__name { font-size: 0.9rem; font-weight: 600; color: #e8e8e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-music__file { font-size: 0.73rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-music__rename { width: 100%; background: #0a0a0a; border: 1px solid #e6017e; border-radius: 6px; color: #e8e8e8; font-size: 0.88rem; padding: 5px 10px; outline: none; }
+.adm-music__actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Blog */
+.adm-blog-list { display: flex; flex-direction: column; gap: 20px; }
+.adm-blog-list-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.adm-blog-title { font-size: 1.2rem; font-weight: 700; color: #fafafa; margin: 0; font-family: 'Playfair Display', serif; }
+.adm-blog-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+.adm-blog-stat { background: #111; border: 1px solid #1f1f1f; border-radius: 12px; padding: 16px 24px; display: flex; flex-direction: column; gap: 4px; min-width: 100px; }
+.adm-blog-stat span:last-child { color: #888; font-size: 0.8rem; }
+.adm-blog-stat-val { font-size: 1.6rem; font-weight: 700; color: #e6017e; font-family: 'Playfair Display', serif; }
+.adm-blog-stat-val--green { color: #4ade80; }
+.adm-blog-stat-val--gray { color: #777; }
+.adm-blog-row-title { font-weight: 600; color: #e8e8e8; font-size: 0.88rem; }
+.adm-blog-row-excerpt { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+.adm-blog-cat { font-size: 0.78rem; color: #999; }
+
+/* Blog editor layout */
+.adm-blog-editor { display: flex; flex-direction: column; gap: 20px; }
+.adm-blog-back { background: none; border: none; color: #888; cursor: pointer; font-size: 0.88rem; font-family: inherit; padding: 0; display: inline-flex; align-items: center; gap: 6px; transition: color 0.15s; }
+.adm-blog-back:hover { color: #e6017e; }
+.adm-blog-layout { display: flex; gap: 20px; align-items: flex-start; }
+.adm-blog-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.adm-blog-title-input { font-family: 'Playfair Display', serif !important; font-size: 1.5rem !important; font-weight: 700; padding: 14px 16px !important; color: #fafafa !important; background: #111 !important; border: 1px solid #2a2a2a !important; }
+.adm-blog-title-input::placeholder { color: #555 !important; }
+.adm-blog-panel { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0; position: sticky; top: 20px; }
+.adm-blog-panel-section { background: #111; border: 1px solid #1f1f1f; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.adm-blog-panel-heading { font-size: 0.82rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 8px; }
+.adm-blog-panel-collapse { display: flex; align-items: center; justify-content: space-between; background: none; border: none; cursor: pointer; color: #aaa; padding: 0; width: 100%; font-family: inherit; }
+.adm-blog-panel-collapse:hover { color: #ddd; }
+.adm-blog-seo-fields { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+.adm-blog-counter { color: #666; font-weight: 400; font-size: 0.78rem; }
+.adm-blog-cover-upload { cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px dashed #333; min-height: 80px; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s; }
+.adm-blog-cover-upload:hover { border-color: #e6017e; }
+.adm-blog-cover-preview { width: 100%; height: auto; display: block; border-radius: 7px; }
+.adm-blog-cover-placeholder { padding: 20px; color: #666; font-size: 0.82rem; text-align: center; }
+.adm-blog-panel-actions { display: flex; flex-direction: column; }
+
+@media (max-width: 860px) {
+  .adm-blog-layout { flex-direction: column; }
+  .adm-blog-panel { width: 100%; position: static; }
+}
 
 /* Settings */
 .adm-settings { display: flex; flex-direction: column; gap: 16px; max-width: 480px; }

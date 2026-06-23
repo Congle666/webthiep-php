@@ -23,3 +23,31 @@
 .lm__submit { margin-top: 4px; padding: 12px; border: none; border-radius: 9px; background: var(--accent-primary); color: #fff; font-weight: 700; font-size: .95rem; cursor: pointer; }
 .lm__submit:hover { filter: brightness(1.08); }
 .lm__submit:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Google OAuth button */
+.lm__google {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 11px 14px; border-radius: 9px;
+  border: 1px solid var(--border-default, #e3dade);
+  background: var(--bg-primary, #fff); color: var(--text-primary, #1a1a1a);
+  font-size: .93rem; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.lm__google:hover { background: var(--bg-secondary, #faf7f8); border-color: #ccc; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.lm__google:disabled { opacity: .6; cursor: not-allowed; }
+.lm__google-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border-default, #e3dade);
+  border-top-color: #4285F4;
+  animation: lm-spin .7s linear infinite; flex-shrink: 0;
+}
+@keyframes lm-spin { to { transform: rotate(360deg); } }
+
+/* Divider "hoặc" */
+.lm__divider {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-muted, #9a93a0); font-size: .8rem; margin: 4px 0;
+}
+.lm__divider::before, .lm__divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border-default, #ece6e8);
+}

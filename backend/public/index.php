@@ -23,6 +23,11 @@ $path = $pos !== false ? substr($uri, $pos + 4) : $uri;   // bỏ tiền tố ..
 $path = '/' . trim($path, '/');
 
 $routes = [
+    // ---- Public blog / Cẩm Nang ----
+    ['GET',    '/posts',                    ['PostController', 'list']],
+    ['GET',    '/posts/{slug}',             ['PostController', 'detail']],
+    ['GET',    '/sitemap',                  ['PostController', 'sitemap']],
+
     // ---- Public catalog ----
     ['GET',  '/templates',                 ['CatalogController', 'templates']],
     ['GET',  '/templates/{slug}',          ['CatalogController', 'templateBySlug']],
@@ -42,6 +47,8 @@ $routes = [
     ['POST', '/auth/login',                ['AuthController', 'login']],
     ['POST', '/auth/logout',               ['AuthController', 'logout']],
     ['GET',  '/auth/me',                   ['AuthController', 'me']],
+    ['GET',  '/auth/google/login',         ['AuthController', 'googleLogin']],
+    ['GET',  '/auth/google/callback',      ['AuthController', 'googleCallback']],
 
     // ---- Customer ----
     ['POST', '/orders',                    ['CustomerController', 'createOrder']],
@@ -52,6 +59,14 @@ $routes = [
     ['POST', '/my/invitations/{slug}/publish', ['CustomerController', 'publish']],
     ['POST', '/my/upload/image',           ['CustomerController', 'uploadImage']],
     ['POST', '/my/upload/music',           ['CustomerController', 'uploadMusic']],
+
+    // ---- Admin blog ----
+    ['GET',    '/admin/posts',              ['PostController', 'adminList']],
+    ['POST',   '/admin/posts/upload-image', ['PostController', 'uploadImage']],
+    ['GET',    '/admin/posts/{id}',         ['PostController', 'adminDetail']],
+    ['POST',   '/admin/posts',              ['PostController', 'create']],
+    ['PUT',    '/admin/posts/{id}',         ['PostController', 'update']],
+    ['DELETE', '/admin/posts/{id}',         ['PostController', 'delete']],
 
     // ---- Admin ----
     ['GET',    '/admin/stats',             ['AdminController', 'stats']],
@@ -78,6 +93,10 @@ $routes = [
     ['DELETE', '/admin/testimonials/{id}', ['AdminController', 'deleteTestimonial']],
     ['GET',    '/admin/assets',            ['AdminController', 'assets']],
     ['POST',   '/admin/assets/upload',     ['AdminController', 'uploadAsset']],
+    ['GET',    '/admin/music',             ['AdminController', 'musicList']],
+    ['POST',   '/admin/music/upload',      ['AdminController', 'uploadMusic']],
+    ['PATCH',  '/admin/music/rename',      ['AdminController', 'renameMusic']],
+    ['DELETE', '/admin/music/{filename}',  ['AdminController', 'deleteMusic']],
     ['GET',    '/admin/settings',          ['AdminController', 'settings']],
     ['PUT',    '/admin/settings',          ['AdminController', 'updateSettings']],
 ];
@@ -89,7 +108,8 @@ if ($path === '/' || $path === '') {
 foreach ($routes as [$rMethod, $pattern, $handler]) {
     if ($rMethod !== $method) continue;
 
-    $regex = '#^' . preg_replace('#\{[a-z]+\}#', '([^/]+)', $pattern) . '$#u';
+    $escaped = preg_quote($pattern, '#');
+    $regex = '#^' . preg_replace('#\\\\\{[a-z]+\\\\\}#', '([^/]+)', $escaped) . '$#u';
     if (preg_match($regex, $path, $m)) {
         array_shift($m);
         [$ctrl, $fn] = $handler;

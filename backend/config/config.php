@@ -6,11 +6,11 @@
 
 return [
     'db' => [
-        'host'    => '127.0.0.1',
-        'port'    => 3306,
-        'name'    => 'juntech_wedding',
-        'user'    => 'root',
-        'pass'    => '',                 // XAMPP mặc định để rỗng
+        'host'    => getenv('DB_HOST') ?: '127.0.0.1',
+        'port'    => (int)(getenv('DB_PORT') ?: 3306),
+        'name'    => getenv('DB_NAME') ?: 'juntech_wedding',
+        'user'    => getenv('DB_USER') ?: 'root',
+        'pass'    => getenv('DB_PASS') ?: '',
         'charset' => 'utf8mb4',
     ],
 
@@ -20,8 +20,15 @@ return [
         'http://127.0.0.1:5173',
     ],
 
-    // Secret cho session/CSRF (đổi thành chuỗi ngẫu nhiên khi deploy thật)
-    'app_secret' => 'change-this-to-a-long-random-string',
+    // Secret cho session/CSRF — đọc từ .env
+    'app_secret' => getenv('APP_SECRET') ?: 'change-this-to-a-long-random-string',
+
+    // Google OAuth 2.0 — điền sau khi tạo credentials trên Google Cloud Console
+    'google' => [
+        'client_id'     => getenv('GOOGLE_CLIENT_ID')     ?: '',
+        'client_secret' => getenv('GOOGLE_CLIENT_SECRET') ?: '',
+        'redirect_uri'  => 'http://localhost:8899/api/auth/google/callback',
+    ],
 
     'app_env' => 'development',          // development | production
 

@@ -1,6 +1,6 @@
 /** Admin "Thiết kế mẫu" — chọn mẫu, kéo-thả trang trí + chỉnh màu, lưu vào DB. */
 import { useEffect, useState, useRef } from 'react';
-import { Loader2, Plus, Trash2, Save, Upload } from 'lucide-react';
+import { Loader2, Plus, Trash2, Save, Upload, Camera } from 'lucide-react';
 import { catalogApi, adminApi } from '../../api/client';
 import type { Template } from '../../data/types';
 import { DecoConfig, DEFAULT_DECORATIONS } from '../invitation/decorations';
@@ -30,6 +30,7 @@ export default function AdminDesigner() {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [regenMsg, setRegenMsg] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [decos, setDecos] = useState<DecoConfig[]>(DEFAULT_DECORATIONS);
   const [layout, setLayout] = useState<string>('traditional');
@@ -103,9 +104,19 @@ export default function AdminDesigner() {
   const save = async () => {
     if (activeId == null) return;
     setSaving(true);
+    setRegenMsg(null);
     const res = await adminApi.updateDesign(activeId, { theme, decorations: decos });
+    if (!res.success) {
+      setSaving(false);
+      alert(res.message ?? 'Lưu thất bại.');
+      return;
+    }
+    // Tự động tạo lại ảnh preview sau khi lưu
+    setRegenMsg('Đang tạo lại ảnh preview...');
+    const regen = await adminApi.regenPreview(activeId);
     setSaving(false);
-    alert(res.success ? 'Đã lưu thiết kế!' : (res.message ?? 'Lưu thất bại.'));
+    setRegenMsg(regen.success ? '✓ Đã lưu & tạo lại ảnh xong!' : '✓ Đã lưu. Tạo ảnh thất bại: ' + (regen.message ?? ''));
+    setTimeout(() => setRegenMsg(null), 4000);
   };
 
   const zoneDecos = decos.filter((d) => (d.zone ?? 'body') === zone);
@@ -212,8 +223,11 @@ export default function AdminDesigner() {
             </div>
 
             <button className="dsn-save" onClick={save} disabled={saving}>
-              <Save size={16} /> {saving ? 'Đang lưu...' : 'Lưu thiết kế'}
+              {saving
+                ? <><Loader2 size={16} className="adm-spin" /> {regenMsg ?? 'Đang lưu...'}</>
+                : <><Save size={16} /><Camera size={14} /> Lưu & tạo lại ảnh</>}
             </button>
+            {regenMsg && !saving && <p className="dsn-regen-msg">{regenMsg}</p>}
           </div>
 
           <div className="dsn-preview">

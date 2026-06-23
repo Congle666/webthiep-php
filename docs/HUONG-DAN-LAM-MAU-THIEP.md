@@ -129,7 +129,36 @@ Bảng chỉnh (slider size/xoay/lớp) đặt ở **cột trái** (AdminDesigne
 
 ---
 
-## 6. Encoding & MySQL (tránh chữ Việt bị vỡ "├ó")
+## 6. Song ngữ (Bilingual) — Quy tắc căn chỉnh text
+
+### 6.1. Kiến trúc song ngữ
+- `i18n.ts → buildBilingual(langs)` — ghép các ngôn ngữ thành `"VI / EN"` (dùng ` / ` làm dấu phân cách).
+- `splitBi(text)` — tách `"VI / EN"` thành `{ primary, secondary }` để render 2 dòng riêng.
+- Component `<BiLine text={...} />` trong `InvitationBody.tsx` — render primary (to) + secondary (nhỏ, mờ 52%) theo chiều dọc, tránh tràn ngang.
+
+### 6.2. ⚠️ KHÔNG render song ngữ bằng chuỗi dài 1 dòng
+**Sai:** `<h2>{t.venueTitle}</h2>` → khi song ngữ thành `"TIỆC CƯỚI SẼ TỔ CHỨC TẠI / WEDDING VENUE"` → xuống dòng giữa chừng, xấu.
+**Đúng:** `<h2 className="inv-h2"><BiLine text={t.venueTitle} /></h2>` → primary + secondary 2 dòng gọn.
+
+### 6.3. Nguyên tắc khi thêm text mới vào InvitationBody
+Bất cứ khi nào thêm element hiển thị text từ `t.xxxKey`:
+- **Dùng `<BiLine text={t.xxxKey} />`** — đặc biệt với heading (h2, inv-h2), các label ngắn (groomSide, brideTitle...), text tiền tố (ceremonyAt, monthLabel...).
+- **KHÔNG cần BiLine** với: input placeholder, nội dung user nhập (tên, địa điểm), giờ/ngày số, các string chắc chắn ngắn (không bao giờ > 20 ký tự sau song ngữ).
+
+### 6.4. CSS BiLine
+```css
+.inv-biline { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; }
+.inv-biline__pri { display: block; }
+.inv-biline__sec { display: block; font-size: 0.78em; opacity: 0.52; letter-spacing: 0.03em; font-weight: 400; }
+```
+Đã có sẵn trong `Invitation.css`. **Không cần copy lại.**
+
+### 6.5. Danh sách 12 ngôn ngữ hỗ trợ
+vi, en, zh, ko, ja, fr, es, ar, ru, id, de, zh-tw — tất cả đã có đủ ~50 key bản dịch trong `i18n.ts`.
+
+---
+
+## 7. Encoding & MySQL (tránh chữ Việt bị vỡ "├ó")
 
 - DB + bảng + cột: **utf8mb4**.
 - Import SQL: `mysql --default-character-set=utf8mb4 -u root < file.sql` (KHÔNG để console Windows tự dùng cp850 → hỏng chữ).
@@ -139,7 +168,7 @@ Bảng chỉnh (slider size/xoay/lớp) đặt ở **cột trái** (AdminDesigne
 
 ---
 
-## 7. Quy tắc làm việc (cho dev/AI)
+## 8. Quy tắc làm việc (cho dev/AI)
 
 - **Tự test trước khi báo xong** — không đẩy việc test cho user. Tương tác UI (kéo-thả) thì test bằng Puppeteer (`chrome-devtools`), mô phỏng thao tác thật, xác nhận PASS rồi mới báo.
 - **Phục vụ session-side:** API frontend gọi `http://localhost:8899/api` qua **`localhost`** (KHÔNG `127.0.0.1`) để cookie session đồng nhất.
@@ -148,7 +177,7 @@ Bảng chỉnh (slider size/xoay/lớp) đặt ở **cột trái** (AdminDesigne
 
 ---
 
-## 8. Checklist nhanh khi thêm mẫu mới
+## 9. Checklist nhanh khi thêm mẫu mới
 
 - [ ] Ảnh đã ở `public/invitation/` (hoặc `<layout>/`)
 - [ ] Tạo mẫu trong Admin → Mẫu thiệp (tên/slug/giá/danh mục/layout)

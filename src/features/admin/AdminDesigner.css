@@ -64,9 +64,10 @@
 .dsn-save { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; padding: 13px; border-radius: 9px; border: none; background: var(--accent-primary); color: #fff; font-weight: 700; cursor: pointer; font-size: 0.92rem; }
 .dsn-save:hover { filter: brightness(1.08); }
 .dsn-save:disabled { opacity: 0.6; cursor: default; }
+.dsn-regen-msg { margin: 0; padding: 8px 12px; border-radius: 8px; background: rgba(0,180,80,0.12); border: 1px solid rgba(0,180,80,0.3); color: #00b450; font-size: 0.78rem; font-weight: 600; text-align: center; }
 
 /* Cột 3: xem trước */
-.dsn-preview { position: sticky; top: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.dsn-preview { position: sticky; top: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; max-height: calc(100vh - 32px); overflow: hidden; }
 .dsn-zone-toggle { display: inline-flex; border: 1px solid var(--border-default); border-radius: 9px; overflow: hidden; }
 .dsn-zone-toggle button { padding: 9px 22px; border: none; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; }
 .dsn-zone-toggle button + button { border-left: 1px solid var(--border-default); }
@@ -76,12 +77,16 @@
 
 /* Sân khấu xem trước — to, nền tối cho giấy nổi bật, cuộn dọc */
 .dsn-stage {
-  width: 100%; max-width: 560px; max-height: calc(100vh - 150px); overflow-y: auto;
+  width: 100%; max-width: 640px; max-height: calc(100vh - 150px); overflow-y: auto;
   border-radius: 14px; border: 1px solid var(--border-default); background: #1a1a1a;
   box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 }
-.dsn-frame { position: relative; width: 100%; background-size: 480px; min-height: 360px; }
+.dsn-frame { position: relative; width: 100%; background-size: 600px; min-height: 360px; overflow: hidden; }
 .dsn-frame--cover { padding: 18px; display: flex; align-items: center; justify-content: center; min-height: 420px; }
+
+/* Override inv-root khi render trong admin designer — vô hiệu backdrop fixed tràn viewport */
+.dsn-frame.inv-root::before { display: none; }
+.dsn-frame.inv-root { max-width: 100%; margin-inline: 0; box-shadow: none; min-height: 0; }
 
 /* Responsive: gập về 1 cột */
 @media (max-width: 1100px) {

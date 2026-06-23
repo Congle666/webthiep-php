@@ -4,6 +4,7 @@ import { LAYOUTS } from '../invitation/layouts';
 import { InvitationBody } from '../invitation/InvitationBody';
 import { DecoConfig, decosByZone } from '../invitation/decorations';
 import { sampleInvitation } from './sampleInvitation';
+import { TRANSLATIONS } from '../invitation/i18n';
 
 type Theme = Record<string, string>;
 export type Zone = 'cover' | 'body';
@@ -59,7 +60,7 @@ export function DesignerPreview({ layout, theme, decos, zone, onChange, selected
     <div className={`dsn-frame inv-root inv-${layout}`} style={themeVars(theme)}>
       <L.Header inv={inv} editMode decorations={zoneDecos} onDecoChange={handleZoneChange}
         selectedId={selectedId} onSelect={onSelect} />
-      <InvitationBody inv={inv} slug="preview" />
+      <InvitationBody inv={inv} slug="preview" t={TRANSLATIONS.vi} />
     </div>
   );
 }

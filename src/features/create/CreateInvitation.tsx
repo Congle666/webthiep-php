@@ -1,13 +1,15 @@
 /** Luồng tạo/chỉnh sửa thiệp cưới: xác thực -> tạo đơn nháp -> editor + preview -> đăng. */
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, Send, Save, Check, Copy, Globe, ChevronDown, Pencil } from 'lucide-react';
+import { ArrowLeft, Eye, Send, Save, Check, Copy, Pencil, Globe } from 'lucide-react';
 import { catalogApi, customerApi } from '../../api/client';
 import type { Template } from '../../data/types';
 import { useAuth } from '../../context/AuthContext';
 import InvitationFormFields, { type InvitationForm } from './InvitationForm';
 import { InvitationView } from '../invitation/InvitationView';
 import { buildPreviewInv } from './buildPreviewInv';
+import { LangManager } from '../invitation/LangManager';
+import { LANGS, type Lang } from '../invitation/i18n';
 import '../invitation/Invitation.css';
 import './CreateInvitation.css';
 
@@ -26,8 +28,7 @@ export default function CreateInvitation() {
   const [prettySlug, setPrettySlug] = useState('');
   const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<'edit' | 'preview'>('edit'); // mobile: chọn xem form hay preview
-  const [lang, setLang] = useState<'vi' | 'en'>('vi');
-  const [langOpen, setLangOpen] = useState(false);
+  const [showLangManager, setShowLangManager] = useState(false);
 
   // 1. Tải template
   useEffect(() => {
@@ -103,23 +104,26 @@ export default function CreateInvitation() {
 
         <span className="ci-top__spacer" />
 
-        <div className="ci-lang">
-          <button type="button" className="ci-lang__btn" onClick={() => setLangOpen((o) => !o)} aria-haspopup="listbox">
-            <Globe size={15} /> {lang === 'vi' ? 'Tiếng Việt' : 'English'} <ChevronDown size={14} />
-          </button>
-          {langOpen && (
-            <div className="ci-lang__menu" role="listbox">
-              <button className={lang === 'vi' ? 'on' : ''} onClick={() => { setLang('vi'); setLangOpen(false); }}>Tiếng Việt</button>
-              <button className={lang === 'en' ? 'on' : ''} onClick={() => { setLang('en'); setLangOpen(false); }}>English</button>
-            </div>
-          )}
-        </div>
-
         <div className="ci-top__actions">
+          <button className="ci-btn ci-btn--ghost ci-lang-btn" onClick={() => setShowLangManager(true)} title="Quản lý ngôn ngữ">
+            <Globe size={15} />
+            {(() => {
+              const langs: Lang[] = (form.settings?.langs as Lang[]) ?? ['vi'];
+              return langs.map(c => LANGS.find(l => l.code === c)?.flag ?? c).join(' ');
+            })()}
+          </button>
           <button className="ci-btn ci-btn--ghost" onClick={save} disabled={saving}><Save size={16} /> {saving ? 'Đang lưu…' : 'Lưu'}</button>
           <button className="ci-btn ci-btn--primary" onClick={publish}><Send size={16} /> Đăng thiệp</button>
         </div>
       </header>
+
+      {showLangManager && (
+        <LangManager
+          value={(form.settings?.langs as Lang[]) ?? ['vi']}
+          onChange={(langs) => onChange({ settings: { ...(form.settings ?? {}), langs } })}
+          onClose={() => setShowLangManager(false)}
+        />
+      )}
 
       {err && <div className="ci-err">{err}</div>}
       {savedAt && <div className="ci-saved"><Check size={14} /> Đã lưu</div>}

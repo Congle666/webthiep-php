@@ -13,6 +13,8 @@ import Contact from './features/contact/Contact';
 import Invitation from './features/invitation/Invitation';
 import Admin from './features/admin/Admin';
 import CreateInvitation from './features/create/CreateInvitation';
+import UserPanel from './features/user/UserPanel';
+import { GoogleSuccess, GoogleError } from './features/auth/GoogleAuthCallback';
 
 // Helper to scroll to top on route change
 function ScrollToTop() {
@@ -45,9 +47,12 @@ export default function App() {
         <LoginModal />
         <Routes>
           {/* Trang độc lập, KHÔNG Header/Footer site */}
+          <Route path="/auth/google/success" element={<GoogleSuccess />} />
+          <Route path="/auth/google/error" element={<GoogleError />} />
           <Route path="/thiep/demo/:slug" element={<Invitation />} />
           <Route path="/thiep/:slug" element={<Invitation />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/tai-khoan" element={<UserPanel />} />
           <Route path="/tao-thiep/:templateSlug" element={<CreateInvitation />} />
 
           {/* Các trang marketing — dùng layout chung */}

@@ -4,6 +4,25 @@
  */
 error_reporting(E_ALL);
 
+// Load .env từ thư mục gốc project (2 cấp trên backend/src/)
+(function () {
+    $envFile = __DIR__ . '/../../.env';
+    if (!file_exists($envFile)) return;
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#')) continue;
+        if (!str_contains($line, '=')) continue;
+        [$key, $val] = explode('=', $line, 2);
+        $key = trim($key);
+        $val = trim($val);
+        // Không ghi đè nếu đã có trong environment thật (server, Docker, hosting)
+        if (getenv($key) === false) {
+            putenv("$key=$val");
+            $_ENV[$key] = $val;
+        }
+    }
+})();
+
 require_once __DIR__ . '/Response.php';
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Request.php';

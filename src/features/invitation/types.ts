@@ -17,6 +17,8 @@ export interface InvitationSettings {
   rsvp?: boolean;
   guestbook?: boolean;
   petals?: boolean;
+  /** Danh sách ngôn ngữ thiệp, index 0 = ngôn ngữ chính. Mặc định ['vi']. */
+  langs?: string[];
 }
 
 /** Một mục lịch trình ngày cưới. */

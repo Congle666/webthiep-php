@@ -1,6 +1,7 @@
 /** Kiểu props dùng chung cho các layout (cover + header). */
 import type { Invitation } from '../types';
 import type { DecoConfig } from '../decorations';
+import type { Lang } from '../i18n';
 
 export interface CoverProps {
   inv: Invitation;
@@ -17,6 +18,8 @@ export interface CoverProps {
   /** id ảnh đang chọn + báo chọn (admin). */
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
+  /** Ngôn ngữ hiển thị thiệp. */
+  lang?: Lang;
 }
 
 export interface HeaderProps {

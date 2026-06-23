@@ -1,11 +1,13 @@
 /** Form chỉnh sửa thiệp — các section collapsible, mỗi section có toggle Hiện/Ẩn. */
 import { useState } from 'react';
-import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Plus, Trash2, Globe } from 'lucide-react';
 import type {
   Invitation, LoveStoryItem, ScheduleItem, InvitationExtra, SectionVisibility,
 } from '../../features/invitation/types';
 import ImageInput from './ImageInput';
 import MusicPicker from './MusicPicker';
+import { LangManager } from '../invitation/LangManager';
+import { LANGS, type Lang } from '../invitation/i18n';
 
 export type InvitationForm = Partial<Invitation>;
 
@@ -13,6 +15,29 @@ interface Props {
   data: InvitationForm;
   onChange: (patch: InvitationForm) => void;
   onBlurSave: () => void;
+}
+
+/** Hiển thị danh sách ngôn ngữ đã chọn dạng badge nhỏ */
+function LangBadges({ langs }: { langs: Lang[] }) {
+  return (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
+      {langs.map((code, i) => {
+        const meta = LANGS.find(l => l.code === code);
+        return (
+          <span key={code} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            padding: '3px 10px', borderRadius: 9999,
+            background: i === 0 ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+            color: i === 0 ? '#fff' : 'var(--text-secondary)',
+            fontSize: '0.75rem', fontWeight: 600,
+          }}>
+            {meta?.flag} {meta?.label}
+            {i === 0 && <span style={{ fontSize: '0.65rem', opacity: 0.8 }}>· Chính</span>}
+          </span>
+        );
+      })}
+    </div>
+  );
 }
 
 /** Khoá hiện/ẩn của các section có thể bật/tắt trên thiệp sống. */
@@ -59,6 +84,13 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
     on: vis[key] !== false, // mặc định hiện
     onToggle: (v: boolean) => { setExtra({ visible: { ...vis, [key]: v } }); onBlurSave(); },
   });
+
+  const [showLangManager, setShowLangManager] = useState(false);
+  const currentLangs = (data.settings?.langs ?? ['vi']) as Lang[];
+  const setLangs = (langs: Lang[]) => {
+    onChange({ settings: { ...data.settings, langs } });
+    onBlurSave();
+  };
 
   const story = data.loveStory ?? [];
   const gallery = data.gallery ?? [];
@@ -238,6 +270,20 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
         </label>
       </Section>
 
+      <Section title="🌐 Ngôn ngữ thiệp" defaultOpen>
+        <div className="ci-field">
+          <span>Ngôn ngữ hiển thị cho khách</span>
+          <LangBadges langs={currentLangs} />
+          <button
+            type="button"
+            className="ci-lang-btn"
+            onClick={() => setShowLangManager(true)}
+          >
+            <Globe size={14} /> Quản lý ngôn ngữ
+          </button>
+        </div>
+      </Section>
+
       <Section title="Nhạc nền">
         <MusicPicker value={data.musicUrl ?? ''} onChange={(u) => { set('musicUrl', u); onBlurSave(); }} />
       </Section>
@@ -248,6 +294,14 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
           <textarea rows={2} value={extra.envelope ?? ''} onChange={(e) => setExtra({ envelope: e.target.value })} onBlur={onBlurSave} placeholder="Trân trọng kính mời…" />
         </label>
       </Section>
+
+      {showLangManager && (
+        <LangManager
+          value={currentLangs}
+          onChange={setLangs}
+          onClose={() => setShowLangManager(false)}
+        />
+      )}
     </div>
   );
 

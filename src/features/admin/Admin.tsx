@@ -2,18 +2,21 @@
 import { useEffect, useState, FormEvent } from 'react';
 import {
   LayoutDashboard, ShoppingBag, LayoutTemplate, Heart, Tag, MessageSquareQuote,
-  Users, Mail, Settings, LogOut, Loader2, Menu, Palette,
+  Users, Mail, Settings, LogOut, Loader2, Menu, Palette, Music2, FileText, Sun, Moon,
 } from 'lucide-react';
 import { authApi, AuthUser } from '../../api/client';
+import { useTheme } from '../../context/ThemeContext';
 import AdminDashboard from './AdminDashboard';
 import { AdminOrders, AdminContacts, AdminUsers } from './AdminTables';
 import AdminTemplates from './AdminTemplates';
 import AdminDesigner from './AdminDesigner';
 import AdminInvitations from './AdminInvitations';
 import { AdminPlans, AdminTestimonials, AdminSettings } from './AdminMisc';
+import AdminMusic from './AdminMusic';
+import AdminBlog from './AdminBlog';
 import './Admin.css';
 
-type Tab = 'dashboard' | 'orders' | 'templates' | 'designer' | 'invitations' | 'plans' | 'testimonials' | 'users' | 'contacts' | 'settings';
+type Tab = 'dashboard' | 'orders' | 'templates' | 'designer' | 'invitations' | 'plans' | 'testimonials' | 'users' | 'contacts' | 'settings' | 'music' | 'blog';
 
 const NAV: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
@@ -21,6 +24,8 @@ const NAV: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'templates', label: 'Mẫu thiệp', icon: LayoutTemplate },
   { id: 'designer', label: 'Thiết kế mẫu', icon: Palette },
   { id: 'invitations', label: 'Thiệp sống', icon: Heart },
+  { id: 'blog', label: 'Bài viết', icon: FileText },
+  { id: 'music', label: 'Nhạc cưới', icon: Music2 },
   { id: 'plans', label: 'Gói giá', icon: Tag },
   { id: 'testimonials', label: 'Đánh giá', icon: MessageSquareQuote },
   { id: 'users', label: 'Người dùng', icon: Users },
@@ -33,6 +38,7 @@ export default function Admin() {
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState<Tab>('dashboard');
   const [navOpen, setNavOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     authApi.me().then((res) => {
@@ -67,12 +73,17 @@ export default function Admin() {
           <button className="adm-burger" onClick={() => setNavOpen((o) => !o)} aria-label="Menu"><Menu size={20} /></button>
           <h1>{current.label}</h1>
           <span className="adm-who">{user.fullName}</span>
+          <button className="adm-theme-toggle" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Chuyển sáng' : 'Chuyển tối'}>
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
         </header>
         {tab === 'dashboard' && <AdminDashboard />}
         {tab === 'orders' && <AdminOrders />}
         {tab === 'templates' && <AdminTemplates />}
         {tab === 'designer' && <AdminDesigner />}
         {tab === 'invitations' && <AdminInvitations />}
+        {tab === 'blog' && <AdminBlog />}
+        {tab === 'music' && <AdminMusic />}
         {tab === 'plans' && <AdminPlans />}
         {tab === 'testimonials' && <AdminTestimonials />}
         {tab === 'users' && <AdminUsers />}

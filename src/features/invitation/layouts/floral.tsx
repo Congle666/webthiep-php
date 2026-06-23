@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { DecorationLayer } from '../DecorationLayer';
 import type { CoverProps, HeaderProps } from './types';
+import { useI18n } from '../i18n';
 import './floral.css';
 
 const FRAME = '/invitation/floral/frame-flower.webp';
@@ -13,7 +14,8 @@ function fmtShort(d: string | null): string {
   return `${dt.getDate()} tháng ${dt.getMonth() + 1}, ${dt.getFullYear()}`;
 }
 
-function FloralCover({ inv, guestName, onOpen, decorations, inline, editable, onDecoChange, selectedId, onSelect }: CoverProps) {
+function FloralCover({ inv, guestName, onOpen, decorations, inline, editable, onDecoChange, selectedId, onSelect, lang = 'vi' }: CoverProps) {
+  const t = useI18n(lang);
   return (
     <motion.div className={`flr-gate ${inline ? 'flr-gate--inline' : ''}`}
       initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
@@ -38,11 +40,11 @@ function FloralCover({ inv, guestName, onOpen, decorations, inline, editable, on
           <div className="flr-divider" />
           <p className="flr-date">{fmtShort(inv.weddingDate)}</p>
 
-          <p className="flr-invite">Thân Mời</p>
+          <p className="flr-invite">{t.coverInvite}</p>
           {guestName && <div className="flr-guest">{guestName}</div>}
-          <p className="flr-sub">đến dự buổi tiệc chung vui cùng gia đình</p>
+          <p className="flr-sub">{t.coverSub}</p>
 
-          <button className="flr-open-btn" onClick={onOpen}>Mở thiệp</button>
+          <button className="flr-open-btn" onClick={onOpen}>{t.coverOpen}</button>
         </div>
       </div>
     </motion.div>

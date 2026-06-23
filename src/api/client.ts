@@ -83,7 +83,7 @@ export const invitationApi = {
     api.post(`/thiep/${slug}/guestbook`, data),
 };
 
-export interface AuthUser { id: number; fullName: string; email: string; phone: string | null; role: 'admin' | 'customer'; }
+export interface AuthUser { id: number; fullName: string; email: string; phone: string | null; role: 'admin' | 'customer'; avatar?: string | null; }
 
 export const authApi = {
   register: (data: { full_name: string; email: string; phone?: string; password: string }) =>
@@ -91,6 +91,7 @@ export const authApi = {
   login: (data: { email: string; password: string }) => api.post<AuthUser>('/auth/login', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get<AuthUser>('/auth/me'),
+  googleLoginUrl: () => api.get<{ url: string }>('/auth/google/login'),
 };
 
 export interface CreateOrderResult {
@@ -113,6 +114,59 @@ export const customerApi = {
     api.post<{ slug: string; url: string }>(`/my/invitations/${slug}/publish`, newSlug ? { slug: newSlug } : {}),
   uploadImage: (file: File) => api.upload<{ url: string }>('/my/upload/image', file),
   uploadMusic: (file: File) => api.upload<{ url: string }>('/my/upload/music', file),
+};
+
+export interface BlogPost {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  coverImage: string | null;
+  category: string;
+  metaTitle: string | null;
+  metaDesc: string | null;
+  readingTime: number;
+  viewCount: number;
+  publishedAt: string | null;
+  // detail only:
+  contentHtml?: string;
+  contentJson?: string;
+  ogImage?: string | null;
+  status?: string;
+  authorId?: number | null;
+  authorName?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface BlogListResponse {
+  posts: BlogPost[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export const blogApi = {
+  list: (params?: { page?: number; limit?: number; category?: string; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.limit) q.set('limit', String(params.limit));
+    if (params?.category) q.set('category', params.category);
+    if (params?.search) q.set('search', params.search);
+    return api.get<BlogListResponse>(`/posts?${q}`);
+  },
+  detail: (slug: string) => api.get<BlogPost>(`/posts/${slug}`),
+};
+
+export const adminBlogApi = {
+  list: () => api.get<BlogPost[]>('/admin/posts'),
+  detail: (id: number) => api.get<BlogPost>(`/admin/posts/${id}`),
+  create: (data: Partial<BlogPost> & { contentHtml?: string; contentJson?: string }) =>
+    api.post<BlogPost>('/admin/posts', data),
+  update: (id: number, data: Partial<BlogPost> & { contentHtml?: string; contentJson?: string }) =>
+    api.put<BlogPost>(`/admin/posts/${id}`, data),
+  delete: (id: number) => api.del(`/admin/posts/${id}`),
+  uploadImage: (file: File) => api.upload<{ url: string }>('/admin/posts/upload-image', file),
 };
 
 export interface MusicTrack { url: string; name: string; }
@@ -173,4 +227,10 @@ export const adminApi = {
   // Thư viện ảnh trang trí
   assets: () => api.get<{ url: string; name: string; group: string }[]>('/admin/assets'),
   uploadAsset: (file: File) => api.upload<{ url: string }>('/admin/assets/upload', file),
+
+  // Thư viện nhạc
+  musicList: () => api.get<MusicTrack[]>('/admin/music'),
+  uploadMusic: (file: File) => api.upload<{ url: string; name: string }>('/admin/music/upload', file),
+  renameMusic: (filename: string, name: string) => api.patch('/admin/music/rename', { filename, name }),
+  deleteMusic: (filename: string) => api.del(`/admin/music/${encodeURIComponent(filename)}`),
 };

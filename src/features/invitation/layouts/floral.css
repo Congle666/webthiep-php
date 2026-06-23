@@ -94,7 +94,7 @@
 .flr-frame {
   position: relative;
   z-index: 30;
-  width: min(400px, 90vw);
+  width: min(480px, 90vw);
   aspect-ratio: 3 / 3.1;          /* thấp hơn -> bớt khoảng trống dưới names */
   background-repeat: no-repeat;
   background-position: center top;
@@ -114,7 +114,7 @@
 }
 .flr-frame-name {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(1.7rem, 6vw, 2.6rem);
+  font-size: clamp(1.9rem, 5.5vw, 3rem);
   font-weight: 600; line-height: 1.1; color: var(--flr-olive); margin: 2px 0;
 }
 .flr-frame-amp {
