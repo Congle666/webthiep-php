@@ -5,6 +5,7 @@ import { adminApi, catalogApi } from '../../api/client';
 import { formatPrice } from '../../data';
 import type { Template } from '../../data/types';
 import { CATEGORY_VI } from './shared';
+import { useToast } from '../../components/common/Toast';
 
 const CATS = ['luxury', 'modern', 'classic', 'minimalist', 'floral', 'vintage'] as const;
 
@@ -19,15 +20,15 @@ export default function AdminTemplates() {
   const [form, setForm] = useState<Form | null>(null);
   const [saving, setSaving] = useState(false);
   const [shooting, setShooting] = useState<string | null>(null); // id mẫu (hoặc 'all') đang chụp
-  const [msg, setMsg] = useState<string>('');
+  const { toast } = useToast();
 
   // Chụp lại ảnh preview coverflow. Cần dev server (5173) đang chạy.
   const regen = async (id: number | 'all') => {
-    setShooting(String(id)); setMsg('');
+    setShooting(String(id));
     const r = await adminApi.regenPreview(id);
     setShooting(null);
-    setMsg(r.success ? (r.message ?? 'Đã tạo lại ảnh.') : (r.message ?? 'Tạo ảnh thất bại.'));
-    setTimeout(() => setMsg(''), 6000);
+    if (r.success) toast(r.message ?? 'Đã tạo lại ảnh.', 'success');
+    else toast(r.message ?? 'Tạo ảnh thất bại.', 'error');
   };
 
   const load = () => catalogApi.templates().then((r) => r.success && setRows(r.data ?? []));
@@ -53,7 +54,6 @@ export default function AdminTemplates() {
         <button className="adm-mini-btn adm-mini-btn--ghost" disabled={shooting !== null} onClick={() => regen('all')} title="Chụp lại ảnh coverflow cho tất cả mẫu (cần dev server đang chạy)">
           {shooting === 'all' ? <Loader2 size={15} className="adm-spin" /> : <Camera size={15} />} Tạo lại ảnh tất cả
         </button>
-        {msg && <span className="adm-sub" style={{ marginLeft: 'auto' }}>{msg}</span>}
       </div>
       <div className="adm-table-wrap">
         <table className="adm-table">

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Upload, Loader2, Play, Pause, Pencil, Trash2, Check, X, Music2 } from 'lucide-react';
 import { adminApi, type MusicTrack } from '../../api/client';
+import { useToast } from '../../components/common/Toast';
 
 export default function AdminMusic() {
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
@@ -10,7 +11,7 @@ export default function AdminMusic() {
   const [playing, setPlaying] = useState<string | null>(null);
   const [editUrl, setEditUrl] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -22,10 +23,7 @@ export default function AdminMusic() {
 
   useEffect(() => { load(); }, []);
 
-  const flash = (text: string, ok = true) => {
-    setMsg({ text, ok });
-    setTimeout(() => setMsg(null), 3500);
-  };
+  const flash = (text: string, ok = true) => toast(text, ok ? 'success' : 'error');
 
   const togglePlay = (url: string) => {
     if (!audioRef.current) audioRef.current = new Audio();
@@ -81,7 +79,6 @@ export default function AdminMusic() {
         <input ref={fileRef} type="file" accept="audio/*" hidden onChange={upload} />
       </div>
 
-      {msg && <p className={`adm-music__msg ${msg.ok ? 'ok' : 'err'}`}>{msg.text}</p>}
 
       {loading ? (
         <div className="adm-music__empty"><Loader2 className="adm-spin" /> Đang tải...</div>

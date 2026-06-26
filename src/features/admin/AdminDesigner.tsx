@@ -6,6 +6,7 @@ import { catalogApi, adminApi } from '../../api/client';
 import type { Template } from '../../data/types';
 import { DecoConfig, DEFAULT_DECORATIONS, defaultDecosByLayout } from '../invitation/decorations';
 import { DesignerPreview, type Zone } from './DesignerPreview';
+import { useToast } from '../../components/common/Toast';
 import '../invitation/Invitation.css';
 import '../invitation/DecorationLayer.css';
 import './AdminDesigner.css';
@@ -29,6 +30,7 @@ const COLOR_FIELDS: { key: keyof Theme; label: string }[] = [
 export default function AdminDesigner() {
   const { id: idParam } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [activeId, setActiveId] = useState<number | null>(idParam ? Number(idParam) : null);
   const [loading, setLoading] = useState(false);
@@ -75,7 +77,7 @@ export default function AdminDesigner() {
       await loadLibrary();
       addFromLibrary(res.data.url, file.name);   // thêm luôn vào thiết kế
     } else {
-      alert(res.message ?? 'Tải ảnh thất bại.');
+      toast(res.message ?? 'Tải ảnh thất bại.', 'error');
     }
   };
 
@@ -120,15 +122,16 @@ export default function AdminDesigner() {
     const res = await adminApi.updateDesign(activeId, designPayload);
     if (!res.success) {
       setSaving(false);
-      alert(res.message ?? 'Lưu thất bại.');
+      toast(res.message ?? 'Lưu thất bại.', 'error');
       return;
     }
     // Tự động tạo lại ảnh preview sau khi lưu
     setRegenMsg('Đang tạo lại ảnh preview...');
     const regen = await adminApi.regenPreview(activeId);
     setSaving(false);
-    setRegenMsg(regen.success ? '✓ Đã lưu & tạo lại ảnh xong!' : '✓ Đã lưu. Tạo ảnh thất bại: ' + (regen.message ?? ''));
-    setTimeout(() => setRegenMsg(null), 4000);
+    setRegenMsg(null);
+    if (regen.success) toast('Đã lưu & tạo lại ảnh xong!', 'success');
+    else toast('Đã lưu. Tạo ảnh thất bại: ' + (regen.message ?? ''), 'error');
   };
 
   const zoneDecos = decos.filter((d) => (d.zone ?? 'body') === zone);

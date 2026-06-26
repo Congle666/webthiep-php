@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { adminBlogApi, BlogPost } from '../../api/client';
 import RichEditor from '../../components/ui/RichEditor';
+import { useToast } from '../../components/common/Toast';
 
 const Spinner = () => (
   <div className="adm-center" style={{ minHeight: 200 }}>
@@ -136,6 +137,7 @@ function BlogList({ onNew, onEdit }: { onNew: () => void; onEdit: (p: BlogPost) 
 
 /* =============== EDIT / CREATE VIEW =============== */
 function BlogEditor({ post, onBack }: { post: BlogPost | null; onBack: () => void }) {
+  const { toast } = useToast();
   const isNew = !post;
   const [title, setTitle] = useState(post?.title ?? '');
   const [contentHtml, setContentHtml] = useState(post?.contentHtml ?? '');
@@ -173,7 +175,7 @@ function BlogEditor({ post, onBack }: { post: BlogPost | null; onBack: () => voi
   };
 
   const save = async () => {
-    if (!title.trim()) { alert('Vui lòng nhập tiêu đề.'); return; }
+    if (!title.trim()) { toast('Vui lòng nhập tiêu đề.', 'error'); return; }
     setSaving(true);
     const payload = {
       title, slug, category, status, excerpt, contentHtml, contentJson,
@@ -186,6 +188,7 @@ function BlogEditor({ post, onBack }: { post: BlogPost | null; onBack: () => voi
     }
     setSaving(false);
     setSaved(true);
+    toast('Đã lưu bài viết.', 'success');
     setTimeout(() => setSaved(false), 2500);
   };
 

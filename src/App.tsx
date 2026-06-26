@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './components/common/Toast';
 import LoginModal from './components/common/LoginModal';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -42,6 +43,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+      <ToastProvider>
       <Router>
         <ScrollToTop />
         <LoginModal />
@@ -67,6 +69,7 @@ export default function App() {
           <Route path="*" element={<SiteLayout><Home /></SiteLayout>} />
         </Routes>
       </Router>
+      </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );
