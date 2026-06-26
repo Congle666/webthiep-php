@@ -1,9 +1,10 @@
 /** Admin "Thiết kế mẫu" — chọn mẫu, kéo-thả trang trí + chỉnh màu, lưu vào DB. */
 import { useEffect, useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, Plus, Trash2, Save, Upload, Camera } from 'lucide-react';
 import { catalogApi, adminApi } from '../../api/client';
 import type { Template } from '../../data/types';
-import { DecoConfig, DEFAULT_DECORATIONS } from '../invitation/decorations';
+import { DecoConfig, DEFAULT_DECORATIONS, defaultDecosByLayout } from '../invitation/decorations';
 import { DesignerPreview, type Zone } from './DesignerPreview';
 import '../invitation/Invitation.css';
 import '../invitation/DecorationLayer.css';
@@ -26,8 +27,10 @@ const COLOR_FIELDS: { key: keyof Theme; label: string }[] = [
 ];
 
 export default function AdminDesigner() {
+  const { id: idParam } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(idParam ? Number(idParam) : null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [regenMsg, setRegenMsg] = useState<string | null>(null);
@@ -41,7 +44,13 @@ export default function AdminDesigner() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    catalogApi.templates().then((res) => { if (res.success && res.data) setTemplates(res.data); });
+    catalogApi.templates().then((res) => {
+      if (res.success && res.data) {
+        setTemplates(res.data);
+        // Auto-select từ URL nếu có
+        if (idParam) selectTemplate(Number(idParam));
+      }
+    });
     loadLibrary();
   }, []);
 
@@ -72,14 +81,16 @@ export default function AdminDesigner() {
 
   const selectTemplate = async (id: number) => {
     setActiveId(id);
+    navigate(`/admin/thiet-ke-mau/${id}`, { replace: true });
     setLoading(true);
     const res = await adminApi.templateDetail(id);
     setLoading(false);
     const detail = res.success && res.data ? res.data : null;
     const d = detail?.design ?? null;
-    setLayout(detail?.layout ?? 'traditional');
+    const tplLayout = detail?.layout ?? 'traditional';
+    setLayout(tplLayout);
     setTheme({ ...DEFAULT_THEME, ...(d?.theme ?? {}) });
-    setDecos(Array.isArray(d?.decorations) && d.decorations.length ? d.decorations : DEFAULT_DECORATIONS);
+    setDecos(Array.isArray(d?.decorations) && d.decorations.length ? d.decorations : defaultDecosByLayout(tplLayout));
     setSelId(null);
   };
 
@@ -105,7 +116,8 @@ export default function AdminDesigner() {
     if (activeId == null) return;
     setSaving(true);
     setRegenMsg(null);
-    const res = await adminApi.updateDesign(activeId, { theme, decorations: decos });
+    const designPayload: { theme: Theme; decorations: DecoConfig[] } = { theme, decorations: decos };
+    const res = await adminApi.updateDesign(activeId, designPayload);
     if (!res.success) {
       setSaving(false);
       alert(res.message ?? 'Lưu thất bại.');

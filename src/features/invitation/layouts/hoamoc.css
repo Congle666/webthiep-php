@@ -1,0 +1,195 @@
+/* ===== HOA MỘC XANH LAYOUT — xanh lá đậm #30530F (theo spec ChungĐôi hoa-moc-xanh) ===== */
+:root {
+  --hmx-green: #30530f;        /* màu chính rgb(48,83,15) */
+  --hmx-green-deep: #233c0a;
+  --hmx-cream: #f7f8f2;
+  --hmx-text: #30530f;
+}
+
+/* ---------- COVER GATE ---------- */
+.hmx-gate {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: var(--hmx-green);
+  overflow: hidden;
+}
+
+/* Bìa render trong khung admin: bỏ fullscreen fixed. */
+.hmx-gate--inline {
+  position: relative; inset: auto; z-index: 1;
+  padding: 24px; border-radius: 12px;
+  background: var(--hmx-green-deep);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 480px;
+}
+
+.hmx-gate-card {
+  position: relative;
+  width: min(620px, 100%);
+  background: var(--hmx-cream);
+  border-radius: 20px;
+  padding: 80px 48px 60px;
+  text-align: center;
+  box-shadow: 0 12px 56px rgba(0, 0, 0, 0.35);
+  /* LIVE: clip hoa trong khoảng bìa (ngoài card thì ẩn). EDIT: rule :has(.deco-layer--edit) mở overflow để kéo ảnh. */
+  overflow: hidden;
+}
+
+.hmx-badge {
+  position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--hmx-green);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(48, 83, 15, 0.45);
+}
+
+/* z-60 luôn trên lớp edit (z-50) — chữ không bị hoa đè */
+.hmx-gate-content { position: relative; z-index: 60; }
+
+/* Tên — Cormorant. Dùng .inv-root .hmx-name để THẮNG '.inv-root h1 { font: Playfair }'. */
+.inv-root .hmx-name {
+  font-family: 'Cormorant', 'Times New Roman', serif;
+  font-size: clamp(2.4rem, 8vw, 3.6rem);
+  font-weight: 600; line-height: 1.05;
+  color: var(--hmx-green); margin: 4px 0; letter-spacing: 0.01em;
+}
+.hmx-amp {
+  display: block; font-family: 'Cormorant', serif;
+  font-size: 1.7rem; color: var(--hmx-green); opacity: 0.7; margin: 2px 0;
+}
+.hmx-divider {
+  width: 56px; height: 1px; margin: 18px auto;
+  background: var(--hmx-green); opacity: 0.4;
+}
+.hmx-date { color: var(--hmx-text); font-size: 1rem; letter-spacing: 0.04em; }
+.hmx-invite {
+  margin-top: 22px; font-size: 0.78rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--hmx-text); opacity: 0.7;
+}
+.hmx-guest {
+  font-family: 'Cormorant', serif; font-size: 1.4rem; font-weight: 600;
+  color: var(--hmx-green); margin: 6px 0;
+}
+.hmx-sub { font-size: 0.9rem; color: var(--hmx-text); opacity: 0.8; }
+
+.hmx-open-btn {
+  margin-top: 30px; padding: 13px 40px; border: none; cursor: pointer;
+  border-radius: 9999px; background: var(--hmx-green); color: #fff;
+  font-size: 0.95rem; letter-spacing: 0.06em;
+  box-shadow: 0 8px 22px rgba(48, 83, 15, 0.4);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.hmx-open-btn:hover { transform: translateY(-2px); background: var(--hmx-green-deep); }
+
+/* ---------- HEADER ---------- */
+.hmx-header {
+  position: relative;
+  z-index: 3;
+  padding: 48px 24px 56px;
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 12px;
+  max-width: 560px; margin: 0 auto;
+  overflow: visible;
+}
+.hmx-header--photos { min-height: 700px; }
+.hmx-header--plain { min-height: 320px; justify-content: center; align-items: center; }
+
+/* Hàng người (chú rể / cô dâu): ảnh + caption cạnh nhau */
+.hmx-person {
+  position: relative; z-index: 5;   /* ảnh đôi trên bar/hoa decoration (z=2) */
+  display: flex; align-items: center; gap: 22px;
+}
+.hmx-person--groom { flex-direction: row; }           /* ảnh trái + cap phải */
+.hmx-person--bride { flex-direction: row; }            /* cap trái + ảnh phải (DOM order) */
+
+.hmx-photo {
+  position: relative; z-index: 5;     /* ảnh đôi trên bar/hoa decoration (z=2) */
+  width: 42%; aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: 3px solid #b0a085;          /* viền be */
+  border-radius: 4px;
+  background: var(--hmx-cream);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+.hmx-person--groom .hmx-photo { transform: rotate(-4deg); }
+.hmx-person--bride .hmx-photo { transform: rotate(4deg); }
+
+.hmx-person-cap {
+  display: flex; flex-direction: column; flex: 1;
+}
+.hmx-person--groom .hmx-person-cap { text-align: left; align-items: flex-start; }
+.hmx-person--bride .hmx-person-cap { text-align: right; align-items: flex-end; }
+
+.hmx-person-role {
+  font-family: 'Cormorant', 'Times New Roman', serif;
+  font-size: 0.95rem; font-style: italic;
+  color: #8a8378; letter-spacing: 0.04em; margin-bottom: 2px;
+}
+.inv-root .hmx-person-name {
+  font-family: 'Cormorant', 'Times New Roman', serif;
+  font-size: clamp(1.6rem, 6vw, 2rem);
+  font-weight: 600; line-height: 1.1;
+  color: var(--hmx-green); margin: 0;
+}
+
+/* Khoảng trống giữa 2 hàng person — dải bar (decoration) nằm vào đây */
+.hmx-bar-gap {
+  flex: 0 0 auto;
+  height: 72px;
+}
+
+/* Fallback tên cặp đôi — z=30 luôn trên hoa (deco max z=9) */
+.hmx-names {
+  position: relative; z-index: 30;
+  text-align: center; margin: 0 auto;
+}
+.inv-root .hmx-name--header {
+  font-size: clamp(2.2rem, 9vw, 3.4rem);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .hmx-gate-card { padding: 64px 22px 44px; }
+  .hmx-header { padding: 32px 14px 44px; gap: 8px; }
+  .hmx-header--photos { min-height: 560px; }
+  .hmx-person { gap: 14px; }
+  .inv-root .hmx-person-name { font-size: 1.45rem; }
+  .hmx-person-role { font-size: 0.82rem; }
+  .hmx-bar-gap { height: 52px; }
+}
+
+/* ===== HOA MỘC XANH BODY OVERRIDES =====
+   Dùng InvitationBody chung nhưng đổi sang tông xanh. */
+.inv-hoamoc {
+  --red:       var(--hmx-green);
+  --red-deep:  var(--hmx-green-deep);
+  --red-soft:  rgba(48, 83, 15, 0.10);
+  --heading:   var(--hmx-green);
+  --text:      var(--hmx-text);
+  --muted:     #6f8a52;
+  background:  #f7f8f2 !important;   /* nền kem trơn — KHÔNG nền giấy (chỉ Long Phụng dùng) */
+  background-image: none !important;
+}
+
+/* Ẩn các phần riêng của traditional */
+.inv-hoamoc .inv-banner,
+.inv-hoamoc .inv-phoenix,
+.inv-hoamoc .inv-songhy,
+.inv-hoamoc .inv-flower,
+.inv-hoamoc .inv-header { display: none; }
+
+/* Backdrop trắng */
+.inv-hoamoc::before { background: #ffffff !important; }
+
+/* Khoảng cách thoáng giữa header và section đầu */
+.inv-hoamoc .inv-section:first-of-type { padding-top: 40px; }
+
+/* Nút submit / map / footer: màu xanh */
+.inv-hoamoc .inv-submit { background: var(--hmx-green); }
+.inv-hoamoc .inv-submit:hover:not(:disabled) { background: var(--hmx-green-deep); filter: none; }
+.inv-hoamoc .inv-map-link { border-color: var(--hmx-green); color: var(--hmx-green); }
+.inv-hoamoc .inv-map-link:hover { background: var(--hmx-green); color: #fff; }
+.inv-hoamoc .inv-radio--active { background: var(--hmx-green); border-color: var(--hmx-green); }
+.inv-hoamoc .inv-footer { background: var(--hmx-green-deep); }

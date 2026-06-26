@@ -1,5 +1,6 @@
 /** Trang quản trị /admin — login gate + dashboard quản lý đầy đủ. */
 import { useEffect, useState, FormEvent } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingBag, LayoutTemplate, Heart, Tag, MessageSquareQuote,
   Users, Mail, Settings, LogOut, Loader2, Menu, Palette, Music2, FileText, Sun, Moon,
@@ -18,27 +19,36 @@ import './Admin.css';
 
 type Tab = 'dashboard' | 'orders' | 'templates' | 'designer' | 'invitations' | 'plans' | 'testimonials' | 'users' | 'contacts' | 'settings' | 'music' | 'blog';
 
-const NAV: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
-  { id: 'orders', label: 'Đơn hàng', icon: ShoppingBag },
-  { id: 'templates', label: 'Mẫu thiệp', icon: LayoutTemplate },
-  { id: 'designer', label: 'Thiết kế mẫu', icon: Palette },
-  { id: 'invitations', label: 'Thiệp sống', icon: Heart },
-  { id: 'blog', label: 'Bài viết', icon: FileText },
-  { id: 'music', label: 'Nhạc cưới', icon: Music2 },
-  { id: 'plans', label: 'Gói giá', icon: Tag },
-  { id: 'testimonials', label: 'Đánh giá', icon: MessageSquareQuote },
-  { id: 'users', label: 'Người dùng', icon: Users },
-  { id: 'contacts', label: 'Liên hệ', icon: Mail },
-  { id: 'settings', label: 'Cài đặt', icon: Settings },
+const NAV: { id: Tab; label: string; icon: typeof LayoutDashboard; slug: string }[] = [
+  { id: 'dashboard',    label: 'Tổng quan',    icon: LayoutDashboard,      slug: 'tong-quan' },
+  { id: 'orders',       label: 'Đơn hàng',     icon: ShoppingBag,          slug: 'don-hang' },
+  { id: 'templates',    label: 'Mẫu thiệp',    icon: LayoutTemplate,       slug: 'mau-thiep' },
+  { id: 'designer',     label: 'Thiết kế mẫu', icon: Palette,              slug: 'thiet-ke-mau' },
+  { id: 'invitations',  label: 'Thiệp sống',   icon: Heart,                slug: 'thiep-song' },
+  { id: 'blog',         label: 'Bài viết',     icon: FileText,             slug: 'bai-viet' },
+  { id: 'music',        label: 'Nhạc cưới',    icon: Music2,               slug: 'nhac-cuoi' },
+  { id: 'plans',        label: 'Gói giá',      icon: Tag,                  slug: 'goi-gia' },
+  { id: 'testimonials', label: 'Đánh giá',     icon: MessageSquareQuote,   slug: 'danh-gia' },
+  { id: 'users',        label: 'Người dùng',   icon: Users,                slug: 'nguoi-dung' },
+  { id: 'contacts',     label: 'Liên hệ',      icon: Mail,                 slug: 'lien-he' },
+  { id: 'settings',     label: 'Cài đặt',      icon: Settings,             slug: 'cai-dat' },
 ];
 
+const slugToTab = (slug?: string): Tab => NAV.find((n) => n.slug === slug)?.id ?? 'dashboard';
+
 export default function Admin() {
+  const { tab: tabParam } = useParams<{ tab?: string }>();
+  const navigate = useNavigate();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState<Tab>('dashboard');
   const [navOpen, setNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  const tab = slugToTab(tabParam);
+  const setTab = (id: Tab) => {
+    const slug = NAV.find((n) => n.id === id)!.slug;
+    navigate(`/admin/${slug}`, { replace: false });
+  };
 
   useEffect(() => {
     authApi.me().then((res) => {

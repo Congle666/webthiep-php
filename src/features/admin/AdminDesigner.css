@@ -75,18 +75,28 @@
 .dsn-hint { font-size: 0.8rem; color: var(--text-secondary); text-align: center; margin: 0; }
 .dsn-hint b { color: var(--accent-primary); }
 
-/* Sân khấu xem trước — to, nền tối cho giấy nổi bật, cuộn dọc */
+/* Sân khấu xem trước — to, nền trắng cho giấy nổi bật, cuộn dọc */
 .dsn-stage {
-  width: 100%; max-width: 640px; max-height: calc(100vh - 150px); overflow-y: auto;
-  border-radius: 14px; border: 1px solid var(--border-default); background: #1a1a1a;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  width: 100%; max-width: 760px; max-height: calc(100vh - 150px); overflow-y: auto;
+  border-radius: 14px; border: 1px solid var(--border-default); background: #ffffff;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
 }
-.dsn-frame { position: relative; width: 100%; background-size: 600px; min-height: 360px; overflow: hidden; }
+/* Wrapper scale: bọc frame render ở 760px rồi thu nhỏ vừa cột.
+   height được JS set = frameHeight * scale để không dư/thiếu chỗ. */
+.dsn-scale-wrap { width: 100%; overflow: hidden; }
+.dsn-frame {
+  position: relative;
+  width: 760px;            /* CỐ ĐỊNH = trang thật (.inv-root) → decoration % khớp 100% */
+  background-size: 700px; min-height: 360px; overflow: hidden;
+  transform: scale(var(--dsn-scale, 1));
+  transform-origin: top left;
+}
 .dsn-frame--cover { padding: 18px; display: flex; align-items: center; justify-content: center; min-height: 420px; }
 
 /* Override inv-root khi render trong admin designer — vô hiệu backdrop fixed tràn viewport */
 .dsn-frame.inv-root::before { display: none; }
-.dsn-frame.inv-root { max-width: 100%; margin-inline: 0; box-shadow: none; min-height: 0; }
+/* height: fit-content + min-height 0 để frame khít nội dung, KHÔNG dư nền kem dưới footer */
+.dsn-frame.inv-root { width: 760px; margin-inline: 0; box-shadow: none; min-height: 0; height: fit-content; }
 
 /* Responsive: gập về 1 cột */
 @media (max-width: 1100px) {

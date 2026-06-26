@@ -107,8 +107,18 @@ Chữ (`.gate-content`, tên cặp đôi) đặt `z-index: 30`; decoration tối
 ### 5.4. Edit mode: lớp ảnh phải lên TRÊN CÙNG + nội dung tắt pointer-events
 Khi `editable`: `.deco-layer--edit { z-index: 50 }` + `.inv-deco-root:has(.deco-layer--edit){ z-index:50 }`; chữ/banner đặt `pointer-events: none`. Nếu không → bấm trúng chữ, không chọn được ảnh.
 
-### 5.5. Bỏ `overflow: hidden` khi edit (nếu không ảnh kéo ra mép bị cắt mất vùng click)
-`.inv-header:has(.deco-layer--edit)`, `.gate-card:has(.deco-layer--edit)` → `overflow: visible`.
+### 5.5. Overflow bìa thiệp: LIVE clip, EDIT visible (QUAN TRỌNG — đừng để hoa tràn ngoài bìa)
+**Quy tắc:** Card bìa (`.flr-gate-card`, `.hmx-gate-card`, `.gate-card`) phải `overflow: hidden` ở chế độ LIVE (khách xem) → hoa/họa tiết chỉ hiện TRONG khoảng bìa, phần tràn ngoài bị ẩn. Chỉ khi EDIT (admin kéo-thả) mới mở `overflow: visible` để kéo ảnh ra mép không bị cắt vùng click.
+**Sai (đã gặp):** để card `overflow: visible` mặc định → hoa tràn ra ngoài card cả khi khách xem, nhìn lem nhem.
+**Đúng:**
+```css
+.flr-gate-card, .hmx-gate-card { overflow: hidden; }  /* LIVE clip trong bìa */
+/* EDIT: mở overflow để kéo ảnh ra mép */
+.flr-gate--inline .flr-gate-card:has(.deco-layer--edit),
+.hmx-gate--inline .hmx-gate-card:has(.deco-layer--edit),
+.inv-header:has(.deco-layer--edit) { overflow: visible; }
+```
+→ Mỗi layout MỚI có cover card riêng: thêm card đó vào rule `:has(.deco-layer--edit) { overflow: visible }` trong `Invitation.css`, và set card `overflow: hidden` mặc định.
 
 ### 5.6. Giới hạn kéo tính theo KÍCH THƯỚC ẢNH, không theo % trang
 **Sai (đã gây bug "ảnh tự nhảy xuống"):** clamp `top = max(KEEP - hImg, ...)` với KEEP là % trang → ra số dương → ép ảnh nhảy.
@@ -186,3 +196,28 @@ vi, en, zh, ko, ja, fr, es, ar, ru, id, de, zh-tw — tất cả đã có đủ 
 - [ ] Xem `/thiep/demo/<slug>` — bìa + nội dung đều đúng
 - [ ] Tên mẫu hiển thị đúng tiếng Việt (utf8mb4)
 - [ ] (Nếu layout mới) đăng ký trong `layouts/index.ts` + CSS prefix riêng
+
+## 10. ⚠️ QUY TRÌNH CLONE MẪU CHUẨN (BẮT BUỘC — tránh lỗi đã gặp)
+
+> Bài học: làm mẫu Hoa Mộc Xanh bị (a) demo render khác bố cục thật, (b) admin designer KHÔNG thấy ảnh cô dâu chú rể → không thiết kế được. Root cause: quên đồng bộ demo data ở admin.
+
+### 10.1. Đo CSS THẬT trước khi code (KHÔNG đoán)
+Dùng Puppeteer (`node_modules` có sẵn) `getComputedStyle` trên trang ChungĐôi thật: fontFamily/Size, màu hex, vị trí (getBoundingClientRect), thứ tự DOM. KHÔNG ước lượng bằng mắt → ra số chính xác. Đã có spec mẫu trong memory `chungdoi-css-spec`.
+
+### 10.2. ⭐ ĐỒNG BỘ 3 NGUỒN DEMO DATA (mắt xích hay quên nhất)
+Một mẫu cần dữ liệu demo ở **3 nơi** — thiếu 1 là lệch:
+| Nguồn | File | Phục vụ |
+|-------|------|---------|
+| 1. Demo công khai | `backend/controllers/CatalogController.php` `demo()` | `/thiep/demo/<slug>` |
+| 2. Admin preview | `src/features/admin/sampleInvitation.ts` | `/admin/thiet-ke-mau/<id>` |
+| 3. DB design | `backend/database/seed_templates_v2.php` | theme + decorations |
+
+→ Nếu layout dùng ảnh động (ảnh đôi, couplePhoto...) thì CẢ nguồn 1 VÀ 2 phải có ảnh placeholder. Nếu chỉ thêm nguồn 1, admin designer sẽ render trống ảnh → user không thiết kế được.
+
+### 10.3. Test CẢ HAI nơi trước khi báo xong
+- [ ] `/thiep/demo/<slug>` — bố cục khớp ChungĐôi (screenshot đối chiếu)
+- [ ] `/admin/thiet-ke-mau/<id>` — preview thấy ĐỦ mọi phần (ảnh đôi, hoa, khung) để thiết kế được
+- [ ] Nếu 2 nơi khác nhau → đồng bộ demo data (mục 10.2)
+
+### 10.4. Nền giấy chỉ cho Long Phụng
+`paper-bg.jpg` là đặc trưng Long Phụng (đỏ truyền thống). Layout khác (floral, hoamoc...) dùng nền màu trơn — override `.inv-<layout> { background: <màu> !important; background-image: none !important; }`.

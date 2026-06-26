@@ -1,13 +1,14 @@
 /** Phần thân thiệp dùng CHUNG cho mọi layout (traditional, floral...). */
 import { motion } from 'framer-motion';
 import { MapPin, Clock, CalendarPlus } from 'lucide-react';
-import type { Invitation as Inv } from './types';
+import type { Invitation as Inv, PhotoAdjust } from './types';
 import { useCountdown } from './useCountdown';
 import { WeddingCalendar } from './WeddingCalendar';
 import { GiftQR } from './GiftQR';
 import { RsvpForm, GuestbookForm } from './InvitationForms';
 import type { InvI18n } from './i18n';
 import { splitBi } from './i18n';
+import { fmtLunarVi } from './lunar';
 
 /** Render text song ngữ thành 2 dòng: primary (to) + secondary (nhỏ, mờ). */
 function BiLine({ text, className }: { text: string; className?: string }) {
@@ -21,13 +22,43 @@ function BiLine({ text, className }: { text: string; className?: string }) {
   );
 }
 
+/** Style nền cho ảnh đôi: áp vị trí (background-position) + zoom (background-size). */
+function cpImgStyle(url?: string, adj?: PhotoAdjust): React.CSSProperties | undefined {
+  if (!url) return undefined;
+  const x = adj?.x ?? 50, y = adj?.y ?? 50, scale = adj?.scale ?? 1;
+  return {
+    backgroundImage: `url('${url}')`,
+    backgroundPosition: `${x}% ${y}%`,
+    backgroundSize: `${Math.round(scale * 100)}%`,
+  };
+}
+
 const revealAnim = {
   initial: { opacity: 0, y: 26 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-50px' },
+  // margin rộng hơn (trigger sớm khi section chớm vào viewport) → section cuối/cao luôn reveal, mượt mobile
+  viewport: { once: true, margin: '0px 0px -120px 0px' },
   transition: { duration: 0.6, ease: 'easeOut' as const },
 };
 const revealNone = {};
+
+/** Stagger cho lưới nhiều con (album/countdown): cha điều phối, con fade-in lần lượt. */
+const gridContainer = {
+  initial: 'hidden',
+  whileInView: 'show',
+  viewport: { once: true, margin: '0px 0px -80px 0px' },
+  variants: {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08 } },
+  },
+};
+const gridItem = {
+  variants: {
+    hidden: { opacity: 0, y: 18 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  },
+};
+const gridNone = {};
 
 type LangKey = 'vi' | 'en' | 'zh' | 'ko' | 'ja' | 'fr';
 
@@ -75,10 +106,13 @@ interface Props {
   slug: string;
   t: InvI18n;
   staticMode?: boolean;
+  guestToken?: string | null;
 }
 
-export function InvitationBody({ inv, slug, t, staticMode }: Props) {
+export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) {
   const reveal = staticMode ? revealNone : revealAnim;
+  const gContainer = staticMode ? gridNone : gridContainer;
+  const gItem = staticMode ? gridNone : gridItem;
   const cd = useCountdown(inv.weddingDate ?? null);
   const date = fmtDate(inv.weddingDate, 'vi');
   const s = inv.settings ?? {};
@@ -91,20 +125,26 @@ export function InvitationBody({ inv, slug, t, staticMode }: Props) {
   const show = (k: keyof NonNullable<typeof vis>) => vis[k] !== false;
   const schedule = ex.schedule ?? [];
   const dress = ex.dressCode;
+  const cer = ex.ceremony;
+  const rec = ex.reception ?? {};
+  // Âm lịch: mặc định hiện (chỉ tắt khi showLunar === false). Định dạng tiếng Việt.
+  const showLunar = ex.showLunar !== false;
+  const cerDate = cer?.datetime ? fmtDate(cer.datetime, 'vi') : null;
 
   return (
     <>
-      {/* ===== ẢNH ĐÔI ===== */}
-      {show('couplePhoto') && (ex.groomPhoto || ex.bridePhoto) && (
+      {/* ===== ẢNH ĐÔI =====
+          hoamoc đã render ảnh đôi (chú rể/cô dâu) ở HEADER → ẩn section này để không lặp. */}
+      {inv.layout !== 'hoamoc' && show('couplePhoto') && (ex.groomPhoto || ex.bridePhoto) && (
         <motion.section className="inv-section inv-couplephoto" {...reveal}>
           <div className="inv-couplephoto-grid">
             <div className="inv-cp-item">
-              <div className="inv-cp-img" style={ex.groomPhoto ? { backgroundImage: `url('${ex.groomPhoto}')` } : undefined} role="img" aria-label={t.groomTitle} />
+              <div className="inv-cp-img" style={cpImgStyle(ex.groomPhoto, ex.groomPhotoAdjust)} role="img" aria-label={t.groomTitle} />
               <span className="inv-cp-cap">{ex.groomTitle || t.groomTitle}</span>
               <span className="inv-cp-name">{inv.groomName}</span>
             </div>
             <div className="inv-cp-item">
-              <div className="inv-cp-img" style={ex.bridePhoto ? { backgroundImage: `url('${ex.bridePhoto}')` } : undefined} role="img" aria-label={t.brideTitle} />
+              <div className="inv-cp-img" style={cpImgStyle(ex.bridePhoto, ex.bridePhotoAdjust)} role="img" aria-label={t.brideTitle} />
               <span className="inv-cp-cap">{ex.brideTitle || t.brideTitle}</span>
               <span className="inv-cp-name">{inv.brideName}</span>
             </div>
@@ -143,31 +183,69 @@ export function InvitationBody({ inv, slug, t, staticMode }: Props) {
         </motion.section>
       )}
 
-      {/* ===== TÊN CÔ DÂU CHÚ RỂ ===== */}
-      <motion.section className="inv-section inv-couple" {...reveal}>
-        {t.coupleAnnounce.split('\n').map((line, i) => (
-          <p key={i} className="inv-couple-pre"><BiLine text={line} /></p>
-        ))}
-        <h1 className="inv-couple-name">{inv.groomName}</h1>
-        <span className="inv-couple-cap"><BiLine text={t.groomTitle} /></span>
-        <span className="inv-couple-amp">&</span>
-        <h1 className="inv-couple-name">{inv.brideName}</h1>
-        <span className="inv-couple-cap"><BiLine text={t.brideTitle} /></span>
-      </motion.section>
+      {/* ===== TÊN CÔ DÂU CHÚ RỂ =====
+          Traditional + Floral đã render tên ở HEADER (trên cùng / trong khung oval)
+          → ẩn ở body để không lặp. Layout khác (không có tên header) thì vẫn hiện. */}
+      {inv.layout !== 'traditional' && inv.layout !== 'floral' && inv.layout !== 'hoamoc' && (
+        <motion.section className="inv-section inv-couple" {...reveal}>
+          {t.coupleAnnounce.split('\n').map((line, i) => (
+            <p key={i} className="inv-couple-pre"><BiLine text={line} /></p>
+          ))}
+          <h1 className={`inv-couple-name${(inv.groomName?.length ?? 0) > 12 ? ' inv-couple-name--full' : ''}`}>{inv.groomName}</h1>
+          <span className="inv-couple-cap"><BiLine text={t.groomTitle} /></span>
+          <span className="inv-couple-amp">&</span>
+          <h1 className={`inv-couple-name${(inv.brideName?.length ?? 0) > 12 ? ' inv-couple-name--full' : ''}`}>{inv.brideName}</h1>
+          <span className="inv-couple-cap"><BiLine text={t.brideTitle} /></span>
+        </motion.section>
+      )}
 
-      {/* ===== THỜI GIAN ===== */}
-      <motion.section className="inv-section inv-time" {...reveal}>
-        <p className="inv-time-pre"><BiLine text={t.ceremonyAt} />:</p>
-        <div className="inv-time-hour">{date.time}</div>
+      {/* ===== ALBUM ===== */}
+      {show('gallery') && gallery.length > 0 && (
+        <motion.section className="inv-section inv-album" {...reveal}>
+          <h2 className="inv-h2"><BiLine text={t.galleryTitle} /></h2>
+          <div className="inv-mini-divider" />
+          <motion.div className="inv-album-grid" {...gContainer}>
+            {gallery.map((src, i) => (
+              <motion.div key={i} className="inv-album-item" style={{ backgroundImage: `url('${src}')` }} role="img" aria-label={`${t.galleryTitle} ${i + 1}`} {...gItem} />
+            ))}
+          </motion.div>
+        </motion.section>
+      )}
+
+      {/* ===== LỄ THÀNH HÔN (sự kiện riêng, có thể khác ngày tiệc) ===== */}
+      {show('ceremony') && cer?.enabled && cer.datetime && cerDate && (
+        <motion.section className="inv-section inv-time inv-ceremony" {...reveal}>
+          <p className="inv-time-pre"><BiLine text={t.ceremonyTitle} /></p>
+          <div className="inv-time-hour">{cerDate.time}</div>
+          <div className="inv-time-dmy">
+            <div className="inv-time-col"><span className="inv-time-label">{cerDate.dow}</span></div>
+            <div className="inv-time-big"><span className="inv-time-num">{cerDate.day}</span></div>
+            <div className="inv-time-col"><span className="inv-time-label"><BiLine text={t.monthLabel} /> {cerDate.month}</span></div>
+          </div>
+          {showLunar && <p className="inv-lunar">{fmtLunarVi(cer.datetime)}</p>}
+          {(cer.venue || cer.address) && (
+            <p className="inv-cer-venue">
+              <BiLine text={t.ceremonyVenueLabel} />{' '}
+              {cer.venue}{cer.venue && cer.address ? ' — ' : ''}{cer.address}
+            </p>
+          )}
+        </motion.section>
+      )}
+
+      {/* ===== TIỆC CƯỚI (mốc chính — dùng wedding_date) ===== */}
+      <motion.section className="inv-section inv-time inv-reception" {...reveal}>
+        <p className="inv-time-pre"><BiLine text={cer?.enabled ? t.receptionTitle : t.ceremonyAt} /></p>
+        <div className="inv-time-hour">{rec.banquetTime || date.time}</div>
         <div className="inv-time-dmy">
           <div className="inv-time-col"><span className="inv-time-label">{date.dow}</span></div>
           <div className="inv-time-big"><span className="inv-time-num">{date.day}</span></div>
           <div className="inv-time-col"><span className="inv-time-label"><BiLine text={t.monthLabel} /> {date.month}</span></div>
         </div>
-        {inv.receptionTime && (
+        {showLunar && inv.weddingDate && <p className="inv-lunar">{fmtLunarVi(inv.weddingDate)}</p>}
+        {(rec.welcomeTime || inv.receptionTime || rec.banquetTime) && (
           <div className="inv-two-time">
-            <div><span className="inv-tt-label"><BiLine text={t.reception} /></span><span className="inv-tt-val">{hhmm(inv.receptionTime)}</span></div>
-            <div><span className="inv-tt-label"><BiLine text={t.banquet} /></span><span className="inv-tt-val">{date.time}</span></div>
+            <div><span className="inv-tt-label"><BiLine text={t.welcomeGuests} /></span><span className="inv-tt-val">{rec.welcomeTime || hhmm(inv.receptionTime)}</span></div>
+            <div><span className="inv-tt-label"><BiLine text={t.banquet} /></span><span className="inv-tt-val">{rec.banquetTime || date.time}</span></div>
           </div>
         )}
       </motion.section>
@@ -184,14 +262,14 @@ export function InvitationBody({ inv, slug, t, staticMode }: Props) {
       {s.countdown !== false && !cd.isPast && (
         <motion.section className="inv-section inv-countdown" {...reveal}>
           <h2 className="inv-h2"><Clock size={18} /> <BiLine text={t.countdownTitle} /></h2>
-          <div className="inv-countdown-grid">
+          <motion.div className="inv-countdown-grid" {...gContainer}>
             {([[t.days, cd.days], [t.hours, cd.hours], [t.minutes, cd.minutes], [t.seconds, cd.seconds]] as [string, number][]).map(([l, v]) => (
-              <div className="inv-cd-box" key={l}>
+              <motion.div className="inv-cd-box" key={l} {...gItem}>
                 <span className="inv-cd-num">{String(v).padStart(2, '0')}</span>
                 <span className="inv-cd-label"><BiLine text={l} /></span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </motion.section>
       )}
 
@@ -207,19 +285,6 @@ export function InvitationBody({ inv, slug, t, staticMode }: Props) {
           </a>
         )}
       </motion.section>
-
-      {/* ===== ALBUM ===== */}
-      {show('gallery') && gallery.length > 0 && (
-        <motion.section className="inv-section inv-album" {...reveal}>
-          <h2 className="inv-h2"><BiLine text={t.galleryTitle} /></h2>
-          <div className="inv-mini-divider" />
-          <div className="inv-album-grid">
-            {gallery.map((src, i) => (
-              <div key={i} className="inv-album-item" style={{ backgroundImage: `url('${src}')` }} role="img" aria-label={`${t.galleryTitle} ${i + 1}`} />
-            ))}
-          </div>
-        </motion.section>
-      )}
 
       {/* ===== DRESS CODE ===== */}
       {show('dressCode') && (dress?.note || (dress?.colors?.length ?? 0) > 0) && (
@@ -268,7 +333,7 @@ export function InvitationBody({ inv, slug, t, staticMode }: Props) {
         <motion.section className="inv-section" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.rsvpTitle} /></h2>
           <div className="inv-mini-divider" />
-          <RsvpForm slug={slug} t={t} />
+          <RsvpForm slug={slug} t={t} guestToken={guestToken} defaultName={inv.guestName ?? undefined} />
         </motion.section>
       )}
 

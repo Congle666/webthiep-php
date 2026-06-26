@@ -57,6 +57,11 @@ $routes = [
     ['GET',  '/my/invitations/{slug}',     ['CustomerController', 'getInvitation']],
     ['PUT',  '/my/invitations/{slug}',     ['CustomerController', 'updateInvitation']],
     ['POST', '/my/invitations/{slug}/publish', ['CustomerController', 'publish']],
+    ['POST', '/my/invitations/{slug}/template', ['CustomerController', 'changeTemplate']],
+    ['GET',    '/my/invitations/{slug}/guests',      ['CustomerController', 'guestsList']],
+    ['POST',   '/my/invitations/{slug}/guests',      ['CustomerController', 'guestCreate']],
+    ['PUT',    '/my/invitations/{slug}/guests/{id}',  ['CustomerController', 'guestUpdate']],
+    ['DELETE', '/my/invitations/{slug}/guests/{id}',  ['CustomerController', 'guestDelete']],
     ['POST', '/my/upload/image',           ['CustomerController', 'uploadImage']],
     ['POST', '/my/upload/music',           ['CustomerController', 'uploadMusic']],
 

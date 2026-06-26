@@ -9,23 +9,21 @@ import {
   Plus, X, ExternalLink, Check, Download, FileHeart,
   ChevronDown, Sun, Moon, BarChart2,
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { customerApi, type AuthUser } from '../../api/client';
-import type { Invitation } from '../invitation/types';
+import type { Invitation, Guest, GuestStats } from '../invitation/types';
 import './UserPanel.css';
 
 type Tab = 'invitations' | 'guests' | 'account';
 
-interface Guest { name: string; addedAt: string; }
-
-function getGuests(slug: string): Guest[] {
-  try { return JSON.parse(localStorage.getItem(`juntech_guests_${slug}`) ?? '[]'); } catch { return []; }
-}
-function saveGuests(slug: string, guests: Guest[]) {
-  localStorage.setItem(`juntech_guests_${slug}`, JSON.stringify(guests));
-}
+const RSVP_LABEL: Record<Guest['rsvpStatus'], string> = {
+  yes: 'Sẽ đến', no: 'Không đến', maybe: 'Có thể', pending: 'Chưa trả lời',
+};
+const RSVP_CLASS: Record<Guest['rsvpStatus'], string> = {
+  yes: 'up-badge-green', no: 'up-badge-gray', maybe: 'up-badge-pink', pending: 'up-badge-gray',
+};
 
 function AvatarCircle({ name, size = 40 }: { name: string; size?: number }) {
   const initials = name.split(' ').slice(-2).map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -88,19 +86,10 @@ function TabInvitations({ onGuestTab }: { onGuestTab: (slug: string) => void }) 
     </div>
   );
 
-  // Build chart data: guest count per invitation
-  const guestData = invitations.map(inv => ({
-    name: `${inv.groomName?.split(' ').pop() ?? '?'} & ${inv.brideName?.split(' ').pop() ?? '?'}`,
-    khach: getGuests(inv.slug).length,
-    status: inv.isPublished ? 1 : 0,
-  }));
-
   const statusData = [
     { name: 'Đã đăng', value: invitations.filter(i => i.isPublished).length, color: '#00b450' },
     { name: 'Nháp', value: invitations.filter(i => !i.isPublished).length, color: '#6b6470' },
   ].filter(d => d.value > 0);
-
-  const totalGuests = invitations.reduce((sum, inv) => sum + getGuests(inv.slug).length, 0);
 
   return (
     <div>
@@ -123,40 +112,11 @@ function TabInvitations({ onGuestTab }: { onGuestTab: (slug: string) => void }) 
           <span className="up-stat-num">{invitations.filter(i => !i.isPublished).length}</span>
           <span className="up-stat-label">Nháp</span>
         </div>
-        <div className="up-stat-card">
-          <span className="up-stat-num up-stat-pink">{totalGuests}</span>
-          <span className="up-stat-label">Tổng khách</span>
-        </div>
       </div>
 
       {/* Charts */}
       {invitations.length > 0 && (
         <div className="up-charts-row">
-          {/* Bar chart: guests per invitation */}
-          <div className="up-chart-card">
-            <div className="up-chart-title"><BarChart2 size={15} /> Khách mời theo thiệp</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={guestData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="guestGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#e6017e" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#e6017e" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#888' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#888' }} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ background: '#1a1820', border: '1px solid #333', borderRadius: 8, fontSize: 12 }}
-                  labelStyle={{ color: '#fff' }}
-                  formatter={(v) => [`${v} khách`, 'Khách mời']}
-                />
-                <Area type="monotone" dataKey="khach" stroke="#e6017e" strokeWidth={2}
-                  fill="url(#guestGrad)" dot={{ fill: '#e6017e', r: 4 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
           {/* Pie chart: trạng thái thiệp */}
           {statusData.length > 1 && (
             <div className="up-chart-card up-chart-card-sm">
@@ -192,7 +152,7 @@ function TabInvitations({ onGuestTab }: { onGuestTab: (slug: string) => void }) 
             )}
             {inv.venueName && <div className="up-inv-venue">{inv.venueName}</div>}
             <div className="up-inv-actions">
-              <Link to={`/tao-thiep/${inv.templateSlug ?? inv.slug}`} className="up-btn up-btn-sm up-btn-outline">
+              <Link to={`/chinh-sua/${inv.slug}`} className="up-btn up-btn-sm up-btn-outline">
                 Chỉnh sửa
               </Link>
               <button className="up-btn up-btn-sm up-btn-outline" onClick={() => onGuestTab(inv.slug)}>
@@ -216,12 +176,15 @@ function TabGuests({ defaultSlug }: { defaultSlug?: string }) {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [selectedSlug, setSelectedSlug] = useState(defaultSlug ?? '');
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [stats, setStats] = useState<GuestStats | null>(null);
   const [newName, setNewName] = useState('');
-  const [bulkMode, setBulkMode] = useState(false);
-  const [bulkText, setBulkText] = useState('');
+  const [newTag, setNewTag] = useState('');
   const [showQr, setShowQr] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [guestsLoading, setGuestsLoading] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [err, setErr] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const origin = window.location.origin;
@@ -236,9 +199,16 @@ function TabGuests({ defaultSlug }: { defaultSlug?: string }) {
     });
   }, [defaultSlug]);
 
-  useEffect(() => {
-    if (selectedSlug) setGuests(getGuests(selectedSlug));
-  }, [selectedSlug]);
+  const loadGuests = (slug: string) => {
+    if (!slug) return;
+    setGuestsLoading(true);
+    customerApi.guests.list(slug).then(r => {
+      if (r.success && r.data) { setGuests(r.data.guests); setStats(r.data.stats); }
+      setGuestsLoading(false);
+    });
+  };
+
+  useEffect(() => { loadGuests(selectedSlug); }, [selectedSlug]);
 
   const invUrl = selectedSlug ? `${origin}/thiep/${selectedSlug}` : '';
   const familyUrl = selectedSlug ? `${origin}/tai-khoan/family/${selectedSlug}` : '';
@@ -250,35 +220,28 @@ function TabGuests({ defaultSlug }: { defaultSlug?: string }) {
     });
   };
 
-  const addGuest = (name: string) => {
-    const trimmed = name.trim();
-    if (!trimmed || !selectedSlug) return;
-    const updated = [...guests, { name: trimmed, addedAt: new Date().toISOString() }];
-    setGuests(updated);
-    saveGuests(selectedSlug, updated);
+  const handleAddSingle = async () => {
+    const name = newName.trim();
+    if (!name || !selectedSlug || adding) return;
+    setAdding(true); setErr('');
+    const r = await customerApi.guests.create(selectedSlug, { name, tag: newTag.trim() || undefined });
+    setAdding(false);
+    if (r.success) {
+      setNewName(''); setNewTag('');
+      loadGuests(selectedSlug);
+      inputRef.current?.focus();
+    } else {
+      setErr(r.message ?? 'Không thêm được khách.');
+    }
   };
 
-  const removeGuest = (idx: number) => {
-    const updated = guests.filter((_, i) => i !== idx);
-    setGuests(updated);
-    saveGuests(selectedSlug, updated);
+  const removeGuest = async (id: number) => {
+    const r = await customerApi.guests.remove(selectedSlug, id);
+    if (r.success) loadGuests(selectedSlug);
   };
 
-  const handleAddSingle = () => {
-    if (!newName.trim()) return;
-    addGuest(newName);
-    setNewName('');
-    inputRef.current?.focus();
-  };
-
-  const handleBulkAdd = () => {
-    bulkText.split('\n').forEach(line => addGuest(line));
-    setBulkText('');
-    setBulkMode(false);
-  };
-
-  const guestLink = (name: string) =>
-    `${invUrl}?khach=${encodeURIComponent(name)}`;
+  // Link riêng dùng token (?g=). Tương thích link cũ ?khach=.
+  const guestLink = (g: Guest) => `${invUrl}?g=${encodeURIComponent(g.token)}`;
 
   if (loading) return <div className="up-loading">Đang tải...</div>;
   if (!invitations.length) return (
@@ -311,9 +274,35 @@ function TabGuests({ defaultSlug }: { defaultSlug?: string }) {
         </div>
       </div>
 
+      {/* Thống kê RSVP */}
+      {stats && (
+        <div className="up-stats-row">
+          <div className="up-stat-card">
+            <span className="up-stat-num">{stats.total}</span>
+            <span className="up-stat-label">Tổng khách</span>
+          </div>
+          <div className="up-stat-card">
+            <span className="up-stat-num up-stat-green">{stats.yes}</span>
+            <span className="up-stat-label">Sẽ đến</span>
+          </div>
+          <div className="up-stat-card">
+            <span className="up-stat-num">{stats.no}</span>
+            <span className="up-stat-label">Không đến</span>
+          </div>
+          <div className="up-stat-card">
+            <span className="up-stat-num up-stat-pink">{stats.pending}</span>
+            <span className="up-stat-label">Chưa trả lời</span>
+          </div>
+          <div className="up-stat-card">
+            <span className="up-stat-num">{stats.opened}</span>
+            <span className="up-stat-label">Đã mở thiệp</span>
+          </div>
+        </div>
+      )}
+
       {/* Chia sẻ link chung */}
       <div className="up-share-card">
-        <div className="up-share-card-title">Thống kê &amp; công cụ</div>
+        <div className="up-share-card-title"><BarChart2 size={15} /> Công cụ chia sẻ</div>
         <div className="up-share-label">CHIA SẺ LINK CHUNG</div>
         <div className="up-share-url-row">
           <span className="up-share-url">/thiep/{selectedSlug}</span>
@@ -337,76 +326,11 @@ function TabGuests({ defaultSlug }: { defaultSlug?: string }) {
       {/* Danh sách khách riêng */}
       <div className="up-guest-section">
         <div className="up-guest-section-header">
-          <span className="up-share-label">MỜI KHÁCH RIÊNG</span>
+          <span className="up-share-label">MỜI KHÁCH RIÊNG (LINK + QR THEO TÊN)</span>
           <div className="up-guest-count-row">
             <span className="up-guest-count">Tổng: {guests.length} khách</span>
-            <button className="up-btn up-btn-sm up-btn-outline" onClick={() => setBulkMode(!bulkMode)}>
-              <Plus size={13} /> Thêm nhiều cùng lúc
-            </button>
           </div>
         </div>
-
-        {bulkMode && (
-          <div className="up-bulk-box">
-            <textarea
-              className="up-bulk-input"
-              placeholder="Nhập mỗi tên khách một dòng:&#10;Nguyễn Văn An&#10;Trần Thị Bình&#10;Lê Hoàng Cường"
-              value={bulkText}
-              onChange={e => setBulkText(e.target.value)}
-              rows={5}
-            />
-            <div className="up-bulk-actions">
-              <button className="up-btn up-btn-primary" onClick={handleBulkAdd}>Thêm tất cả</button>
-              <button className="up-btn up-btn-ghost" onClick={() => setBulkMode(false)}>Huỷ</button>
-            </div>
-          </div>
-        )}
-
-        {guests.length > 0 && (
-          <div className="up-guest-table-wrap">
-            <table className="up-guest-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Tên khách</th>
-                  <th>Link thiệp cá nhân</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {guests.map((g, i) => {
-                  const link = guestLink(g.name);
-                  const key = `guest-${i}`;
-                  return (
-                    <tr key={i}>
-                      <td className="up-guest-num">{i + 1}</td>
-                      <td className="up-guest-name">{g.name}</td>
-                      <td className="up-guest-link">
-                        <span className="up-guest-link-text" title={link}>
-                          ...?khach={encodeURIComponent(g.name).slice(0, 20)}
-                        </span>
-                      </td>
-                      <td className="up-guest-actions-cell">
-                        <button className="up-icon-btn" title="Copy link" onClick={() => copyText(link, key)}>
-                          {copied === key ? <Check size={14} /> : <Copy size={14} />}
-                        </button>
-                        <button className="up-icon-btn" title="Xem QR" onClick={() => setShowQr(link)}>
-                          <QrCode size={14} />
-                        </button>
-                        <a className="up-icon-btn" href={link} target="_blank" rel="noreferrer" title="Mở thiệp">
-                          <ExternalLink size={14} />
-                        </a>
-                        <button className="up-icon-btn up-icon-btn-danger" title="Xoá" onClick={() => removeGuest(i)}>
-                          <X size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
 
         {/* Thêm khách mới */}
         <div className="up-add-guest">
@@ -418,10 +342,70 @@ function TabGuests({ defaultSlug }: { defaultSlug?: string }) {
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddSingle()}
           />
-          <button className="up-btn up-btn-primary" onClick={handleAddSingle} disabled={!newName.trim()}>
-            <Plus size={14} /> Thêm
+          <input
+            className="up-add-input"
+            placeholder="Nhóm (Nhà gái, Bạn CR...)"
+            value={newTag}
+            onChange={e => setNewTag(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAddSingle()}
+            style={{ maxWidth: 180 }}
+          />
+          <button className="up-btn up-btn-primary" onClick={handleAddSingle} disabled={!newName.trim() || adding}>
+            <Plus size={14} /> {adding ? 'Đang thêm...' : 'Thêm'}
           </button>
         </div>
+        {err && <p className="up-family-hint" style={{ color: '#e6017e' }}>{err}</p>}
+
+        {guestsLoading ? <div className="up-loading">Đang tải khách...</div> : guests.length > 0 && (
+          <div className="up-guest-table-wrap">
+            <table className="up-guest-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tên khách</th>
+                  <th>Nhóm</th>
+                  <th>RSVP</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                {guests.map((g, i) => {
+                  const link = guestLink(g);
+                  const key = `guest-${g.id}`;
+                  return (
+                    <tr key={g.id}>
+                      <td className="up-guest-num">{i + 1}</td>
+                      <td className="up-guest-name">
+                        {g.name}
+                        {g.openedAt && <span className="up-guest-link-text" title="Đã mở thiệp"> · đã mở</span>}
+                      </td>
+                      <td className="up-guest-link">{g.tag || '—'}</td>
+                      <td>
+                        <span className={`up-badge ${RSVP_CLASS[g.rsvpStatus]}`}>
+                          {RSVP_LABEL[g.rsvpStatus]}{g.rsvpStatus === 'yes' && g.rsvpCount > 1 ? ` (${g.rsvpCount})` : ''}
+                        </span>
+                      </td>
+                      <td className="up-guest-actions-cell">
+                        <button className="up-icon-btn" title="Copy link riêng" onClick={() => copyText(link, key)}>
+                          {copied === key ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                        <button className="up-icon-btn" title="Xem QR" onClick={() => setShowQr(link)}>
+                          <QrCode size={14} />
+                        </button>
+                        <a className="up-icon-btn" href={link} target="_blank" rel="noreferrer" title="Mở thiệp">
+                          <ExternalLink size={14} />
+                        </a>
+                        <button className="up-icon-btn up-icon-btn-danger" title="Xoá" onClick={() => removeGuest(g.id)}>
+                          <X size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {showQr && <QrModal url={showQr} onClose={() => setShowQr(null)} />}

@@ -2,11 +2,11 @@
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { DecorationLayer } from '../DecorationLayer';
+import type { DecoConfig } from '../decorations';
 import type { CoverProps, HeaderProps } from './types';
 import { useI18n } from '../i18n';
 import './floral.css';
 
-const FRAME = '/invitation/floral/frame-flower.webp';
 
 function fmtShort(d: string | null): string {
   if (!d) return '';
@@ -52,20 +52,36 @@ function FloralCover({ inv, guestName, onOpen, decorations, inline, editable, on
 }
 
 function FloralHeader({ inv, editMode, decorations, onDecoChange, selectedId, onSelect }: HeaderProps) {
+  // Tách deco theo zone: 'header' khóa với .flr-header block; phần còn lại ('body') phủ toàn trang.
+  const headerDecos = (decorations ?? []).filter((d) => (d.zone ?? 'body') === 'header');
+  const bodyDecos = (decorations ?? []).filter((d) => (d.zone ?? 'body') !== 'header');
+
+  // onChange của mỗi nhóm trả về list ĐÃ SỬA của riêng nhóm đó → merge lại để không mất nhóm kia.
+  const onHeaderChange = onDecoChange
+    ? (next: DecoConfig[]) => onDecoChange([...next, ...bodyDecos])
+    : undefined;
+  const onBodyChange = onDecoChange
+    ? (next: DecoConfig[]) => onDecoChange([...headerDecos, ...next])
+    : undefined;
+
   return (
     <>
       <header className="flr-header">
-        <div className="flr-frame" style={{ backgroundImage: `url('${FRAME}')` }}>
-          <div className="flr-frame-inner">
-            <span className="flr-frame-label">THE WEDDING OF</span>
-            <h1 className="flr-frame-name">{inv.brideName}</h1>
-            <span className="flr-frame-amp">&</span>
-            <h1 className="flr-frame-name">{inv.groomName}</h1>
-          </div>
+        {/* Decoration zone header — tọa độ % theo .flr-header, khóa tương đối với tên */}
+        <div className="flr-deco-header">
+          <DecorationLayer editable={editMode} value={headerDecos} onChange={onHeaderChange}
+            selectedId={selectedId} onSelect={onSelect} />
+        </div>
+        <div className="flr-frame-names">
+          <span className="flr-frame-label">THE WEDDING OF</span>
+          <h1 className="flr-frame-name">{inv.brideName}</h1>
+          <span className="flr-frame-amp">&</span>
+          <h1 className="flr-frame-name">{inv.groomName}</h1>
         </div>
       </header>
+      {/* body decos (nếu có) phủ toàn trang — tọa độ % theo inv-root */}
       <div className="inv-deco-root">
-        <DecorationLayer editable={editMode} value={decorations} onChange={onDecoChange}
+        <DecorationLayer editable={editMode} value={bodyDecos} onChange={onBodyChange}
           selectedId={selectedId} onSelect={onSelect} />
       </div>
     </>

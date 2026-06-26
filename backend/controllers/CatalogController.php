@@ -39,6 +39,26 @@ class CatalogController
         $t = Database::one("SELECT * FROM templates WHERE slug = ? AND is_active = 1", [$slug]);
         if (!$t) Response::error('Không tìm thấy mẫu thiệp.', 404);
 
+        $layout = $t['layout'] ?? 'traditional';
+
+        // Ảnh đôi (chú rể / cô dâu) — chỉ layout hoamoc dùng trong header
+        $extra = [
+            // Lễ thành hôn riêng (tư gia, sáng) — khác giờ/nơi với tiệc
+            'ceremony' => [
+                'enabled' => true,
+                'datetime' => '2026-05-02 09:00',
+                'venue' => 'Tư Gia Nhà Gái',
+                'address' => '123 Nguyễn Huệ, Quận 1, TP.HCM',
+            ],
+            // Tiệc cưới: giờ đón khách + khai tiệc
+            'reception' => ['welcomeTime' => '17:30', 'banquetTime' => '18:00'],
+            'showLunar' => true,
+        ];
+        if ($layout === 'hoamoc') {
+            $extra['groomPhoto'] = '/invitation/floral/hoamoc-couple-1.webp';
+            $extra['bridePhoto'] = '/invitation/floral/hoamoc-couple-2.webp';
+        }
+
         Response::ok([
             'slug' => 'demo-' . $t['slug'],
             'groomName' => 'Minh Quân', 'brideName' => 'Thu Hà',
@@ -60,10 +80,11 @@ class CatalogController
             'musicUrl' => null,
             'inviteMessage' => 'Trân trọng kính mời bạn đến chung vui cùng gia đình chúng tôi.',
             'settings' => ['countdown' => true, 'rsvp' => true, 'guestbook' => true],
+            'extra' => $extra,
             'isPublished' => true,
             'templateSlug' => $t['slug'],
             'design' => jdec($t['design'] ?? null),
-            'layout' => $t['layout'] ?? 'traditional',
+            'layout' => $layout,
             'isDemo' => true,
             'guestbook' => [],
         ]);

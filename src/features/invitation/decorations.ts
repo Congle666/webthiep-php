@@ -14,7 +14,7 @@ export interface DecoConfig {
   flip: boolean;       // lật ngang
   z: number;           // z-index
   opacity: number;
-  zone?: 'cover' | 'body';  // vùng đặt ảnh: bìa thiệp (cover) hoặc nội dung/header (body). Mặc định 'body'.
+  zone?: 'cover' | 'body' | 'header';  // vùng đặt ảnh: bìa (cover), nội dung (body), hoặc header floral (header — tọa độ % theo .flr-header block). Mặc định 'body'.
 }
 
 /** Vị trí mặc định cho header thiệp (vùng nội dung/body). */
@@ -26,6 +26,46 @@ export const DEFAULT_DECORATIONS: DecoConfig[] = [
   { id: 'watermark',     label: 'Watermark phượng', src: '/invitation/phoenix-watermark.webp', top: 50, left: -8, width: 40, rotate: 0, flip: false, z: 0, opacity: 0.06, zone: 'body' },
 ];
 
+/** Vị trí mặc định cho thiệp FLORAL (hoa mộc lan).
+ *  Tọa độ tính theo .flr-header BLOCK (zone='header') — khung + hoa khóa tương đối với tên, KHÔNG trôi theo trang. */
+export const DEFAULT_FLORAL_DECORATIONS: DecoConfig[] = [
+  // Khung oval — % theo .flr-header block (width 70% giống ChungĐôi, căn giữa)
+  { id: 'floral-frame', label: 'Khung hoa oval', src: '/invitation/floral/frame-flower.webp',
+    top: 6, left: 15, width: 70, rotate: 0, flip: false, z: 1, opacity: 1, zone: 'header' },
+  // Hoa trái dưới — nằm đáy khung (dưới tên), không đè
+  { id: 'floral-flower-bl', label: 'Hoa trái dưới', src: '/invitation/floral/flower-corner.webp',
+    top: 58, left: -6, width: 40, rotate: 0, flip: false, z: 3, opacity: 0.9, zone: 'header' },
+  // Hoa phải dưới — đáy khung phải
+  { id: 'floral-flower-br', label: 'Hoa phải dưới', src: '/invitation/floral/flower-corner.webp',
+    top: 52, left: 62, width: 42, rotate: 0, flip: true, z: 3, opacity: 0.9, zone: 'header' },
+];
+
+export const DEFAULT_FLORAL_COVER_DECORATIONS: DecoConfig[] = [
+  { id: 'floral-cover-bl', label: 'Hoa bìa trái dưới', src: '/invitation/floral/flower-corner.webp', top: 42, left: -12, width: 52, rotate: 0,   flip: false, z: 2, opacity: 0.92, zone: 'cover' },
+  { id: 'floral-cover-tr', label: 'Hoa bìa phải trên', src: '/invitation/floral/flower-corner.webp', top: -8, left: 60,  width: 52, rotate: 180, flip: true,  z: 2, opacity: 0.88, zone: 'cover' },
+];
+
+/** Vị trí mặc định cho thiệp HOA MỘC XANH.
+ *  Hoa watercolor (flower.webp) rải 2 bên, zone body (% TOÀN trang), KHÔNG che giữa. */
+export const DEFAULT_HOAMOC_DECORATIONS: DecoConfig[] = [
+  { id: 'hoamoc-bar', label: 'Dải bar xanh', src: '/invitation/floral/hoamoc-bar.webp', top: 18, left: 0, width: 100, rotate: 0, flip: false, z: 2, opacity: 1, zone: 'body' },
+  { id: 'hoamoc-flower-tl', label: 'Hoa trái trên',  src: '/invitation/floral/hoamoc-flower.webp', top: 5,  left: -8, width: 32, rotate: 0, flip: false, z: 2, opacity: 0.95, zone: 'body' },
+  { id: 'hoamoc-flower-mr', label: 'Hoa phải giữa',  src: '/invitation/floral/hoamoc-flower.webp', top: 30, left: 72, width: 30, rotate: 0, flip: true,  z: 2, opacity: 0.95, zone: 'body' },
+  { id: 'hoamoc-flower-bl', label: 'Hoa trái dưới',  src: '/invitation/floral/hoamoc-flower.webp', top: 60, left: -6, width: 28, rotate: 0, flip: false, z: 2, opacity: 0.95, zone: 'body' },
+];
+
+export const DEFAULT_HOAMOC_COVER_DECORATIONS: DecoConfig[] = [
+  { id: 'hoamoc-cover-tl', label: 'Hoa bìa trái trên', src: '/invitation/floral/hoamoc-flower.webp', top: -6, left: -10, width: 42, rotate: 0,   flip: false, z: 2, opacity: 0.95, zone: 'cover' },
+  { id: 'hoamoc-cover-br', label: 'Hoa bìa phải dưới', src: '/invitation/floral/hoamoc-flower.webp', top: 64, left: 62,  width: 44, rotate: 180, flip: true,  z: 2, opacity: 0.95, zone: 'cover' },
+];
+
+/** Trả về decorations mặc định theo layout. */
+export function defaultDecosByLayout(layout: string): DecoConfig[] {
+  if (layout === 'floral') return [...DEFAULT_FLORAL_DECORATIONS, ...DEFAULT_FLORAL_COVER_DECORATIONS];
+  if (layout === 'hoamoc') return [...DEFAULT_HOAMOC_DECORATIONS, ...DEFAULT_HOAMOC_COVER_DECORATIONS];
+  return [...DEFAULT_DECORATIONS, ...DEFAULT_COVER_DECORATIONS];
+}
+
 /** Vị trí mặc định cho BÌA thiệp (vùng cover/gate). Dùng khi seed thiết kế mới. */
 export const DEFAULT_COVER_DECORATIONS: DecoConfig[] = [
   { id: 'cover-phoenix-left',  label: 'Phượng trái',  src: '/invitation/phoenix-left.webp',  top: -2, left: -6, width: 42, rotate: 0, flip: false, z: 1, opacity: 0.9, zone: 'cover' },
@@ -35,7 +75,7 @@ export const DEFAULT_COVER_DECORATIONS: DecoConfig[] = [
 ];
 
 /** Lọc danh sách trang trí theo vùng. Ảnh không có `zone` coi như 'body' (tương thích cũ). */
-export function decosByZone(list: DecoConfig[] | undefined, zone: 'cover' | 'body'): DecoConfig[] | undefined {
+export function decosByZone(list: DecoConfig[] | undefined, zone: 'cover' | 'body' | 'header'): DecoConfig[] | undefined {
   if (!list) return undefined;
   const filtered = list.filter((d) => (d.zone ?? 'body') === zone);
   return filtered.length ? filtered : undefined;

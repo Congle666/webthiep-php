@@ -49,7 +49,7 @@ function mapTemplate(array $t): array
         'category'    => $t['category'],
         'layout'      => $t['layout'] ?? 'traditional',
         'description' => $t['description'],
-        'thumbnail'   => $t['thumbnail'] ?? '',
+        'thumbnail'   => ($t['thumbnail'] ?? '') ?: ('/invitation/covers/' . $t['slug'] . '.webp'),
         'gallery'     => jdec($t['gallery'] ?? null),
         'features'    => jdec($t['features'] ?? null),
         'priceFrom'   => (int) $t['price_from'],

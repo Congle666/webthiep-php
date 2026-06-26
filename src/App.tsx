@@ -52,8 +52,11 @@ export default function App() {
           <Route path="/thiep/demo/:slug" element={<Invitation />} />
           <Route path="/thiep/:slug" element={<Invitation />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/:tab" element={<Admin />} />
+          <Route path="/admin/:tab/:id" element={<Admin />} />
           <Route path="/tai-khoan" element={<UserPanel />} />
           <Route path="/tao-thiep/:templateSlug" element={<CreateInvitation />} />
+          <Route path="/chinh-sua/:slug" element={<CreateInvitation />} />
 
           {/* Các trang marketing — dùng layout chung */}
           <Route path="/" element={<SiteLayout><Home /></SiteLayout>} />

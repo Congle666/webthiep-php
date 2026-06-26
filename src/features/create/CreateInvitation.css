@@ -228,6 +228,86 @@
 .ci-imgin__preview { margin-top: 6px; max-width: 90px; max-height: 90px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-default, #ddd); }
 .ci-imgin__err { font-size: .78rem; color: #b00046; }
 
+/* ===== Theme toggle ===== */
+.ci-theme-toggle { width: 40px; padding: 9px 0; justify-content: center; }
+
+/* ===== Ảnh đôi — PhotoUploader (vùng tròn + nút Tải lên) ===== */
+.ci-uploader-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 560px) { .ci-uploader-grid { grid-template-columns: 1fr; } }
+
+.ci-uploader { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.ci-uploader__label { font-size: .85rem; font-weight: 600; color: var(--text-primary, #1a1a1a); }
+.ci-uploader__spot {
+  position: relative; width: 140px; height: 140px;
+  border: 2px dashed var(--border-hover, #ddd5da);
+  background: var(--bg-tertiary, #f4eef0);
+  display: grid; place-items: center; overflow: hidden; cursor: pointer;
+  transition: border-color .15s;
+}
+.ci-uploader__spot:hover { border-color: var(--accent-primary); }
+.ci-uploader__spot.has-img { cursor: default; border-style: solid; }
+.ci-uploader__img { position: absolute; inset: 0; background-repeat: no-repeat; }
+.ci-uploader__ph { color: var(--text-muted, #9a93a0); }
+.ci-uploader__busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.35); color: #fff; }
+
+.ci-uploader__upload {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 9999px; border: none; cursor: pointer;
+  background: var(--accent-primary); color: #fff; font-size: .85rem; font-weight: 600;
+}
+.ci-uploader__upload:hover { filter: brightness(1.08); }
+.ci-uploader__upload:disabled { opacity: .6; cursor: not-allowed; }
+.ci-uploader__acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.ci-uploader__act {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border-radius: 7px; cursor: pointer; font-size: .78rem; font-weight: 600;
+  border: 1px solid var(--border-default, #ece6e8); background: var(--bg-primary, #fff); color: var(--text-secondary, #6b6168);
+}
+.ci-uploader__act:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+.ci-uploader__act--del { color: #b00046; }
+.ci-uploader__act--del:hover { border-color: #b00046; color: #b00046; }
+.ci-uploader__formats { font-size: .72rem; color: var(--text-muted, #9a93a0); }
+
+/* ===== Thư viện ảnh — grid thumbnail ===== */
+.ci-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.ci-gallery-item { position: relative; aspect-ratio: 1 / 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-default, #ece6e8); }
+.ci-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ci-gallery-del {
+  position: absolute; top: 5px; right: 5px; width: 26px; height: 26px;
+  display: grid; place-items: center; border: none; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff; cursor: pointer; opacity: 0; transition: opacity .15s;
+}
+.ci-gallery-item:hover .ci-gallery-del { opacity: 1; }
+.ci-gallery-add {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  aspect-ratio: 1 / 1; border-radius: 10px; cursor: pointer;
+  border: 1px dashed var(--accent-primary); background: rgba(230,1,126,.04);
+  color: var(--accent-primary); font-size: .78rem; font-weight: 600;
+}
+.ci-gallery-add:hover { background: rgba(230,1,126,.1); }
+.ci-gallery-add:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ===== Modal điều chỉnh ảnh ===== */
+.ci-modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: rgba(0,0,0,.5); padding: 20px; }
+.ci-modal__box {
+  width: 100%; max-width: 380px; background: var(--bg-primary, #fff); color: var(--text-primary, #1a1a1a);
+  border: 1px solid var(--border-default, #ece6e8); border-radius: 16px; padding: 20px;
+  display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-lg, 0 16px 48px rgba(0,0,0,.2));
+}
+.ci-modal__head { display: flex; align-items: center; justify-content: space-between; }
+.ci-modal__head strong { font-size: 1.02rem; }
+.ci-modal__x { border: none; background: none; cursor: pointer; color: var(--text-secondary, #6b6168); display: grid; place-items: center; }
+.ci-modal__foot { display: flex; gap: 8px; justify-content: flex-end; }
+.ci-adjust-frame {
+  width: 220px; max-width: 100%; margin: 0 auto; overflow: hidden; position: relative;
+  background: var(--bg-tertiary, #f4eef0); border: 1px solid var(--border-default, #ece6e8);
+  cursor: grab; touch-action: none;
+}
+.ci-adjust-frame:active { cursor: grabbing; }
+.ci-adjust-img { position: absolute; inset: 0; background-repeat: no-repeat; pointer-events: none; }
+.ci-adjust-zoom { display: flex; align-items: center; gap: 10px; color: var(--text-secondary, #6b6168); font-size: .82rem; }
+.ci-adjust-zoom input { flex: 1; accent-color: var(--accent-primary); }
+
 /* ===== Chọn nhạc ===== */
 .ci-music { display: flex; flex-direction: column; gap: 10px; }
 .ci-music-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -240,3 +320,24 @@
 .ci-music-upload { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .ci-music-custom { font-size: .82rem; color: var(--text-secondary, #6b6168); }
 .ci-music-clear { border: none; background: none; color: #b00046; font-size: .82rem; cursor: pointer; text-decoration: underline; }
+
+/* ───────── Modal đổi mẫu thiệp ───────── */
+.ci-tplmodal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(20, 16, 22, .6); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.ci-tplmodal { width: min(960px, 100%); max-height: 88vh; display: flex; flex-direction: column; background: var(--bg-primary, #fff); border: 1px solid var(--border-default, #ece6e8); border-radius: 16px; box-shadow: 0 24px 60px rgba(0, 0, 0, .28); overflow: hidden; }
+.ci-tplmodal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px; border-bottom: 1px solid var(--border-default, #ece6e8); }
+.ci-tplmodal-title { margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text-primary, #1a1a1a); }
+.ci-tplmodal-sub { margin: 4px 0 0; font-size: .86rem; color: var(--text-secondary, #6b6168); }
+.ci-tplmodal-x { flex: none; display: inline-flex; padding: 6px; border: none; background: none; color: var(--text-muted, #9a93a0); cursor: pointer; border-radius: 8px; }
+.ci-tplmodal-x:hover { background: var(--bg-tertiary, #f4eef0); color: var(--text-primary, #1a1a1a); }
+.ci-tplmodal-body { padding: 22px 24px; overflow-y: auto; }
+.ci-tplmodal-empty { text-align: center; color: var(--text-secondary, #6b6168); padding: 40px 0; }
+.ci-tplmodal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; }
+.ci-tplmodal-card { display: flex; flex-direction: column; gap: 8px; padding: 0; border: none; background: none; cursor: pointer; text-align: center; }
+.ci-tplmodal-thumb { position: relative; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; border: 2px solid var(--border-default, #ece6e8); background: var(--bg-tertiary, #f4eef0); transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+.ci-tplmodal-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ci-tplmodal-card:hover .ci-tplmodal-thumb { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(0, 0, 0, .14); }
+.ci-tplmodal-card.is-active .ci-tplmodal-thumb { border-color: var(--accent-primary, #e6017e); box-shadow: 0 0 0 3px var(--accent-soft, #fde4f1); }
+.ci-tplmodal-card.is-active { cursor: default; }
+.ci-tplmodal-tick { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: var(--accent-primary, #e6017e); color: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+.ci-tplmodal-name { font-size: .88rem; font-weight: 600; color: var(--text-primary, #1a1a1a); }
+.ci-tplmodal-card.is-active .ci-tplmodal-name { color: var(--accent-primary, #e6017e); }

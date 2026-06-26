@@ -72,12 +72,13 @@ export const contactApi = {
     api.post('/contact', data),
 };
 
-import type { Invitation } from '../features/invitation/types';
+import type { Invitation, Guest, GuestStats } from '../features/invitation/types';
 
 export const invitationApi = {
-  view: (slug: string) => api.get<Invitation>(`/thiep/${slug}`),
+  view: (slug: string, token?: string) =>
+    api.get<Invitation>(`/thiep/${slug}${token ? `?g=${encodeURIComponent(token)}` : ''}`),
   demo: (slug: string) => api.get<Invitation>(`/demo/${slug}`),
-  rsvp: (slug: string, data: { guest_name: string; attendance: 'yes' | 'no' | 'maybe'; guest_count?: number; message?: string }) =>
+  rsvp: (slug: string, data: { guest_name: string; attendance: 'yes' | 'no' | 'maybe'; guest_count?: number; message?: string; token?: string }) =>
     api.post(`/thiep/${slug}/rsvp`, data),
   guestbook: (slug: string, data: { guest_name: string; message: string }) =>
     api.post(`/thiep/${slug}/guestbook`, data),
@@ -112,8 +113,22 @@ export const customerApi = {
     api.put<Invitation>(`/my/invitations/${slug}`, data),
   publish: (slug: string, newSlug?: string) =>
     api.post<{ slug: string; url: string }>(`/my/invitations/${slug}/publish`, newSlug ? { slug: newSlug } : {}),
+  changeTemplate: (slug: string, templateId: number) =>
+    api.post<Template>(`/my/invitations/${slug}/template`, { template_id: templateId }),
   uploadImage: (file: File) => api.upload<{ url: string }>('/my/upload/image', file),
   uploadMusic: (file: File) => api.upload<{ url: string }>('/my/upload/music', file),
+
+  // Khách mời (Phase 02) — CRUD per-thiệp.
+  guests: {
+    list: (slug: string) =>
+      api.get<{ guests: Guest[]; stats: GuestStats }>(`/my/invitations/${slug}/guests`),
+    create: (slug: string, data: { name: string; tag?: string }) =>
+      api.post<Guest>(`/my/invitations/${slug}/guests`, data),
+    update: (slug: string, id: number, data: { name: string; tag?: string }) =>
+      api.put<Guest>(`/my/invitations/${slug}/guests/${id}`, data),
+    remove: (slug: string, id: number) =>
+      api.del(`/my/invitations/${slug}/guests/${id}`),
+  },
 };
 
 export interface BlogPost {

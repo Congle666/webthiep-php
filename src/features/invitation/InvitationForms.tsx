@@ -5,8 +5,8 @@ import { invitationApi } from '../../api/client';
 import type { GuestbookEntry } from './types';
 import type { InvI18n } from './i18n';
 
-export function RsvpForm({ slug, t }: { slug: string; t: InvI18n }) {
-  const [name, setName] = useState('');
+export function RsvpForm({ slug, t, guestToken, defaultName }: { slug: string; t: InvI18n; guestToken?: string | null; defaultName?: string }) {
+  const [name, setName] = useState(defaultName ?? '');
   const [attendance, setAttendance] = useState<'yes' | 'no' | 'maybe'>('yes');
   const [count, setCount] = useState(1);
   const [message, setMessage] = useState('');
@@ -20,6 +20,7 @@ export function RsvpForm({ slug, t }: { slug: string; t: InvI18n }) {
     setLoading(true); setErr('');
     const res = await invitationApi.rsvp(slug, {
       guest_name: name.trim(), attendance, guest_count: count, message: message.trim() || undefined,
+      token: guestToken ?? undefined,
     });
     setLoading(false);
     if (res.success) setDone(true);

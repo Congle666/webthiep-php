@@ -135,6 +135,18 @@ class CustomerController
         Response::ok(null, 'Đã lưu thiệp.');
     }
 
+    /** POST /api/my/invitations/{slug}/template — đổi mẫu thiệp (chỉ template_id, giữ nội dung). */
+    public static function changeTemplate(string $slug): void
+    {
+        $inv = self::ownInvitation($slug);
+        $tid = Request::input('template_id');
+        if (!is_numeric($tid)) Response::validation(['template_id' => 'Bắt buộc']);
+        $tpl = Database::one("SELECT * FROM templates WHERE id = ? AND is_active = 1", [(int)$tid]);
+        if (!$tpl) Response::error('Mẫu thiệp không tồn tại.', 404);
+        Database::run("UPDATE invitations SET template_id = ? WHERE id = ?", [(int)$tid, $inv['id']]);
+        Response::ok(mapTemplate($tpl), 'Đã đổi mẫu thiệp.');
+    }
+
     /** POST /api/my/invitations/{slug}/publish — đăng thiệp (set slug đẹp + expiry theo plan). */
     public static function publish(string $slug): void
     {
@@ -244,6 +256,105 @@ class CustomerController
     private static function prettyName(string $s): string
     {
         return ucwords(trim(preg_replace('/[-_]+/', ' ', $s)));
+    }
+
+    // ───────────── Khách mời (guests) ─────────────
+
+    /** GET /api/my/invitations/{slug}/guests — danh sách + thống kê RSVP. */
+    public static function guestsList(string $slug): void
+    {
+        $inv = self::ownInvitation($slug);
+        $guests = Database::all(
+            "SELECT id, name, token, tag, rsvp_status, rsvp_count, opened_at, created_at
+             FROM guests WHERE invitation_id = ? ORDER BY id DESC",
+            [$inv['id']]
+        );
+
+        $stats = ['total' => 0, 'yes' => 0, 'no' => 0, 'maybe' => 0, 'pending' => 0, 'opened' => 0];
+        foreach ($guests as $g) {
+            $stats['total']++;
+            $st = $g['rsvp_status'];
+            if (isset($stats[$st])) $stats[$st]++;
+            if (!empty($g['opened_at'])) $stats['opened']++;
+        }
+
+        Response::ok([
+            'guests' => array_map([self::class, 'mapGuest'], $guests),
+            'stats'  => $stats,
+        ]);
+    }
+
+    /** POST /api/my/invitations/{slug}/guests — thêm khách (sinh token riêng). */
+    public static function guestCreate(string $slug): void
+    {
+        $inv = self::ownInvitation($slug);
+
+        [$errors, $d] = Request::validate([
+            'name' => 'required|max:120',
+            'tag'  => 'max:60',
+        ]);
+        if ($errors) Response::validation($errors);
+
+        // token duy nhất (12 hex). Retry vài lần phòng trùng.
+        $token = '';
+        for ($i = 0; $i < 5; $i++) {
+            $token = bin2hex(random_bytes(6));
+            $dup = Database::one("SELECT id FROM guests WHERE token = ?", [$token]);
+            if (!$dup) break;
+        }
+
+        $id = Database::insert(
+            "INSERT INTO guests (invitation_id, name, token, tag) VALUES (?, ?, ?, ?)",
+            [$inv['id'], $d['name'], $token, $d['tag'] ?? null]
+        );
+
+        $g = Database::one("SELECT id, name, token, tag, rsvp_status, rsvp_count, opened_at, created_at FROM guests WHERE id = ?", [$id]);
+        Response::created(self::mapGuest($g), 'Đã thêm khách mời.');
+    }
+
+    /** PUT /api/my/invitations/{slug}/guests/{id} — sửa tên/tag. */
+    public static function guestUpdate(string $slug, string $id): void
+    {
+        $inv = self::ownInvitation($slug);
+        $g = Database::one("SELECT * FROM guests WHERE id = ? AND invitation_id = ?", [(int)$id, $inv['id']]);
+        if (!$g) Response::error('Không tìm thấy khách mời.', 404);
+
+        [$errors, $d] = Request::validate([
+            'name' => 'required|max:120',
+            'tag'  => 'max:60',
+        ]);
+        if ($errors) Response::validation($errors);
+
+        Database::run(
+            "UPDATE guests SET name = ?, tag = ? WHERE id = ? AND invitation_id = ?",
+            [$d['name'], $d['tag'] ?? null, (int)$id, $inv['id']]
+        );
+        $g = Database::one("SELECT id, name, token, tag, rsvp_status, rsvp_count, opened_at, created_at FROM guests WHERE id = ?", [(int)$id]);
+        Response::ok(self::mapGuest($g), 'Đã cập nhật khách mời.');
+    }
+
+    /** DELETE /api/my/invitations/{slug}/guests/{id}. */
+    public static function guestDelete(string $slug, string $id): void
+    {
+        $inv = self::ownInvitation($slug);
+        $g = Database::one("SELECT id FROM guests WHERE id = ? AND invitation_id = ?", [(int)$id, $inv['id']]);
+        if (!$g) Response::error('Không tìm thấy khách mời.', 404);
+        Database::run("DELETE FROM guests WHERE id = ? AND invitation_id = ?", [(int)$id, $inv['id']]);
+        Response::ok(null, 'Đã xóa khách mời.');
+    }
+
+    /** Map row guests -> shape camelCase cho FE. */
+    private static function mapGuest(array $g): array
+    {
+        return [
+            'id'         => (int) $g['id'],
+            'name'       => $g['name'],
+            'token'      => $g['token'],
+            'tag'        => $g['tag'],
+            'rsvpStatus' => $g['rsvp_status'],
+            'rsvpCount'  => (int) $g['rsvp_count'],
+            'openedAt'   => $g['opened_at'],
+        ];
     }
 
     private static function ownInvitation(string $slug): array

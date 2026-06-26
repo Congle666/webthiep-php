@@ -32,11 +32,12 @@ interface Props {
   opened: boolean;
   onOpen?: () => void;
   guestName?: string | null;
+  guestToken?: string | null;
   editMode?: boolean;
   staticMode?: boolean;
 }
 
-export function InvitationView({ inv, slug, opened, onOpen, guestName = null, editMode = false, staticMode }: Props) {
+export function InvitationView({ inv, slug, opened, onOpen, guestName = null, guestToken = null, editMode = false, staticMode }: Props) {
   // Danh sách ngôn ngữ chủ thiệp cài (mặc định ['vi'])
   const configuredLangs = useMemo<Lang[]>(() => {
     const raw = inv.settings?.langs ?? ['vi'];
@@ -64,7 +65,8 @@ export function InvitationView({ inv, slug, opened, onOpen, guestName = null, ed
 
   const L = LAYOUTS[inv.layout ?? 'traditional'] ?? LAYOUTS.traditional;
   const allDecos = inv.design?.decorations?.length ? inv.design.decorations : undefined;
-  const bodyDecos = decosByZone(allDecos, 'body');
+  // Header nhận CẢ zone 'body' lẫn 'header' (floral) — layout tự tách trong FloralHeader.
+  const bodyDecos = allDecos?.filter((d) => (d.zone ?? 'body') !== 'cover');
   const coverDecos = decosByZone(allDecos, 'cover');
   const rootClass = `inv-root inv-${inv.layout ?? 'traditional'}`;
 
@@ -88,7 +90,7 @@ export function InvitationView({ inv, slug, opened, onOpen, guestName = null, ed
         )}
       </AnimatePresence>
       <L.Header inv={inv} editMode={editMode} decorations={bodyDecos} />
-      <InvitationBody inv={inv} slug={slug} t={t} staticMode={staticMode} />
+      <InvitationBody inv={inv} slug={slug} t={t} staticMode={staticMode} guestToken={guestToken} />
     </div>
   );
 }

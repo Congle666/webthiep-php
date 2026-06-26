@@ -2,6 +2,16 @@
 import type { Invitation } from '../invitation/types';
 
 export function sampleInvitation(layout: string): Invitation {
+  // ceremony/reception cho mọi layout (preview P1 thấy lễ/tiệc).
+  // groomPhoto/bridePhoto CHỈ cho hoamoc (header ảnh đôi) — admin designer phải thấy placeholder.
+  const extra: Invitation['extra'] = {
+    ceremony: { enabled: true, datetime: '2026-12-20 09:00', venue: 'Tư Gia Nhà Gái', address: '123 Nguyễn Huệ, Quận 1' },
+    reception: { welcomeTime: '17:00', banquetTime: '18:00' },
+    showLunar: true,
+    ...(layout === 'hoamoc'
+      ? { groomPhoto: '/invitation/floral/hoamoc-couple-1.webp', bridePhoto: '/invitation/floral/hoamoc-couple-2.webp' }
+      : {}),
+  };
   return {
     slug: 'preview',
     groomName: 'Minh Quân',
@@ -34,5 +44,6 @@ export function sampleInvitation(layout: string): Invitation {
     guestbook: [],
     layout,
     isDemo: true,
+    extra,
   };
 }

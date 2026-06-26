@@ -1,9 +1,9 @@
-/* ===== FLORAL LAYOUT — xanh ô-liu + hoa mộc lan trắng ===== */
+/* ===== FLORAL LAYOUT — Mai Lan Trắng (theo spec ChungĐôi: olive #404A1D) ===== */
 :root {
-  --flr-olive: #5a6b3b;
-  --flr-olive-deep: #4a5a30;
+  --flr-olive: #404a1d;        /* màu chính ChungĐôi rgb(64,74,29) */
+  --flr-olive-deep: #2f3815;
   --flr-cream: #f7f2ea;
-  --flr-text: #5c5848;
+  --flr-text: #404a1d;          /* ChungĐôi dùng cùng tông olive cho text */
 }
 
 /* ---------- COVER GATE ---------- */
@@ -11,12 +11,18 @@
   position: fixed; inset: 0; z-index: 1000;
   display: flex; align-items: center; justify-content: center;
   padding: 24px;
-  background: radial-gradient(ellipse at 50% 30%, #56683a 0%, var(--flr-olive-deep) 55%, #3c4a26 100%);
+  background: #ffffff;
   overflow: hidden;
 }
 
 /* Bìa floral render trong khung admin: bỏ fullscreen fixed. */
-.flr-gate--inline { position: relative; inset: auto; z-index: 1; padding: 24px; border-radius: 12px; }
+.flr-gate--inline {
+  position: relative; inset: auto; z-index: 1;
+  padding: 24px; border-radius: 12px;
+  background: #f0ede6;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 480px;
+}
 
 .flr-dot {
   position: absolute; width: 7px; height: 7px; border-radius: 50%;
@@ -29,12 +35,14 @@
 
 .flr-gate-card {
   position: relative;
-  width: min(620px, 100%);
+  width: min(640px, 100%);
   background: var(--flr-cream);
   border-radius: 22px;
-  padding: 72px 36px 56px;
+  padding: 80px 48px 64px;
   text-align: center;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  /* shadow nhẹ như ChungĐôi */
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.14);
+  /* LIVE: clip hoa trong khoảng bìa (ngoài card thì ẩn). EDIT: rule :has(.deco-layer--edit) mở overflow để kéo ảnh. */
   overflow: hidden;
 }
 
@@ -48,7 +56,8 @@
   box-shadow: 0 4px 14px rgba(90, 107, 59, 0.4);
 }
 
-.flr-gate-content { position: relative; z-index: 30; }
+/* z-60 để luôn trên lớp edit (z-50) — chữ không bao giờ bị hoa đè */
+.flr-gate-content { position: relative; z-index: 60; }
 
 .flr-name {
   font-family: 'Playfair Display', serif;
@@ -87,45 +96,105 @@
 /* ---------- HEADER ---------- */
 .flr-header {
   position: relative;
-  padding: 40px 16px 8px;
+  z-index: 3;
+  min-height: 600px; /* đủ cao chứa khung oval (width 70% → cao ~tỷ lệ) + hoa đáy */
   display: flex; align-items: center; justify-content: center;
+  padding: 60px 16px 80px;
+  overflow: visible; /* PHẢI visible để khung oval (decoration) tràn ra ngoài đẹp */
 }
 
-.flr-frame {
+/* Zone decoration của riêng header floral — tọa độ % theo block này (khóa với tên) */
+.flr-deco-header { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.flr-deco-header .deco-layer { position: absolute; inset: 0; }
+.flr-deco-header .deco-layer--edit { z-index: 50; }
+.flr-deco-header:has(.deco-layer--edit) { z-index: 50; }
+
+/* Tên cặp đôi — z phải > decoration z (max z=9) */
+.flr-frame-names {
   position: relative;
   z-index: 30;
-  width: min(480px, 90vw);
-  aspect-ratio: 3 / 3.1;          /* thấp hơn -> bớt khoảng trống dưới names */
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: contain;
-  display: flex; justify-content: center; align-items: center;
+  text-align: center;
+  max-width: 62%;   /* khớp bề rộng oval 70% (tên gọn trong khung) */
+  margin: 0 auto;
+  /* Nền mờ nhẹ phía sau text để đọc được dù khung oval bên dưới */
+  background: radial-gradient(ellipse at center, rgba(247,242,234,0.85) 50%, transparent 80%);
+  border-radius: 8px;
 }
 
-.flr-frame-inner {
-  text-align: center;
-  padding: 0 16%;
-  margin-top: -6%;               /* canh names vào giữa vùng oval (không lệch trên) */
-}
+/* Giữ class cũ để tương thích nếu còn dùng ở đâu đó */
+.flr-frame-inner { text-align: center; }
+
+/* "THE WEDDING OF" — Baskerville 15px, letter-spacing rộng (spec ChungĐôi 3.75px) */
 .flr-frame-label {
-  display: block; font-size: 0.7rem; letter-spacing: 0.32em;
-  text-transform: uppercase; color: var(--flr-olive); opacity: 0.75;
-  margin-bottom: 12px;
+  display: block;
+  font-family: 'Cormorant', 'Times New Roman', serif;
+  font-size: 0.82rem; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--flr-olive); opacity: 0.8;
+  margin-bottom: 14px;
 }
-.flr-frame-name {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(1.9rem, 5.5vw, 3rem);
-  font-weight: 600; line-height: 1.1; color: var(--flr-olive); margin: 2px 0;
+/* Tên CD-CR — font script Dancing Script (có tiếng Việt), rất lớn.
+   Dùng .inv-root .flr-frame-name để THẮNG rule '.inv-root h1 { font: Playfair }' (specificity cao hơn). */
+.inv-root .flr-frame-name {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(2.6rem, 11vw, 4.6rem);  /* Dancing Script rộng hơn → nhỏ hơn chút để gọn trong oval */
+  font-weight: 600; line-height: 1.1; color: var(--flr-olive); margin: 0;
 }
 .flr-frame-amp {
-  font-family: 'Playfair Display', serif; font-size: 1.3rem;
-  color: var(--flr-olive); opacity: 0.7;
+  font-family: 'Dancing Script', cursive; font-size: clamp(1.8rem, 6vw, 3rem);
+  font-weight: 500; color: var(--flr-olive); opacity: 0.85;
+  display: block; margin: 2px 0; line-height: 1;
 }
 
+@media (max-width: 800px) {
+  .flr-header { min-height: 480px; }
+  .flr-frame-names { max-width: 64%; }
+}
 @media (max-width: 640px) {
   .flr-gate-card { padding: 64px 22px 44px; }
+  .flr-header { min-height: 380px; }
+  .flr-frame-names { max-width: 70%; }
+  .flr-frame-name { font-size: clamp(2.4rem, 12vw, 3.2rem); }
 }
 
-/* Kéo nội dung lên sát header floral (bớt khoảng trống dưới khung hoa) */
-.inv-floral .flr-header { margin-bottom: -110px; }
-.inv-floral .inv-section:first-of-type { padding-top: 8px; }
+/* ===== FLORAL BODY OVERRIDES =====
+   Thiệp floral dùng InvitationBody chung nhưng cần màu olive thay đỏ truyền thống. */
+.inv-floral {
+  --red:       var(--flr-olive);
+  --red-deep:  var(--flr-olive-deep);
+  --red-soft:  rgba(90, 107, 59, 0.10);
+  --heading:   var(--flr-olive);
+  --text:      var(--flr-text);
+  --muted:     #8c9b7a;
+  background:  var(--flr-cream) url('/invitation/paper-bg.jpg');
+  background-size: 700px;
+}
+
+/* Banner đỏ của traditional không có ở floral — ẩn đi */
+.inv-floral .inv-banner { display: none; }
+/* Phoenix và Song Hỷ của traditional cũng ẩn ở floral */
+.inv-floral .inv-phoenix,
+.inv-floral .inv-songhy,
+.inv-floral .inv-flower { display: none; }
+/* Header floral dùng riêng */
+.inv-floral .inv-header { display: none; }
+
+/* Backdrop trắng cho floral (override nâu của traditional) */
+.inv-floral::before { background: #ffffff !important; }
+
+/* ==== BODY FLORAL: hoa watercolor dọc 2 bên ==== */
+.inv-floral .inv-body-wrap {
+  position: relative;
+}
+
+
+/* Khoảng cách THOÁNG giữa header floral và section đầu (family) — không kéo sát.
+   Header floral có khung oval + tên; family cách ra đủ rộng như ChungĐôi. */
+.inv-floral .inv-section:first-of-type { padding-top: 48px; }
+
+/* Nút submit / map / gcal: màu olive */
+.inv-floral .inv-submit { background: var(--flr-olive); }
+.inv-floral .inv-submit:hover:not(:disabled) { background: var(--flr-olive-deep); filter: none; }
+.inv-floral .inv-map-link { border-color: var(--flr-olive); color: var(--flr-olive); }
+.inv-floral .inv-map-link:hover { background: var(--flr-olive); color: #fff; }
+.inv-floral .inv-radio--active { background: var(--flr-olive); border-color: var(--flr-olive); }
+.inv-floral .inv-footer { background: var(--flr-olive-deep); }

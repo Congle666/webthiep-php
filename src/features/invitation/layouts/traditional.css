@@ -1,0 +1,36 @@
+/* ===== LAYOUT TRUYỀN THỐNG (Long Phụng) — theo spec ChungĐôi Song Phụng =====
+   Tên CD-CR ở GÓC TRÊN TRÁI, UPPERCASE, font Cormorant SC, cạnh phượng. */
+
+/* Khối tên — góc trên trái, z=30 nổi trên phượng (z=3) + banner (z=1) */
+.inv-lp-names {
+  position: relative;
+  z-index: 30;
+  text-align: left;
+  /* căn trái như ChungĐôi: cách mép trái 24px, chừa chỗ phượng bên phải */
+  padding: 48px 24px 8px 32px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* Tên: Cormorant SC (serif small-caps), uppercase, đỏ thẫm #710001-ish (dùng var heading).
+   .inv-root .inv-lp-name để THẮNG rule '.inv-root h1 { font: Playfair }' (specificity cao hơn). */
+.inv-root .inv-lp-name {
+  font-family: 'Cormorant SC', 'Cormorant', 'Playfair Display', serif;
+  font-size: clamp(1.9rem, 5.5vw, 3rem);  /* ~36px → 52px như ChungĐôi text-[36px] md/lg */
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--heading);
+  margin: 0;
+}
+/* dòng tên thứ 2 (cô dâu) thụt vào nhẹ như ChungĐôi (ml-[50px]) */
+.inv-lp-name--2 {
+  margin: 8px 0 0 28px;
+}
+
+@media (max-width: 640px) {
+  .inv-lp-names { padding: 32px 18px 6px 20px; }
+  .inv-lp-name { font-size: clamp(1.5rem, 8vw, 2.2rem); }
+  .inv-lp-name--2 { margin-left: 18px; }
+}

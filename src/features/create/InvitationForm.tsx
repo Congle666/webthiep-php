@@ -1,10 +1,11 @@
 /** Form chỉnh sửa thiệp — các section collapsible, mỗi section có toggle Hiện/Ẩn. */
-import { useState } from 'react';
-import { ChevronDown, Plus, Trash2, Globe } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ChevronDown, Plus, Trash2, Globe, Loader2 } from 'lucide-react';
 import type {
   Invitation, LoveStoryItem, ScheduleItem, InvitationExtra, SectionVisibility,
 } from '../../features/invitation/types';
-import ImageInput from './ImageInput';
+import { customerApi } from '../../api/client';
+import PhotoUploader from './PhotoUploader';
 import MusicPicker from './MusicPicker';
 import { LangManager } from '../invitation/LangManager';
 import { LANGS, type Lang } from '../invitation/i18n';
@@ -94,6 +95,24 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
 
   const story = data.loveStory ?? [];
   const gallery = data.gallery ?? [];
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const [galleryBusy, setGalleryBusy] = useState(false);
+
+  async function addGalleryFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    const room = 20 - gallery.length;
+    const picked = files.slice(0, Math.max(0, room));
+    setGalleryBusy(true);
+    const urls: string[] = [];
+    for (const f of picked) {
+      const r = await customerApi.uploadImage(f);
+      if (r.success && r.data) urls.push(r.data.url);
+    }
+    setGalleryBusy(false);
+    if (urls.length) { onChange({ gallery: [...gallery, ...urls] }); onBlurSave(); }
+    if (galleryRef.current) galleryRef.current.value = '';
+  }
   const schedule = extra.schedule ?? [];
 
   const text = (label: string, k: keyof Invitation, type = 'text') => (
@@ -139,9 +158,25 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
       </Section>
 
       <Section title="Ảnh đôi" toggle={visToggle('couplePhoto')}>
-        <p className="ci-hint">Chọn ảnh chú rể & cô dâu từ máy (hoặc dán URL).</p>
-        <ImageInput label="Ảnh chú rể" value={extra.groomPhoto ?? ''} onChange={(u) => setExtra({ groomPhoto: u })} onBlurSave={onBlurSave} />
-        <ImageInput label="Ảnh cô dâu" value={extra.bridePhoto ?? ''} onChange={(u) => setExtra({ bridePhoto: u })} onBlurSave={onBlurSave} />
+        <p className="ci-hint">Tải ảnh chú rể & cô dâu, sau đó tinh chỉnh khung hiển thị.</p>
+        <div className="ci-uploader-grid">
+          <PhotoUploader
+            label="Ảnh chú rể"
+            value={extra.groomPhoto ?? ''}
+            adjust={extra.groomPhotoAdjust}
+            onChange={(u) => setExtra({ groomPhoto: u })}
+            onAdjust={(a) => setExtra({ groomPhotoAdjust: a })}
+            onBlurSave={onBlurSave}
+          />
+          <PhotoUploader
+            label="Ảnh cô dâu"
+            value={extra.bridePhoto ?? ''}
+            adjust={extra.bridePhotoAdjust}
+            onChange={(u) => setExtra({ bridePhoto: u })}
+            onAdjust={(a) => setExtra({ bridePhotoAdjust: a })}
+            onBlurSave={onBlurSave}
+          />
+        </div>
       </Section>
 
       <Section title="Thông tin gia đình" toggle={visToggle('family')}>
@@ -168,9 +203,58 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
         </label>
       </Section>
 
-      <Section title="Thời gian & Tiệc cưới">
-        {text('Ngày cưới', 'weddingDate', 'datetime-local')}
-        {text('Giờ đón khách', 'receptionTime', 'datetime-local')}
+      <Section title="Tiệc cưới">
+        {text('Ngày cưới (mốc chính, countdown/lịch)', 'weddingDate', 'datetime-local')}
+        <div className="ci-pair">
+          <label className="ci-field">
+            <span>Giờ đón khách</span>
+            <input type="time" value={extra.reception?.welcomeTime ?? ''}
+              onChange={(e) => setExtra({ reception: { ...extra.reception, welcomeTime: e.target.value } })}
+              onBlur={onBlurSave} />
+          </label>
+          <label className="ci-field">
+            <span>Giờ khai tiệc</span>
+            <input type="time" value={extra.reception?.banquetTime ?? ''}
+              onChange={(e) => setExtra({ reception: { ...extra.reception, banquetTime: e.target.value } })}
+              onBlur={onBlurSave} />
+          </label>
+        </div>
+        <label className="ci-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <input type="checkbox" checked={extra.showLunar !== false}
+            onChange={(e) => { setExtra({ showLunar: e.target.checked }); onBlurSave(); }} />
+          <span>Hiện âm lịch (Tức ngày … tháng … năm Can-Chi)</span>
+        </label>
+      </Section>
+
+      <Section title="Lễ thành hôn riêng" toggle={visToggle('ceremony')}>
+        <p className="ci-hint">Bật nếu lễ tại tư gia diễn ra ở thời điểm/địa điểm khác tiệc cưới.</p>
+        <label className="ci-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <input type="checkbox" checked={!!extra.ceremony?.enabled}
+            onChange={(e) => { setExtra({ ceremony: { ...extra.ceremony, enabled: e.target.checked } }); onBlurSave(); }} />
+          <span>Có lễ thành hôn riêng</span>
+        </label>
+        {extra.ceremony?.enabled && (
+          <>
+            <label className="ci-field">
+              <span>Giờ &amp; ngày lễ</span>
+              <input type="datetime-local" value={extra.ceremony?.datetime ?? ''}
+                onChange={(e) => setExtra({ ceremony: { ...extra.ceremony, datetime: e.target.value } })}
+                onBlur={onBlurSave} />
+            </label>
+            <label className="ci-field">
+              <span>Địa điểm lễ (vd: Tư gia nhà gái)</span>
+              <input value={extra.ceremony?.venue ?? ''}
+                onChange={(e) => setExtra({ ceremony: { ...extra.ceremony, venue: e.target.value } })}
+                onBlur={onBlurSave} />
+            </label>
+            <label className="ci-field">
+              <span>Địa chỉ lễ</span>
+              <input value={extra.ceremony?.address ?? ''}
+                onChange={(e) => setExtra({ ceremony: { ...extra.ceremony, address: e.target.value } })}
+                onBlur={onBlurSave} />
+            </label>
+          </>
+        )}
       </Section>
 
       <Section title="Địa điểm">
@@ -199,18 +283,24 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
       </Section>
 
       <Section title="Thư viện ảnh" toggle={visToggle('gallery')}>
-        <p className="ci-hint">Tối đa 20 ảnh.</p>
-        {gallery.map((url, i) => (
-          <div className="ci-row" key={i}>
-            <div style={{ flex: 1 }}>
-              <ImageInput value={url} onChange={(u) => updateGallery(i, u)} onBlurSave={onBlurSave} placeholder="Dán URL hoặc chọn ảnh" />
+        <p className="ci-hint">Tối đa 20 ảnh. {gallery.length}/20 đã chọn.</p>
+        <div className="ci-gallery-grid">
+          {gallery.map((url, i) => (
+            <div className="ci-gallery-item" key={i}>
+              <img src={url} alt="" />
+              <button type="button" className="ci-gallery-del" onClick={() => removeGallery(i)} aria-label="Xoá ảnh">
+                <Trash2 size={14} />
+              </button>
             </div>
-            <button type="button" className="ci-icon-btn" onClick={() => removeGallery(i)} aria-label="Xoá"><Trash2 size={16} /></button>
-          </div>
-        ))}
-        {gallery.length < 20 && (
-          <button type="button" className="ci-add" onClick={() => onChange({ gallery: [...gallery, ''] })}><Plus size={15} /> Thêm ảnh</button>
-        )}
+          ))}
+          {gallery.length < 20 && (
+            <button type="button" className="ci-gallery-add" onClick={() => galleryRef.current?.click()} disabled={galleryBusy}>
+              {galleryBusy ? <Loader2 size={20} className="ci-spin" /> : <Plus size={22} />}
+              <span>Thêm ảnh</span>
+            </button>
+          )}
+        </div>
+        <input ref={galleryRef} type="file" accept="image/*" multiple hidden onChange={addGalleryFiles} />
       </Section>
 
       <Section title="Dress Code" toggle={visToggle('dressCode')}>
@@ -320,7 +410,6 @@ export default function InvitationFormFields({ data, onChange, onBlurSave }: Pro
   }
   function addStory() { onChange({ loveStory: [...story, { date: '', title: '', text: '' }] }); }
   function removeStory(i: number) { onChange({ loveStory: story.filter((_, idx) => idx !== i) }); onBlurSave(); }
-  function updateGallery(i: number, v: string) { onChange({ gallery: gallery.map((g, idx) => (idx === i ? v : g)) }); }
   function removeGallery(i: number) { onChange({ gallery: gallery.filter((_, idx) => idx !== i) }); onBlurSave(); }
   function updateSchedule(i: number, patch: Partial<ScheduleItem>) { setExtra({ schedule: schedule.map((it, idx) => (idx === i ? { ...it, ...patch } : it)) }); }
   function removeSchedule(i: number) { setExtra({ schedule: schedule.filter((_, idx) => idx !== i) }); onBlurSave(); }

@@ -12,7 +12,8 @@ export default function Invitation() {
   const location = useLocation();
   const isDemo = location.pathname.includes('/thiep/demo/');
   const [params] = useSearchParams();
-  const guestName = params.get('khach');
+  const guestToken = params.get('g');
+  const guestNameQuery = params.get('khach');
   const editMode = params.get('edit') !== null;
   const previewMode = params.get('preview') !== null; // nhúng iframe trang chủ: bỏ gate
   const autoScrollPreview = params.get('scroll') !== null; // chỉ card giữa: tự cuộn lặp
@@ -28,14 +29,14 @@ export default function Invitation() {
     const fetcher: Promise<{ success: boolean; data?: Inv; message?: string }> =
       draftMode ? customerApi.getInvitation(slug)
       : isDemo ? invitationApi.demo(slug)
-      : invitationApi.view(slug);
+      : invitationApi.view(slug, guestToken ?? undefined);
     fetcher.then((res) => {
       if (res.success && res.data) {
         setInv(res.data); setStatus('ok');
         document.title = `Thiệp cưới ${res.data.groomName} & ${res.data.brideName}`;
       } else { setStatus('error'); setErrMsg(res.message ?? 'Không tìm thấy thiệp.'); }
     });
-  }, [slug, isDemo, draftMode]);
+  }, [slug, isDemo, draftMode, guestToken]);
 
   // Chế độ preview (iframe trang chủ): tự cuộn xuống/lên.
   // Bật/tắt qua postMessage từ trang cha (không đổi src -> không reload, không kẹt loading).
@@ -109,7 +110,8 @@ export default function Invitation() {
       )}
       <InvitationView
         inv={inv} slug={slug} opened={opened} onOpen={handleOpen}
-        guestName={guestName} editMode={editMode} staticMode={previewMode}
+        guestName={inv.guestName ?? guestNameQuery} guestToken={guestToken}
+        editMode={editMode} staticMode={previewMode}
       />
     </>
   );

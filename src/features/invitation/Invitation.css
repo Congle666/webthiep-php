@@ -4,28 +4,31 @@
 .inv-root {
   --red: #9e2b25; --red-deep: #7a1f1b; --red-soft: rgba(158,43,37,0.10);
   --text: #5a4a3a; --heading: #8a241f; --muted: #9c8b76;
+  /* Biến font tập trung (DRY) — mọi layout dùng chung, đồng nhất typography */
+  --inv-font-script: 'Dancing Script', cursive;   /* tên cặp đôi script (floral) */
+  --inv-font-serif: 'Cormorant', 'Playfair Display', serif;  /* tiêu đề/tên trang trọng */
+  --inv-font-body: 'Inter', sans-serif;            /* nội dung */
   color: var(--text);
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
   background: #f5ead7 url('/invitation/paper-bg.jpg');
-  background-size: 600px;
+  background-size: 700px;
   /* Thiệp cưới online = khung dọc (như mobile). Trên desktop giới hạn bề ngang & căn giữa
      để hoạ tiết (tính theo % bề ngang) không phình to/đè chữ. Hai bên là backdrop. */
   width: 100%;
-  max-width: 640px;
+  max-width: 760px;
   margin-inline: auto;
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.22);
 }
-/* Backdrop full-viewport phía sau khung thiệp (vùng trống 2 bên trên desktop). */
+/* Backdrop full-viewport phía sau khung thiệp — trắng sạch như ChungĐôi */
 .inv-root::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: #e7dcc6 url('/invitation/paper-bg.jpg');
-  background-size: 600px;
+  background: #ffffff;
 }
 .inv-root h1, .inv-root h2, .inv-root h3 { color: var(--heading); font-family: 'Playfair Display', serif; }
 
@@ -38,24 +41,37 @@
 .gate {
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at center, #8a1f1a 0%, #5e1412 100%);
+  background: #ffffff;
   padding: 20px;
 }
 /* Bìa render trong khung admin: bỏ fullscreen fixed, đặt theo dòng. */
-.gate--inline { position: relative; inset: auto; z-index: 1; padding: 0; min-height: 0; border-radius: 12px; }
-.gate--inline .gate-card { width: 100%; max-width: 100%; box-shadow: none; }
+.gate--inline {
+  position: relative; inset: auto; z-index: 1;
+  padding: 20px; min-height: 0; border-radius: 12px;
+  background: #f0f0f0;
+  display: flex; align-items: center; justify-content: center;
+}
+.gate--inline .gate-card {
+  /* aspect-ratio auto trong admin — card tự cao theo nội dung, không bị chữ wrap */
+  aspect-ratio: unset;
+  width: min(92%, 480px);
+  max-width: 100%;
+  min-height: 360px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
 
 .gate-card {
-  position: relative; width: min(92vw, 680px); aspect-ratio: 4/3;
-  background: #f5ead7 url('/invitation/paper-bg.jpg'); background-size: 420px;
-  border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  position: relative; width: min(92vw, 720px); aspect-ratio: 4/3;
+  background: #f5ead7 url('/invitation/paper-bg.jpg'); background-size: 480px;
+  border-radius: 14px; box-shadow: 0 8px 48px rgba(0,0,0,0.18);
   overflow: hidden; display: flex; align-items: center; justify-content: center;
 }
 /* Mọi ảnh trang trí bìa (phượng/song hỷ/hoa) nay là DECORATION trong .deco-layer, không còn <img> tĩnh. */
-.gate-content { position: relative; z-index: 30; text-align: center; padding: 84px 18px 28px; width: 66%; margin: 0 auto; }
+/* z-60 để luôn trên lớp edit (z-50) — chữ không bị hoa/phượng đè khi edit bìa */
+.gate-content { position: relative; z-index: 60; text-align: center; padding: 80px 18px 28px; width: 60%; margin: 0 auto; }
 /* lớp nền kem mờ phía sau chữ để phượng không che mất chữ */
-.gate-content::before { content: ''; position: absolute; inset: 60px -6px 12px -6px; background: radial-gradient(ellipse at center, rgba(245,234,215,0.92) 40%, rgba(245,234,215,0.55) 70%, transparent 100%); z-index: -1; border-radius: 50%; }
-.gate-name { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 6vw, 2.4rem); color: var(--red); font-weight: 600; line-height: 1.2; }
+.gate-content::before { content: ''; position: absolute; inset: 50px -10px 8px -10px; background: radial-gradient(ellipse at center, rgba(245,234,215,0.94) 45%, rgba(245,234,215,0.6) 70%, transparent 100%); z-index: -1; border-radius: 50%; }
+.gate-name { font-family: 'Playfair Display', serif; font-size: clamp(1.9rem, 6.5vw, 2.9rem); color: var(--red); font-weight: 600; line-height: 1.15; }
 .gate-amp { display: block; font-style: italic; color: var(--red); font-size: 1.2rem; margin: 2px 0; }
 .gate-mini-divider { width: 90px; height: 1px; background: var(--red); opacity: 0.5; margin: 14px auto; }
 .gate-date { color: var(--red); font-weight: 600; font-size: 0.95rem; }
@@ -127,20 +143,24 @@
 
 /* Watermark phượng nền nay là DECORATION (zone body, opacity thấp) — không còn <img> tĩnh. */
 
-/* ===== HEADER (khớp chungdoi: phượng lớn 2 góc + Song Hỷ to trên banner đỏ) ===== */
-.inv-header { position: relative; z-index: 1; height: 420px; }
-.inv-phoenix { position: absolute; width: 280px; max-width: 44%; top: 0; z-index: 3; }
-.inv-phoenix--l { left: -10px; top: 6px; }
-.inv-phoenix--r { right: -10px; transform: scaleX(-1); top: 40px; }
-.inv-songhy { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 170px; max-width: 38%; z-index: 4; }
-.inv-banner { position: absolute; top: 178px; left: 0; right: 0; height: 76px; background: var(--red-deep); z-index: 1; }
-.inv-flower { position: absolute; top: 280px; right: 6%; width: 190px; max-width: 32%; z-index: 2; opacity: 0.85; }
+/* ===== HEADER (khớp chungdoi: phượng lớn 2 góc + Song Hỷ to trên banner đỏ) =====
+   z=1: banner (trong header) nằm DƯỚI phượng (deco-root z=2) → phượng nổi trên banner, không bị đè. */
+.inv-header { position: relative; z-index: 1; height: 480px; }
+.inv-phoenix { position: absolute; width: 320px; max-width: 46%; top: 0; z-index: 3; }
+.inv-phoenix--l { left: -12px; top: 4px; }
+.inv-phoenix--r { right: -12px; transform: scaleX(-1); top: 44px; }
+.inv-songhy { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); width: 200px; max-width: 38%; z-index: 4; }
+.inv-banner { position: absolute; top: 200px; left: 0; right: 0; height: 84px; background: var(--red-deep); z-index: 1; }
+.inv-flower { position: absolute; top: 318px; right: 6%; width: 210px; max-width: 32%; z-index: 2; opacity: 0.85; }
 
 /* ===== SECTION ===== */
-.inv-section { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 40px 32px; text-align: center; }
-.inv-h2 { font-size: clamp(1.05rem, 3.2vw, 1.4rem); font-weight: 700; letter-spacing: 0.1em; color: var(--red); margin-bottom: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; text-align: center; }
+/* padding dọc rộng (64px) cho khoảng cách thoáng giữa các khối chữ — giống ChungĐôi */
+.inv-section { position: relative; z-index: 3; max-width: 760px; margin: 0 auto; padding: 64px 40px; text-align: center; }
+/* Heading — Cormorant/Times 20-24px bold, letter-spacing 1px, uppercase (spec ChungĐôi) */
+.inv-h2 { font-family: 'Cormorant', 'Times New Roman', serif; font-size: clamp(1.25rem, 3.2vw, 1.5rem); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; text-align: center; }
 .inv-h2 svg { color: var(--red); }
 .inv-mini-divider { width: 70px; height: 1px; background: var(--red); opacity: 0.45; margin: 8px auto 22px; }
+/* (Đã bỏ border-top giữa các section — ChungĐôi không có đường kẻ, section cách nhau bằng khoảng trống) */
 
 /* ── BiLine: song ngữ 2 dòng (primary to + secondary nhỏ mờ) ── */
 .inv-biline { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; }
@@ -149,31 +169,36 @@
 
 /* Chú rể / cô dâu */
 .inv-family-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.inv-family { display: flex; flex-direction: column; gap: 3px; padding: 0 10px; }
+.inv-family { display: flex; flex-direction: column; gap: 3px; padding: 0 12px; }
 .inv-family + .inv-family { border-left: 1px solid var(--red-soft); }
-.inv-family-label { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.06em; }
-.inv-family-name { font-weight: 700; color: var(--red); font-size: 0.98rem; margin-bottom: 2px; }
-.inv-family p { font-size: 0.82rem; color: var(--text); }
-.inv-family-addr { color: var(--muted); font-size: 0.76rem; }
+/* Family — theo spec ChungĐôi: "Ông Bà" 14px w300, tên cha mẹ 14px w600, địa chỉ 12px w300 */
+.inv-family-label { font-family: 'Cormorant', 'Times New Roman', serif; font-size: 0.92rem; color: var(--red); letter-spacing: 0.02em; font-weight: 400; padding-bottom: 6px; margin-bottom: 8px; display: block; opacity: 0.85; }
+.inv-family-name { font-weight: 600; color: var(--red); font-size: 0.98rem; margin-bottom: 2px; }
+.inv-family p { font-family: 'Cormorant', 'Times New Roman', serif; font-size: 1rem; font-weight: 600; line-height: 1.5; margin: 0; color: var(--red); }
+.inv-family-addr { color: var(--red); opacity: 0.75; font-size: 0.82rem; font-weight: 400; margin-top: 4px; }
 
-/* Tên cô dâu chú rể */
-.inv-couple-pre { font-size: 0.78rem; letter-spacing: 0.08em; color: var(--text); margin-bottom: 18px; line-height: 1.7; }
-.inv-couple-name { font-size: clamp(1.9rem, 6vw, 3rem); font-weight: 600; line-height: 1.15; }
-.inv-couple-cap { display: block; font-size: 0.7rem; letter-spacing: 0.2em; color: var(--muted); margin: 4px 0 14px; }
-.inv-couple-amp { display: block; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.5rem; color: var(--red); margin: 2px 0; }
+/* Tên cô dâu chú rể đầy đủ — font Cormorant 40px (spec Fz Qellia → Cormorant), căn giữa */
+.inv-couple-pre { font-family: 'Cormorant', 'Times New Roman', serif; font-size: 0.82rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; line-height: 1.9; margin: 0; }
+.inv-couple-name { font-family: 'Cormorant', 'Playfair Display', serif; font-size: clamp(2rem, 5.5vw, 2.6rem); font-weight: 600; line-height: 1.15; color: var(--heading); }
+.inv-couple-name--full { font-size: clamp(1.7rem, 5vw, 2.3rem); }
+.inv-couple-cap { display: block; font-family: 'Cormorant', serif; font-size: 0.74rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 2px 0 16px; }
+.inv-couple-amp { display: block; font-family: 'Cormorant', serif; font-size: 1.8rem; color: var(--heading); font-style: italic; margin: 6px 0; }
 
 /* Thời gian */
-.inv-time-pre { font-size: 0.78rem; letter-spacing: 0.08em; color: var(--text); font-weight: 600; }
-.inv-time-hour { font-family: 'Playfair Display', serif; font-size: 1.7rem; font-weight: 700; color: var(--red); margin: 8px 0 16px; }
+/* Thời gian — spec ChungĐôi: pre uppercase Baskerville, giờ 20px, ngày 30px */
+.inv-time-pre { font-family: 'Cormorant', serif; font-size: 0.95rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--red); font-weight: 600; }
+.inv-time-hour { font-family: 'Cormorant', serif; font-size: 1.4rem; font-weight: 600; color: var(--red); margin: 8px 0 16px; letter-spacing: 0.04em; }
 .inv-time-dmy { display: inline-flex; align-items: center; gap: 16px; }
 .inv-time-col { text-align: center; }
-.inv-time-label { font-size: 0.9rem; color: var(--text); font-weight: 700; letter-spacing: 0.05em; }
+.inv-time-label { font-family: 'Cormorant', serif; font-size: 0.95rem; color: var(--red); font-weight: 600; letter-spacing: 0.04em; }
 .inv-time-big { padding: 0 14px; border-left: 1px solid var(--red); border-right: 1px solid var(--red); }
-.inv-time-num { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-weight: 700; color: var(--red); line-height: 1; }
+.inv-time-num { font-family: 'Cormorant', serif; font-size: 2.1rem; font-weight: 600; color: var(--red); line-height: 1; }
 .inv-two-time { display: flex; gap: 40px; justify-content: center; margin-top: 22px; }
 .inv-two-time div { display: flex; flex-direction: column; gap: 3px; }
 .inv-tt-label { font-size: 0.68rem; letter-spacing: 0.1em; color: var(--muted); }
 .inv-tt-val { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--red); }
+.inv-lunar { font-family: 'Cormorant', serif; font-size: 0.85rem; font-style: italic; color: var(--muted); margin-top: 6px; }
+.inv-cer-venue { font-family: 'Cormorant', serif; font-size: 0.95rem; color: var(--text); margin-top: 14px; }
 
 /* Lịch */
 .inv-cal { max-width: 340px; margin: 0 auto; background: rgba(255,255,255,0.35); border: 1px solid var(--red-soft); border-radius: 12px; padding: 18px 14px; }
@@ -237,20 +262,30 @@
 .inv-wish p { color: var(--text); font-size: 0.88rem; line-height: 1.6; margin-top: 2px; }
 
 /* ===== FOOTER ===== */
-.inv-footer { position: relative; z-index: 1; text-align: center; padding: 32px 24px; background: var(--red-deep); color: #f3e3d0; margin-top: 40px; }
+.inv-footer { position: relative; z-index: 3; text-align: center; padding: 32px 24px; background: var(--red-deep); color: #f3e3d0; margin-top: 40px; }
 .inv-footer p { color: #f3e3d0; font-size: 0.9rem; }
 .inv-footer-brand { opacity: 0.7; font-size: 0.72rem; letter-spacing: 0.1em; margin-top: 12px; }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 680px) {
-  .inv-section { padding: 34px 20px; }
+@media (max-width: 800px) {
+  .inv-section { padding: 48px 28px; }
+  .inv-header { height: 400px; }
+  .inv-phoenix { width: 260px; }
+  .inv-phoenix--l { left: -12px; }
+  .inv-phoenix--r { right: -12px; top: 36px; }
+  .inv-songhy { width: 160px; top: 78px; }
+  .inv-banner { top: 168px; height: 72px; }
+  .inv-flower { width: 175px; top: 268px; right: 4%; }
+}
+@media (max-width: 600px) {
+  .inv-section { padding: 40px 18px; }
   .inv-header { height: 300px; }
-  .inv-phoenix { width: 170px; }
+  .inv-phoenix { width: 180px; }
   .inv-phoenix--l { left: -14px; }
-  .inv-phoenix--r { right: -14px; top: 36px; }
-  .inv-songhy { width: 120px; top: 58px; }
-  .inv-banner { top: 128px; height: 58px; }
-  .inv-flower { width: 130px; top: 200px; right: 4%; }
+  .inv-phoenix--r { right: -14px; top: 30px; }
+  .inv-songhy { width: 128px; top: 58px; }
+  .inv-banner { top: 130px; height: 60px; }
+  .inv-flower { width: 140px; top: 206px; right: 4%; }
   .inv-qr img { width: 118px; height: 118px; }
   /* Gate trên mobile: cao hơn để chữ thoáng */
   .gate-card { aspect-ratio: 3/4.2; }
@@ -258,10 +293,10 @@
 }
 @media (max-width: 420px) {
   .inv-header { height: 260px; }
-  .inv-phoenix { width: 140px; }
-  .inv-songhy { width: 100px; top: 48px; }
-  .inv-banner { top: 108px; height: 52px; }
-  .inv-flower { width: 110px; top: 170px; }
+  .inv-phoenix { width: 145px; }
+  .inv-songhy { width: 104px; top: 48px; }
+  .inv-banner { top: 110px; height: 54px; }
+  .inv-flower { width: 115px; top: 172px; }
 }
 
 /* ===== ALBUM ẢNH CƯỚI ===== */
@@ -269,7 +304,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  max-width: 640px;
+  max-width: 760px;
   margin: 24px auto 0;
 }
 .inv-album-item {
@@ -294,15 +329,22 @@
    toạ độ % vẫn tính theo hộp (header/gate-card) nên LIVE không đổi. */
 .inv-header:has(.deco-layer--edit) { overflow: visible; }
 .gate--inline .gate-card:has(.deco-layer--edit),
-.flr-gate--inline .flr-gate-card:has(.deco-layer--edit) { overflow: visible; }
+.flr-gate--inline .flr-gate-card:has(.deco-layer--edit),
+.hmx-gate--inline .hmx-gate-card:has(.deco-layer--edit) { overflow: visible; }
 
 /* Lớp trang trí phủ TOÀN trang thiệp (toạ độ % theo cả trang) -> kéo ảnh đi bất kỳ đâu.
    pointer-events none để không chặn nội dung; chỉ ảnh (deco-img) bắt chuột khi edit. */
+/* Decoration (phượng/hoa) z=2: NỔI TRÊN banner đỏ (header z=1) nhưng DƯỚI section content (z=3) + tên (z=30).
+   Edit mode nâng lên 50 để click trúng ảnh. pointer-events none để không chặn scroll/click. */
 .inv-deco-root { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .inv-deco-root .deco-layer { position: absolute; inset: 0; }
 .inv-deco-root .deco-layer--edit { z-index: 50; }
-/* nâng cả container lớp trang trí khi edit (đè lên frame/banner để click trúng ảnh) */
 .inv-deco-root:has(.deco-layer--edit) { z-index: 50; }
+
+/* Edit mode: lớp deco nhảy z=50 để kéo ảnh → tên CD-CR (z=30) phải lên z=60 để KHÔNG bị đè.
+   Áp cho cả Long Phụng (.inv-lp-names) và Floral (.flr-frame-names). */
+.inv-root:has(.deco-layer--edit) .inv-lp-names,
+.inv-root:has(.deco-layer--edit) .flr-frame-names { z-index: 60; }
 
 /* ===== Section mới: ảnh đôi, lời mở đầu, dress code, lịch trình, cảm ơn, phong bì ===== */
 .inv-couplephoto-grid { display: flex; gap: 28px; justify-content: center; flex-wrap: wrap; }

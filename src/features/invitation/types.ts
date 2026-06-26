@@ -39,12 +39,22 @@ export interface SectionVisibility {
   gift?: boolean;
   thanks?: boolean;
   envelope?: boolean;
+  ceremony?: boolean;   // Lễ thành hôn (reception luôn hiện vì là mốc chính)
+}
+
+/** Tinh chỉnh ảnh: vị trí (0-100%) + phóng to (1-3x). */
+export interface PhotoAdjust {
+  x: number;     // object-position X %, 0-100 (mặc định 50)
+  y: number;     // object-position Y %, 0-100 (mặc định 50)
+  scale: number; // phóng to 1-3 (mặc định 1)
 }
 
 /** Dữ liệu mở rộng (1 cột JSON `extra`): các khối ngoài schema cũ. */
 export interface InvitationExtra {
   groomPhoto?: string;          // ảnh chú rể (tròn)
   bridePhoto?: string;          // ảnh cô dâu (tròn)
+  groomPhotoAdjust?: PhotoAdjust;  // tinh chỉnh vị trí/zoom ảnh chú rể
+  bridePhotoAdjust?: PhotoAdjust;  // tinh chỉnh vị trí/zoom ảnh cô dâu
   groomTitle?: string;          // danh xưng: "Chú rể"
   brideTitle?: string;          // "Cô dâu"
   groomShort?: string;          // tên ngắn chú rể
@@ -55,6 +65,17 @@ export interface InvitationExtra {
   schedule?: ScheduleItem[];    // lịch trình ngày cưới
   thanks?: string;              // lời cảm ơn
   envelope?: string;            // lời mời trên phong bì
+  ceremony?: {            // Lễ thành hôn (tư gia) — sự kiện riêng, có thể khác ngày tiệc
+    enabled?: boolean;
+    datetime?: string;    // "2026-11-20 09:00"
+    venue?: string;       // "Tư gia nhà gái"
+    address?: string;
+  };
+  reception?: {           // Tiệc cưới — chi tiết bổ sung (ngày/venue dùng wedding_date + venue_*)
+    welcomeTime?: string; // giờ đón khách "17:00"
+    banquetTime?: string; // giờ khai tiệc "18:30"
+  };
+  showLunar?: boolean;    // hiện âm lịch (mặc định true khi lang vi)
   visible?: SectionVisibility;  // hiện/ẩn khối
 }
 
@@ -75,6 +96,26 @@ export interface BankInfo {
   bank?: string;      // mã NH VietQR, vd "VCB", "MB"
   account?: string;   // số tài khoản
   name?: string;      // tên chủ TK
+}
+
+/** Khách mời (Phase 02) — khớp shape backend mapGuest(). */
+export interface Guest {
+  id: number;
+  name: string;
+  token: string;
+  tag?: string | null;
+  rsvpStatus: 'pending' | 'yes' | 'no' | 'maybe';
+  rsvpCount: number;
+  openedAt?: string | null;
+}
+
+export interface GuestStats {
+  total: number;
+  yes: number;
+  no: number;
+  maybe: number;
+  pending: number;
+  opened: number;
 }
 
 export interface Invitation {
@@ -105,4 +146,6 @@ export interface Invitation {
   design?: InvitationDesign;
   layout?: 'traditional' | 'floral' | string;
   isDemo?: boolean;
+  /** Tên khách từ link riêng ?g=token (BE trả khi token hợp lệ). */
+  guestName?: string | null;
 }
