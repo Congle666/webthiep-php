@@ -259,11 +259,11 @@ class PostController
     {
         Auth::requireAdmin();
 
-        if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+        // Frontend gửi field 'file' (đồng bộ với các upload khác). Fallback 'image' cho tương thích cũ.
+        $f = $_FILES['file'] ?? $_FILES['image'] ?? null;
+        if (!$f || $f['error'] !== UPLOAD_ERR_OK) {
             Response::error('Không nhận được file. Vui lòng chọn ảnh.', 422);
         }
-
-        $f   = $_FILES['image'];
         $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['webp', 'png', 'jpg', 'jpeg', 'gif'], true)) {
             Response::error('Định dạng không hỗ trợ (chỉ webp/png/jpg/jpeg/gif).', 422);
