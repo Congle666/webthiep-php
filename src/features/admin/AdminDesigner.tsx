@@ -178,7 +178,7 @@ export default function AdminDesigner() {
                 <h3>Chỉnh ảnh đang chọn</h3>
                 <p className="dsn-edit-name">{selected.label ?? selected.id}</p>
                 <label>Kích thước: {selected.width}%
-                  <input type="range" min={3} max={90} value={selected.width} onChange={(e) => patchSel({ width: +e.target.value })} />
+                  <input type="range" min={3} max={130} value={selected.width} onChange={(e) => patchSel({ width: +e.target.value })} />
                 </label>
                 <label>Xoay: {selected.rotate}°
                   <input type="range" min={-180} max={180} value={selected.rotate} onChange={(e) => patchSel({ rotate: +e.target.value })} />

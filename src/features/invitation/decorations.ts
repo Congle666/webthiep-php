@@ -63,18 +63,12 @@ export const DEFAULT_HOAMOC_COVER_DECORATIONS: DecoConfig[] = [
  *  Khung cảnh watercolor: lâu đài (chateau) lớn giữa header, mây rải nền trên, cây 2 bên, hoa nhỏ.
  *  Zone body (% TOÀN trang). Tên + WELCOME ở header z=30 nên không bị che. */
 export const DEFAULT_LAUDAI_DECORATIONS: DecoConfig[] = [
-  // Mây nền trên (z thấp)
-  { id: 'laudai-cloud-1', label: 'Mây trái',  src: '/invitation/laudai/cloud-1.webp', top: 7,  left: -4, width: 38, rotate: 0, flip: false, z: 2, opacity: 0.85, zone: 'body' },
-  { id: 'laudai-cloud-2', label: 'Mây phải',  src: '/invitation/laudai/cloud-2.webp', top: 5,  left: 60, width: 42, rotate: 0, flip: false, z: 2, opacity: 0.85, zone: 'body' },
-  { id: 'laudai-cloud-3', label: 'Mây giữa',  src: '/invitation/laudai/cloud-3.webp', top: 16, left: 30, width: 40, rotate: 0, flip: false, z: 2, opacity: 0.7,  zone: 'body' },
-  // Lâu đài lớn giữa header
-  { id: 'laudai-chateau', label: 'Lâu đài',    src: '/invitation/laudai/chateau.webp', top: 22, left: 10, width: 80, rotate: 0, flip: false, z: 4, opacity: 1, zone: 'body' },
-  // Cây 2 bên
-  { id: 'laudai-cay-l',   label: 'Cây trái',   src: '/invitation/laudai/cay1-1.webp', top: 30, left: -6, width: 26, rotate: 0, flip: false, z: 5, opacity: 1, zone: 'body' },
-  { id: 'laudai-cay-r',   label: 'Cây phải',   src: '/invitation/laudai/cay2-1.webp', top: 30, left: 78, width: 26, rotate: 0, flip: true,  z: 5, opacity: 1, zone: 'body' },
-  // Hoa nhỏ rải dưới
-  { id: 'laudai-hoa-bl',  label: 'Hoa trái dưới', src: '/invitation/laudai/hoanho2-1.webp', top: 58, left: -4, width: 22, rotate: 0, flip: false, z: 3, opacity: 0.95, zone: 'body' },
-  { id: 'laudai-hoa-br',  label: 'Hoa phải dưới', src: '/invitation/laudai/hoanho3-1.webp', top: 58, left: 80, width: 22, rotate: 0, flip: true,  z: 3, opacity: 0.95, zone: 'body' },
+  // Lâu đài FULL-WIDTH (ảnh chateau đã có sẵn mây + vườn + đài phun + cây) — phủ ngang thiệp.
+  // top âm để khung cảnh phủ lên cả vùng tên (tên z=30 nổi trên ảnh, như ChungĐôi).
+  { id: 'laudai-chateau', label: 'Lâu đài (khung cảnh)', src: '/invitation/laudai/chateau.webp', top: 8, left: 0, width: 100, rotate: 0, flip: false, z: 2, opacity: 1, zone: 'body' },
+  // Hoa nhỏ rải 2 bên (điểm xuyết, KHÔNG che giữa)
+  { id: 'laudai-hoa-bl',  label: 'Hoa trái dưới', src: '/invitation/laudai/hoanho2-1.webp', top: 56, left: -6, width: 24, rotate: 0, flip: false, z: 3, opacity: 0.92, zone: 'body' },
+  { id: 'laudai-hoa-br',  label: 'Hoa phải dưới', src: '/invitation/laudai/hoanho3-1.webp', top: 56, left: 82, width: 24, rotate: 0, flip: true,  z: 3, opacity: 0.92, zone: 'body' },
 ];
 
 export const DEFAULT_LAUDAI_COVER_DECORATIONS: DecoConfig[] = [

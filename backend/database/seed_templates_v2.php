@@ -99,15 +99,10 @@ upsertTemplate($pdo, 4, 'Hoa Mộc Xanh', 'hoa-moc-xanh', 'hoamoc', 'floral', 'T
 
 // Template 5: Lâu Đài Xanh — layout laudai, xanh rừng #3A5A2C, khung cảnh lâu đài watercolor (chateau+mây+cây+hoa).
 $ldxDeco = json_encode([
-  // BODY — khung cảnh: mây nền + lâu đài giữa + cây 2 bên + hoa nhỏ, % toàn trang (kéo-thả được)
-  ['id'=>'laudai-cloud-1','label'=>'Mây trái','src'=>'/invitation/laudai/cloud-1.webp','top'=>7,'left'=>-4,'width'=>38,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.85,'zone'=>'body'],
-  ['id'=>'laudai-cloud-2','label'=>'Mây phải','src'=>'/invitation/laudai/cloud-2.webp','top'=>5,'left'=>60,'width'=>42,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.85,'zone'=>'body'],
-  ['id'=>'laudai-cloud-3','label'=>'Mây giữa','src'=>'/invitation/laudai/cloud-3.webp','top'=>16,'left'=>30,'width'=>40,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.7,'zone'=>'body'],
-  ['id'=>'laudai-chateau','label'=>'Lâu đài','src'=>'/invitation/laudai/chateau.webp','top'=>22,'left'=>10,'width'=>80,'rotate'=>0,'flip'=>false,'z'=>4,'opacity'=>1,'zone'=>'body'],
-  ['id'=>'laudai-cay-l','label'=>'Cây trái','src'=>'/invitation/laudai/cay1-1.webp','top'=>30,'left'=>-6,'width'=>26,'rotate'=>0,'flip'=>false,'z'=>5,'opacity'=>1,'zone'=>'body'],
-  ['id'=>'laudai-cay-r','label'=>'Cây phải','src'=>'/invitation/laudai/cay2-1.webp','top'=>30,'left'=>78,'width'=>26,'rotate'=>0,'flip'=>true,'z'=>5,'opacity'=>1,'zone'=>'body'],
-  ['id'=>'laudai-hoa-bl','label'=>'Hoa trái dưới','src'=>'/invitation/laudai/hoanho2-1.webp','top'=>58,'left'=>-4,'width'=>22,'rotate'=>0,'flip'=>false,'z'=>3,'opacity'=>0.95,'zone'=>'body'],
-  ['id'=>'laudai-hoa-br','label'=>'Hoa phải dưới','src'=>'/invitation/laudai/hoanho3-1.webp','top'=>58,'left'=>80,'width'=>22,'rotate'=>0,'flip'=>true,'z'=>3,'opacity'=>0.95,'zone'=>'body'],
+  // BODY — lâu đài FULL-WIDTH (chateau đã có sẵn mây+vườn+đài phun+cây) + hoa điểm xuyết 2 bên
+  ['id'=>'laudai-chateau','label'=>'Lâu đài (khung cảnh)','src'=>'/invitation/laudai/chateau.webp','top'=>8,'left'=>0,'width'=>100,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>1,'zone'=>'body'],
+  ['id'=>'laudai-hoa-bl','label'=>'Hoa trái dưới','src'=>'/invitation/laudai/hoanho2-1.webp','top'=>56,'left'=>-6,'width'=>24,'rotate'=>0,'flip'=>false,'z'=>3,'opacity'=>0.92,'zone'=>'body'],
+  ['id'=>'laudai-hoa-br','label'=>'Hoa phải dưới','src'=>'/invitation/laudai/hoanho3-1.webp','top'=>56,'left'=>82,'width'=>24,'rotate'=>0,'flip'=>true,'z'=>3,'opacity'=>0.92,'zone'=>'body'],
   // COVER — ornament + 2 hoa góc card
   ['id'=>'laudai-cover-orn','label'=>'Hoa văn bìa','src'=>'/invitation/laudai/ornament.webp','top'=>-4,'left'=>30,'width'=>40,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.95,'zone'=>'cover'],
   ['id'=>'laudai-cover-tl','label'=>'Hoa bìa trái','src'=>'/invitation/laudai/hoanho2-1.webp','top'=>70,'left'=>-10,'width'=>34,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.9,'zone'=>'cover'],
