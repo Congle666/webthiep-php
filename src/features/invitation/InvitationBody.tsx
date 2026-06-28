@@ -1,4 +1,5 @@
 /** Phần thân thiệp dùng CHUNG cho mọi layout (traditional, floral...). */
+import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, CalendarPlus } from 'lucide-react';
 import type { Invitation as Inv, PhotoAdjust } from './types';
@@ -41,6 +42,13 @@ const revealAnim = {
   transition: { duration: 0.6, ease: 'easeOut' as const },
 };
 const revealNone = {};
+
+/** Thứ tự section THÂN mặc định — copy CHÍNH XÁC thứ tự render cũ. Mẫu thiếu sectionOrder dùng cái này. */
+const DEFAULT_ORDER = [
+  'couplePhoto', 'intro', 'family', 'couple', 'album', 'ceremony', 'reception',
+  'calendar', 'countdown', 'venue', 'dressCode', 'schedule', 'gift', 'rsvp',
+  'guestbook', 'thanks', 'envelope',
+];
 
 /** Stagger cho lưới nhiều con (album/countdown): cha điều phối, con fade-in lần lượt. */
 const gridContainer = {
@@ -131,11 +139,15 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
   const showLunar = ex.showLunar !== false;
   const cerDate = cer?.datetime ? fmtDate(cer.datetime, 'vi') : null;
 
-  return (
-    <>
-      {/* ===== ẢNH ĐÔI =====
-          hoamoc đã render ảnh đôi (chú rể/cô dâu) ở HEADER → ẩn section này để không lặp. */}
-      {inv.layout !== 'hoamoc' && show('couplePhoto') && (ex.groomPhoto || ex.bridePhoto) && (
+  /**
+   * Mỗi section THÂN → 1 hàm render (key → JSX). Logic điều kiện GIỮ NGUYÊN bên trong.
+   * Section nào không thỏa điều kiện trả về null (không render gì) — y hệt hành vi cũ.
+   */
+  const SECTIONS: Record<string, () => React.ReactNode> = {
+    // ===== ẢNH ĐÔI =====
+    // hoamoc đã render ảnh đôi (chú rể/cô dâu) ở HEADER → ẩn section này để không lặp.
+    couplePhoto: () =>
+      inv.layout !== 'hoamoc' && show('couplePhoto') && (ex.groomPhoto || ex.bridePhoto) ? (
         <motion.section className="inv-section inv-couplephoto" {...reveal}>
           <div className="inv-couplephoto-grid">
             <div className="inv-cp-item">
@@ -150,17 +162,19 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             </div>
           </div>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== LỜI MỞ ĐẦU ===== */}
-      {show('intro') && ex.intro && (
+    // ===== LỜI MỞ ĐẦU =====
+    intro: () =>
+      show('intro') && ex.intro ? (
         <motion.section className="inv-section inv-intro" {...reveal}>
           <p className="inv-intro-text">{ex.intro}</p>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== THÔNG TIN LỄ CƯỚI ===== */}
-      {show('family') && (
+    // ===== THÔNG TIN LỄ CƯỚI =====
+    family: () =>
+      show('family') ? (
         <motion.section className="inv-section" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.familyTitle} /></h2>
           <div className="inv-mini-divider" />
@@ -181,12 +195,13 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             </div>
           </div>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== TÊN CÔ DÂU CHÚ RỂ =====
-          Traditional + Floral đã render tên ở HEADER (trên cùng / trong khung oval)
-          → ẩn ở body để không lặp. Layout khác (không có tên header) thì vẫn hiện. */}
-      {inv.layout !== 'traditional' && inv.layout !== 'floral' && inv.layout !== 'hoamoc' && inv.layout !== 'laudai' && (
+    // ===== TÊN CÔ DÂU CHÚ RỂ =====
+    // Traditional + Floral đã render tên ở HEADER (trên cùng / trong khung oval)
+    // → ẩn ở body để không lặp. Layout khác (không có tên header) thì vẫn hiện.
+    couple: () =>
+      inv.layout !== 'traditional' && inv.layout !== 'floral' && inv.layout !== 'hoamoc' && inv.layout !== 'laudai' ? (
         <motion.section className="inv-section inv-couple" {...reveal}>
           {t.coupleAnnounce.split('\n').map((line, i) => (
             <p key={i} className="inv-couple-pre"><BiLine text={line} /></p>
@@ -197,10 +212,11 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
           <h1 className={`inv-couple-name${(inv.brideName?.length ?? 0) > 12 ? ' inv-couple-name--full' : ''}`}>{inv.brideName}</h1>
           <span className="inv-couple-cap"><BiLine text={t.brideTitle} /></span>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== ALBUM ===== */}
-      {show('gallery') && gallery.length > 0 && (
+    // ===== ALBUM =====
+    album: () =>
+      show('gallery') && gallery.length > 0 ? (
         <motion.section className="inv-section inv-album" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.galleryTitle} /></h2>
           <div className="inv-mini-divider" />
@@ -210,10 +226,11 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             ))}
           </motion.div>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== LỄ THÀNH HÔN (sự kiện riêng, có thể khác ngày tiệc) ===== */}
-      {show('ceremony') && cer?.enabled && cer.datetime && cerDate && (
+    // ===== LỄ THÀNH HÔN (sự kiện riêng, có thể khác ngày tiệc) =====
+    ceremony: () =>
+      show('ceremony') && cer?.enabled && cer.datetime && cerDate ? (
         <motion.section className="inv-section inv-time inv-ceremony" {...reveal}>
           <p className="inv-time-pre"><BiLine text={t.ceremonyTitle} /></p>
           <div className="inv-time-hour">{cerDate.time}</div>
@@ -230,9 +247,10 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             </p>
           )}
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== TIỆC CƯỚI (mốc chính — dùng wedding_date) ===== */}
+    // ===== TIỆC CƯỚI (mốc chính — dùng wedding_date) =====
+    reception: () => (
       <motion.section className="inv-section inv-time inv-reception" {...reveal}>
         <p className="inv-time-pre"><BiLine text={cer?.enabled ? t.receptionTitle : t.ceremonyAt} /></p>
         <div className="inv-time-hour">{rec.banquetTime || date.time}</div>
@@ -249,17 +267,21 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
           </div>
         )}
       </motion.section>
+    ),
 
-      {/* ===== LỊCH THÁNG ===== */}
+    // ===== LỊCH THÁNG =====
+    calendar: () => (
       <motion.section className="inv-section" {...reveal}>
         <WeddingCalendar date={inv.weddingDate} />
         <a className="inv-gcal" href={gcalUrl(inv)} target="_blank" rel="noreferrer">
           <CalendarPlus size={14} /> {t.addToCalendar}
         </a>
       </motion.section>
+    ),
 
-      {/* ===== COUNTDOWN ===== */}
-      {s.countdown !== false && !cd.isPast && (
+    // ===== COUNTDOWN =====
+    countdown: () =>
+      s.countdown !== false && !cd.isPast ? (
         <motion.section className="inv-section inv-countdown" {...reveal}>
           <h2 className="inv-h2"><Clock size={18} /> <BiLine text={t.countdownTitle} /></h2>
           <motion.div className="inv-countdown-grid" {...gContainer}>
@@ -271,9 +293,10 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             ))}
           </motion.div>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== ĐỊA ĐIỂM ===== */}
+    // ===== ĐỊA ĐIỂM =====
+    venue: () => (
       <motion.section className="inv-section" {...reveal}>
         <h2 className="inv-h2"><BiLine text={t.venueTitle} /></h2>
         <div className="inv-mini-divider" />
@@ -285,9 +308,11 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
           </a>
         )}
       </motion.section>
+    ),
 
-      {/* ===== DRESS CODE ===== */}
-      {show('dressCode') && (dress?.note || (dress?.colors?.length ?? 0) > 0) && (
+    // ===== DRESS CODE =====
+    dressCode: () =>
+      show('dressCode') && (dress?.note || (dress?.colors?.length ?? 0) > 0) ? (
         <motion.section className="inv-section inv-dresscode" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.dressCodeTitle} /></h2>
           <div className="inv-mini-divider" />
@@ -298,10 +323,11 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             </div>
           )}
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== LỊCH TRÌNH NGÀY CƯỚI ===== */}
-      {show('schedule') && schedule.length > 0 && (
+    // ===== LỊCH TRÌNH NGÀY CƯỚI =====
+    schedule: () =>
+      show('schedule') && schedule.length > 0 ? (
         <motion.section className="inv-section inv-schedule" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.scheduleTitle} /></h2>
           <div className="inv-mini-divider" />
@@ -314,10 +340,11 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             ))}
           </ul>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== QR MỪNG CƯỚI ===== */}
-      {show('gift') && hasQr && (
+    // ===== QR MỪNG CƯỚI =====
+    gift: () =>
+      show('gift') && hasQr ? (
         <motion.section className="inv-section" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.giftTitle} /></h2>
           <div className="inv-mini-divider" />
@@ -326,43 +353,55 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             <GiftQR label={`${t.brideTitle}${inv.brideName ? ' - ' + inv.brideName : ''}`} bank={inv.bankBride ?? {}} fallbackImg={inv.giftQrBride} />
           </div>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== RSVP ===== */}
-      {s.rsvp !== false && (
+    // ===== RSVP =====
+    rsvp: () =>
+      s.rsvp !== false ? (
         <motion.section className="inv-section" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.rsvpTitle} /></h2>
           <div className="inv-mini-divider" />
           <RsvpForm slug={slug} t={t} guestToken={guestToken} defaultName={inv.guestName ?? undefined} />
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== SỔ LƯU BÚT ===== */}
-      {s.guestbook !== false && (
+    // ===== SỔ LƯU BÚT =====
+    guestbook: () =>
+      s.guestbook !== false ? (
         <motion.section className="inv-section" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.guestbookTitle} /></h2>
           <div className="inv-mini-divider" />
           <GuestbookForm slug={slug} initial={inv.guestbook ?? []} t={t} />
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== LỜI CẢM ƠN ===== */}
-      {show('thanks') && ex.thanks && (
+    // ===== LỜI CẢM ƠN =====
+    thanks: () =>
+      show('thanks') && ex.thanks ? (
         <motion.section className="inv-section inv-thanks" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.thanksTitle} /></h2>
           <div className="inv-mini-divider" />
           <p className="inv-thanks-text">{ex.thanks}</p>
         </motion.section>
-      )}
+      ) : null,
 
-      {/* ===== PHONG BÌ / LỜI MỜI ===== */}
-      {show('envelope') && ex.envelope && (
+    // ===== PHONG BÌ / LỜI MỜI =====
+    envelope: () =>
+      show('envelope') && ex.envelope ? (
         <motion.section className="inv-section inv-envelope" {...reveal}>
           <p className="inv-envelope-text">{ex.envelope}</p>
         </motion.section>
-      )}
+      ) : null,
+  };
 
-      {/* ===== FOOTER ===== */}
+  // Thứ tự MẶC ĐỊNH = đúng thứ tự render hiện có. Mẫu KHÔNG có sectionOrder → dùng cái này (giữ nguyên 100%).
+  const order = inv.design?.sectionOrder ?? DEFAULT_ORDER;
+
+  return (
+    <>
+      {order.map((key) => <React.Fragment key={key}>{SECTIONS[key]?.()}</React.Fragment>)}
+
+      {/* ===== FOOTER (luôn cuối, ngoài order) ===== */}
       <footer className="inv-footer">
         <p>{ex.thanks || t.footerDefault}</p>
         <p className="inv-footer-brand">{t.footerBrand}</p>

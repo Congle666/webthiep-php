@@ -4,6 +4,12 @@ import type { DecoConfig } from './decorations';
 export interface InvitationDesign {
   theme?: Record<string, string>;
   decorations?: DecoConfig[];
+  /**
+   * Thứ tự + danh sách section THÂN của thiệp. Thiếu = dùng DEFAULT_ORDER (giữ nguyên bố cục hiện tại).
+   * Keys hợp lệ: 'couplePhoto','intro','family','couple','album','ceremony','reception',
+   * 'calendar','countdown','venue','dressCode','schedule','gift','rsvp','guestbook','thanks','envelope'.
+   */
+  sectionOrder?: string[];
 }
 
 export interface LoveStoryItem {

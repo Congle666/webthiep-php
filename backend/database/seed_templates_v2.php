@@ -116,7 +116,11 @@ $ldxTheme = json_encode([
   'bg'=>'#ffffff','paper'=>null,
 ], JSON_UNESCAPED_UNICODE);
 
-$ldxDesign = json_encode(['theme'=>json_decode($ldxTheme),'decorations'=>json_decode($ldxDeco)], JSON_UNESCAPED_UNICODE);
+// Bố cục chữ RIÊNG cho Lâu Đài Xanh: family → couple → dressCode (lên sớm) → ceremony/reception,
+// album DỜI XUỐNG sau countdown. Minh chứng SECTION-ORDER SYSTEM (mỗi mẫu bố cục khác nhau như ChungĐôi).
+$ldxOrder = ['couplePhoto','intro','couple','dressCode','ceremony','reception','calendar','countdown','album','venue','family','schedule','gift','rsvp','guestbook','thanks','envelope'];
+
+$ldxDesign = json_encode(['theme'=>json_decode($ldxTheme),'decorations'=>json_decode($ldxDeco),'sectionOrder'=>$ldxOrder], JSON_UNESCAPED_UNICODE);
 
 upsertTemplate($pdo, 5, 'Lâu Đài Xanh', 'lau-dai-xanh', 'laudai', 'luxury', 'Thiệp lâu đài xanh rừng phong cách watercolor, khung cảnh chateau lãng mạn giữa vườn cây.', 349000, $ldxDesign);
 
