@@ -1,0 +1,165 @@
+/* ===== LÂU ĐÀI XANH LAYOUT — xanh rừng #3A5A2C (theo spec ChungĐôi lau-dai-xanh) ===== */
+:root {
+  --ldx-green: #3a5a2c;        /* màu chính rgb(58,90,44) */
+  --ldx-green-deep: #2c4520;
+  --ldx-green-soft: #7c9466;
+  --ldx-white: #ffffff;
+}
+
+/* ---------- COVER GATE ---------- */
+.ldx-gate {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: var(--ldx-green);
+  overflow: hidden;
+}
+
+/* Bìa render trong khung admin: bỏ fullscreen fixed. */
+.ldx-gate--inline {
+  position: relative; inset: auto; z-index: 1;
+  padding: 24px; border-radius: 12px;
+  background: var(--ldx-green-deep);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 480px;
+}
+
+.ldx-gate-card {
+  position: relative;
+  width: min(620px, 100%);
+  background: var(--ldx-white);
+  border-radius: 20px;
+  padding: 80px 48px 60px;
+  text-align: center;
+  box-shadow: 0 12px 56px rgba(0, 0, 0, 0.35);
+  /* LIVE: clip hoa trong khoảng bìa. EDIT: rule :has(.deco-layer--edit) mở overflow để kéo ảnh. */
+  overflow: hidden;
+}
+
+.ldx-badge {
+  position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--ldx-green);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(58, 90, 44, 0.45);
+}
+
+/* z-60 luôn trên lớp edit (z-50) — chữ không bị hoa đè */
+.ldx-gate-content { position: relative; z-index: 60; }
+
+/* Tên — Cormorant UPPERCASE. Dùng .inv-root .ldx-name để THẮNG '.inv-root h1 { font: Playfair }'. */
+.inv-root .ldx-name {
+  font-family: 'Cormorant', 'Times New Roman', serif;
+  font-size: clamp(2.4rem, 8vw, 3.6rem);
+  font-weight: 600; line-height: 1.05;
+  color: var(--ldx-green); margin: 4px 0; letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.ldx-amp {
+  display: block; font-family: 'Cormorant', serif;
+  font-size: 1.7rem; color: var(--ldx-green); opacity: 0.7; margin: 2px 0;
+}
+.ldx-divider {
+  width: 56px; height: 1px; margin: 18px auto;
+  background: var(--ldx-green); opacity: 0.4;
+}
+.ldx-date { color: var(--ldx-green); font-size: 1rem; letter-spacing: 0.04em; }
+.ldx-invite {
+  margin-top: 22px; font-size: 0.78rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--ldx-green); opacity: 0.7;
+}
+.ldx-guest {
+  font-family: 'Cormorant', serif; font-size: 1.4rem; font-weight: 600;
+  color: var(--ldx-green); margin: 6px 0;
+}
+.ldx-sub { font-size: 0.9rem; color: var(--ldx-green); opacity: 0.8; }
+
+.ldx-open-btn {
+  margin-top: 30px; padding: 13px 40px; border: none; cursor: pointer;
+  border-radius: 9999px; background: var(--ldx-green); color: #fff;
+  font-size: 0.95rem; letter-spacing: 0.06em;
+  box-shadow: 0 8px 22px rgba(58, 90, 44, 0.4);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.ldx-open-btn:hover { transform: translateY(-2px); background: var(--ldx-green-deep); }
+
+/* ---------- HEADER (khung cảnh lâu đài) ---------- */
+.ldx-header {
+  position: relative;
+  z-index: 3;
+  min-height: 640px;
+  padding: 40px 24px 24px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px;
+  max-width: 600px; margin: 0 auto;
+  overflow: visible;
+}
+
+/* Tên cặp đôi script — z=30 luôn trên khung cảnh (deco max z=9) */
+.ldx-names {
+  position: relative; z-index: 30;
+  text-align: center; margin: 0 auto;
+}
+.inv-root .ldx-name--header {
+  font-family: 'Cormorant', 'Times New Roman', serif;
+  font-size: clamp(2.2rem, 9vw, 3.4rem);
+  font-weight: 600; font-style: italic;
+  color: var(--ldx-green); margin: 0;
+  text-transform: none; letter-spacing: 0.01em;
+}
+
+/* WELCOME TO OUR WEDDING + ornament */
+.ldx-welcome {
+  position: relative; z-index: 30;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  margin-top: 4px;
+}
+.ldx-welcome-text {
+  font-family: 'Cormorant', serif;
+  font-size: 0.82rem; letter-spacing: 0.34em;
+  text-transform: uppercase; color: var(--ldx-green); opacity: 0.85;
+}
+.ldx-ornament {
+  width: clamp(90px, 26vw, 150px); height: auto;
+  opacity: 0.95;
+}
+
+@media (max-width: 640px) {
+  .ldx-gate-card { padding: 64px 22px 44px; }
+  .ldx-header { min-height: 480px; padding: 28px 14px 18px; }
+  .ldx-welcome-text { font-size: 0.72rem; letter-spacing: 0.26em; }
+}
+
+/* ===== LÂU ĐÀI XANH BODY OVERRIDES =====
+   Dùng InvitationBody chung nhưng đổi sang tông xanh rừng, nền TRẮNG. */
+.inv-laudai {
+  --red:       var(--ldx-green);
+  --red-deep:  var(--ldx-green-deep);
+  --red-soft:  rgba(58, 90, 44, 0.10);
+  --heading:   var(--ldx-green);
+  --text:      var(--ldx-green);
+  --muted:     #7c9466;
+  background:  #ffffff !important;   /* nền trắng trơn — KHÔNG nền giấy (chỉ Long Phụng dùng) */
+  background-image: none !important;
+}
+
+/* Ẩn các phần riêng của traditional */
+.inv-laudai .inv-banner,
+.inv-laudai .inv-phoenix,
+.inv-laudai .inv-songhy,
+.inv-laudai .inv-flower,
+.inv-laudai .inv-header { display: none; }
+
+/* Backdrop trắng */
+.inv-laudai::before { background: #ffffff !important; }
+
+/* Khoảng cách thoáng giữa header và section đầu */
+.inv-laudai .inv-section:first-of-type { padding-top: 40px; }
+
+/* Nút submit / map / footer: màu xanh */
+.inv-laudai .inv-submit { background: var(--ldx-green); }
+.inv-laudai .inv-submit:hover:not(:disabled) { background: var(--ldx-green-deep); filter: none; }
+.inv-laudai .inv-map-link { border-color: var(--ldx-green); color: var(--ldx-green); }
+.inv-laudai .inv-map-link:hover { background: var(--ldx-green); color: #fff; }
+.inv-laudai .inv-radio--active { background: var(--ldx-green); border-color: var(--ldx-green); }
+.inv-laudai .inv-footer { background: var(--ldx-green-deep); }

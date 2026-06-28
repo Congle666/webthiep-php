@@ -330,7 +330,8 @@
 .inv-header:has(.deco-layer--edit) { overflow: visible; }
 .gate--inline .gate-card:has(.deco-layer--edit),
 .flr-gate--inline .flr-gate-card:has(.deco-layer--edit),
-.hmx-gate--inline .hmx-gate-card:has(.deco-layer--edit) { overflow: visible; }
+.hmx-gate--inline .hmx-gate-card:has(.deco-layer--edit),
+.ldx-gate--inline .ldx-gate-card:has(.deco-layer--edit) { overflow: visible; }
 
 /* Lớp trang trí phủ TOÀN trang thiệp (toạ độ % theo cả trang) -> kéo ảnh đi bất kỳ đâu.
    pointer-events none để không chặn nội dung; chỉ ảnh (deco-img) bắt chuột khi edit. */

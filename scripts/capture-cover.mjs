@@ -43,7 +43,7 @@ async function shoot(slug) {
     // KHÔNG ?preview → giữ màn cover gate (bìa thiệp "Mở thiệp").
     await p.goto(`${APP}/thiep/demo/${slug}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
     // chờ cover gate render (cover có nhiều class tuỳ layout: .gate / .flr-gate / .hmx-gate)
-    await p.waitForSelector('.gate, .flr-gate, .hmx-gate', { timeout: 60000 });
+    await p.waitForSelector('.gate, .flr-gate, .hmx-gate, .ldx-gate', { timeout: 60000 });
     await new Promise((r) => setTimeout(r, 2800)); // chờ font + ảnh hoa load
     // chụp viewport (vùng bìa), KHÔNG fullPage → đúng phần bìa đẹp
     await p.screenshot({ path: path.join(OUT, `${slug}.webp`), type: 'webp', quality: 80 });

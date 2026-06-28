@@ -186,7 +186,7 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
       {/* ===== TÊN CÔ DÂU CHÚ RỂ =====
           Traditional + Floral đã render tên ở HEADER (trên cùng / trong khung oval)
           → ẩn ở body để không lặp. Layout khác (không có tên header) thì vẫn hiện. */}
-      {inv.layout !== 'traditional' && inv.layout !== 'floral' && inv.layout !== 'hoamoc' && (
+      {inv.layout !== 'traditional' && inv.layout !== 'floral' && inv.layout !== 'hoamoc' && inv.layout !== 'laudai' && (
         <motion.section className="inv-section inv-couple" {...reveal}>
           {t.coupleAnnounce.split('\n').map((line, i) => (
             <p key={i} className="inv-couple-pre"><BiLine text={line} /></p>

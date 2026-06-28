@@ -196,6 +196,12 @@ vi, en, zh, ko, ja, fr, es, ar, ru, id, de, zh-tw — tất cả đã có đủ 
 - [ ] Xem `/thiep/demo/<slug>` — bìa + nội dung đều đúng
 - [ ] Tên mẫu hiển thị đúng tiếng Việt (utf8mb4)
 - [ ] (Nếu layout mới) đăng ký trong `layouts/index.ts` + CSS prefix riêng
+- [ ] **Sinh ảnh coverflow + thumbnail** (BẮT BUỘC — nếu thiếu, home/modal hiện ảnh vỡ):
+  - `node scripts/capture-preview.mjs <slug>` → `public/invitation/thumbs-full/<slug>.webp` (coverflow home "Cảm hứng cặp đôi" + ảnh mẫu)
+  - `node scripts/capture-cover.mjs <slug>` → `public/invitation/covers/<slug>.webp` (modal "Đổi mẫu thiệp" — ảnh bìa)
+  - Cần dev server (5173) + backend (8899) đang chạy khi chụp.
+
+> **Lưu ý coverflow home:** Section "Cảm hứng từ những cặp đôi" — click thiệp giữa → mở thẳng `/thiep/demo/<slug>` (chỉ xem, KHÔNG modal). Tự lấy `useTemplates()` nên thêm mẫu mới là tự hiện, chỉ cần có `thumbs-full/<slug>.webp`.
 
 ## 10. ⚠️ QUY TRÌNH CLONE MẪU CHUẨN (BẮT BUỘC — tránh lỗi đã gặp)
 

@@ -97,4 +97,32 @@ $hmxDesign = json_encode(['theme'=>json_decode($hmxTheme),'decorations'=>json_de
 
 upsertTemplate($pdo, 4, 'Hoa Mộc Xanh', 'hoa-moc-xanh', 'hoamoc', 'floral', 'Thiệp hoa mộc xanh lá tươi mát, ảnh cặp đôi nghiêng và dải bar thanh lịch.', 299000, $hmxDesign);
 
-echo "Seeded 3 templates OK\n";
+// Template 5: Lâu Đài Xanh — layout laudai, xanh rừng #3A5A2C, khung cảnh lâu đài watercolor (chateau+mây+cây+hoa).
+$ldxDeco = json_encode([
+  // BODY — khung cảnh: mây nền + lâu đài giữa + cây 2 bên + hoa nhỏ, % toàn trang (kéo-thả được)
+  ['id'=>'laudai-cloud-1','label'=>'Mây trái','src'=>'/invitation/laudai/cloud-1.webp','top'=>7,'left'=>-4,'width'=>38,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.85,'zone'=>'body'],
+  ['id'=>'laudai-cloud-2','label'=>'Mây phải','src'=>'/invitation/laudai/cloud-2.webp','top'=>5,'left'=>60,'width'=>42,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.85,'zone'=>'body'],
+  ['id'=>'laudai-cloud-3','label'=>'Mây giữa','src'=>'/invitation/laudai/cloud-3.webp','top'=>16,'left'=>30,'width'=>40,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.7,'zone'=>'body'],
+  ['id'=>'laudai-chateau','label'=>'Lâu đài','src'=>'/invitation/laudai/chateau.webp','top'=>22,'left'=>10,'width'=>80,'rotate'=>0,'flip'=>false,'z'=>4,'opacity'=>1,'zone'=>'body'],
+  ['id'=>'laudai-cay-l','label'=>'Cây trái','src'=>'/invitation/laudai/cay1-1.webp','top'=>30,'left'=>-6,'width'=>26,'rotate'=>0,'flip'=>false,'z'=>5,'opacity'=>1,'zone'=>'body'],
+  ['id'=>'laudai-cay-r','label'=>'Cây phải','src'=>'/invitation/laudai/cay2-1.webp','top'=>30,'left'=>78,'width'=>26,'rotate'=>0,'flip'=>true,'z'=>5,'opacity'=>1,'zone'=>'body'],
+  ['id'=>'laudai-hoa-bl','label'=>'Hoa trái dưới','src'=>'/invitation/laudai/hoanho2-1.webp','top'=>58,'left'=>-4,'width'=>22,'rotate'=>0,'flip'=>false,'z'=>3,'opacity'=>0.95,'zone'=>'body'],
+  ['id'=>'laudai-hoa-br','label'=>'Hoa phải dưới','src'=>'/invitation/laudai/hoanho3-1.webp','top'=>58,'left'=>80,'width'=>22,'rotate'=>0,'flip'=>true,'z'=>3,'opacity'=>0.95,'zone'=>'body'],
+  // COVER — ornament + 2 hoa góc card
+  ['id'=>'laudai-cover-orn','label'=>'Hoa văn bìa','src'=>'/invitation/laudai/ornament.webp','top'=>-4,'left'=>30,'width'=>40,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.95,'zone'=>'cover'],
+  ['id'=>'laudai-cover-tl','label'=>'Hoa bìa trái','src'=>'/invitation/laudai/hoanho2-1.webp','top'=>70,'left'=>-10,'width'=>34,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>0.9,'zone'=>'cover'],
+  ['id'=>'laudai-cover-br','label'=>'Hoa bìa phải','src'=>'/invitation/laudai/hoanho3-1.webp','top'=>70,'left'=>76,'width'=>34,'rotate'=>0,'flip'=>true,'z'=>2,'opacity'=>0.9,'zone'=>'cover'],
+], JSON_UNESCAPED_UNICODE);
+
+// Màu theo spec ChungĐôi Lâu Đài Xanh: xanh rừng #3A5A2C, nền TRẮNG (không nền giấy)
+$ldxTheme = json_encode([
+  'red'=>'#3a5a2c','redDeep'=>'#2c4520','redSoft'=>'rgba(58,90,44,0.10)',
+  'text'=>'#3a5a2c','heading'=>'#3a5a2c','muted'=>'#7c9466',
+  'bg'=>'#ffffff','paper'=>null,
+], JSON_UNESCAPED_UNICODE);
+
+$ldxDesign = json_encode(['theme'=>json_decode($ldxTheme),'decorations'=>json_decode($ldxDeco)], JSON_UNESCAPED_UNICODE);
+
+upsertTemplate($pdo, 5, 'Lâu Đài Xanh', 'lau-dai-xanh', 'laudai', 'luxury', 'Thiệp lâu đài xanh rừng phong cách watercolor, khung cảnh chateau lãng mạn giữa vườn cây.', 349000, $ldxDesign);
+
+echo "Seeded 4 templates OK\n";

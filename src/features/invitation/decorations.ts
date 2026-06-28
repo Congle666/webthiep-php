@@ -59,10 +59,35 @@ export const DEFAULT_HOAMOC_COVER_DECORATIONS: DecoConfig[] = [
   { id: 'hoamoc-cover-br', label: 'Hoa bìa phải dưới', src: '/invitation/floral/hoamoc-flower.webp', top: 64, left: 62,  width: 44, rotate: 180, flip: true,  z: 2, opacity: 0.95, zone: 'cover' },
 ];
 
+/** Vị trí mặc định cho thiệp LÂU ĐÀI XANH.
+ *  Khung cảnh watercolor: lâu đài (chateau) lớn giữa header, mây rải nền trên, cây 2 bên, hoa nhỏ.
+ *  Zone body (% TOÀN trang). Tên + WELCOME ở header z=30 nên không bị che. */
+export const DEFAULT_LAUDAI_DECORATIONS: DecoConfig[] = [
+  // Mây nền trên (z thấp)
+  { id: 'laudai-cloud-1', label: 'Mây trái',  src: '/invitation/laudai/cloud-1.webp', top: 7,  left: -4, width: 38, rotate: 0, flip: false, z: 2, opacity: 0.85, zone: 'body' },
+  { id: 'laudai-cloud-2', label: 'Mây phải',  src: '/invitation/laudai/cloud-2.webp', top: 5,  left: 60, width: 42, rotate: 0, flip: false, z: 2, opacity: 0.85, zone: 'body' },
+  { id: 'laudai-cloud-3', label: 'Mây giữa',  src: '/invitation/laudai/cloud-3.webp', top: 16, left: 30, width: 40, rotate: 0, flip: false, z: 2, opacity: 0.7,  zone: 'body' },
+  // Lâu đài lớn giữa header
+  { id: 'laudai-chateau', label: 'Lâu đài',    src: '/invitation/laudai/chateau.webp', top: 22, left: 10, width: 80, rotate: 0, flip: false, z: 4, opacity: 1, zone: 'body' },
+  // Cây 2 bên
+  { id: 'laudai-cay-l',   label: 'Cây trái',   src: '/invitation/laudai/cay1-1.webp', top: 30, left: -6, width: 26, rotate: 0, flip: false, z: 5, opacity: 1, zone: 'body' },
+  { id: 'laudai-cay-r',   label: 'Cây phải',   src: '/invitation/laudai/cay2-1.webp', top: 30, left: 78, width: 26, rotate: 0, flip: true,  z: 5, opacity: 1, zone: 'body' },
+  // Hoa nhỏ rải dưới
+  { id: 'laudai-hoa-bl',  label: 'Hoa trái dưới', src: '/invitation/laudai/hoanho2-1.webp', top: 58, left: -4, width: 22, rotate: 0, flip: false, z: 3, opacity: 0.95, zone: 'body' },
+  { id: 'laudai-hoa-br',  label: 'Hoa phải dưới', src: '/invitation/laudai/hoanho3-1.webp', top: 58, left: 80, width: 22, rotate: 0, flip: true,  z: 3, opacity: 0.95, zone: 'body' },
+];
+
+export const DEFAULT_LAUDAI_COVER_DECORATIONS: DecoConfig[] = [
+  { id: 'laudai-cover-orn', label: 'Hoa văn bìa', src: '/invitation/laudai/ornament.webp', top: -4, left: 30,  width: 40, rotate: 0,   flip: false, z: 2, opacity: 0.95, zone: 'cover' },
+  { id: 'laudai-cover-tl',  label: 'Hoa bìa trái', src: '/invitation/laudai/hoanho2-1.webp', top: 70, left: -10, width: 34, rotate: 0,   flip: false, z: 2, opacity: 0.9,  zone: 'cover' },
+  { id: 'laudai-cover-br',  label: 'Hoa bìa phải', src: '/invitation/laudai/hoanho3-1.webp', top: 70, left: 76,  width: 34, rotate: 0,   flip: true,  z: 2, opacity: 0.9,  zone: 'cover' },
+];
+
 /** Trả về decorations mặc định theo layout. */
 export function defaultDecosByLayout(layout: string): DecoConfig[] {
   if (layout === 'floral') return [...DEFAULT_FLORAL_DECORATIONS, ...DEFAULT_FLORAL_COVER_DECORATIONS];
   if (layout === 'hoamoc') return [...DEFAULT_HOAMOC_DECORATIONS, ...DEFAULT_HOAMOC_COVER_DECORATIONS];
+  if (layout === 'laudai') return [...DEFAULT_LAUDAI_DECORATIONS, ...DEFAULT_LAUDAI_COVER_DECORATIONS];
   return [...DEFAULT_DECORATIONS, ...DEFAULT_COVER_DECORATIONS];
 }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, ChevronLeft, ChevronRight, MousePointerClick, Pencil, Send,
@@ -8,7 +9,6 @@ import ScrollReveal from '../../components/common/ScrollReveal';
 import Button from '../../components/common/Button';
 import { useTemplates, useTestimonials } from '../../hooks/useCatalog';
 import type { Template } from '../../data/types';
-import { TemplateModal } from './TemplateModal';
 import './Home.css';
 
 /* ===== Mini wedding card (CSS) dùng trong phone mockup ===== */
@@ -84,21 +84,21 @@ function Hero() {
 
 /* ===== SHOWCASE — coverflow 3D như chungdoi: 2 bên ẢNH TĨNH (nhẹ), giữa IFRAME sống (cuộn) ===== */
 function Showcase({ templates }: { templates: Template[] }) {
+  const navigate = useNavigate();
   const [index, setIndex] = useState(0);
-  const [modal, setModal] = useState<Template | null>(null);
-  const [paused, setPaused] = useState(false); // hover/modal -> dừng tự nhảy, để ảnh cuộn
+  const [paused, setPaused] = useState(false); // hover -> dừng tự nhảy, để ảnh cuộn
   const total = templates.length;
 
   const go = (dir: number) => setIndex((p) => (p + dir + total) % total);
   const NEAR = 3;      // hiện nhiều thiệp 2 bên (ảnh tĩnh nhẹ -> show được nhiều)
 
   // Card giữa cuộn ảnh xuống rồi lên (CSS), xong tự nhảy sang mẫu kế.
-  // Tạm dừng khi hover (di chuột vào -> để xem ảnh cuộn) hoặc khi mở modal.
+  // Tạm dừng khi hover (di chuột vào -> để xem ảnh cuộn).
   useEffect(() => {
-    if (paused || modal || total <= 1) return;
+    if (paused || total <= 1) return;
     const id = setTimeout(() => setIndex((p) => (p + 1) % total), 8500);
     return () => clearTimeout(id);
-  }, [index, paused, modal, total]);
+  }, [index, paused, total]);
 
   if (total === 0) return null;
 
@@ -134,9 +134,9 @@ function Showcase({ templates }: { templates: Template[] }) {
                 <button
                   key={t.id} type="button"
                   className={`cf__card ${center ? 'cf__card--center' : ''}`}
-                  style={style} aria-label={center ? `Xem chi tiết ${t.name}` : `Chọn ${t.name}`}
-                  // Card giữa: mở modal chi tiết. Card bên: trượt vào giữa.
-                  onClick={() => { center ? setModal(t) : setIndex(i); }}
+                  style={style} aria-label={center ? `Xem demo ${t.name}` : `Chọn ${t.name}`}
+                  // Card giữa: xem DEMO luôn (section cảm hứng — chỉ để xem). Card bên: trượt vào giữa.
+                  onClick={() => { center ? navigate(`/thiep/demo/${t.slug}`) : setIndex(i); }}
                 >
                   {/* KHÔNG dùng iframe (5 iframe = 5 React app -> lag). Card giữa: ảnh full cuộn dọc bằng CSS.
                       Card bên: cũng ảnh full nhưng đứng yên (top-crop). Mượt 60fps, nhẹ. */}
@@ -173,8 +173,6 @@ function Showcase({ templates }: { templates: Template[] }) {
           </div>
         </ScrollReveal>
       </div>
-
-      {modal && <TemplateModal t={modal} onClose={() => setModal(null)} />}
     </section>
   );
 }
@@ -356,16 +354,16 @@ function MultiLang() {
 /** Cảm hứng cặp đôi — dải NGANG NHẢY từng nấc mỗi ~4.5s (không lướt liên tục).
  * Hover 1 thiệp -> ảnh cuộn dọc; hover toàn dải -> dừng nhảy. */
 function Inspiration({ templates }: { templates: Template[] }) {
+  const navigate = useNavigate();
   const [start, setStart] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [modal, setModal] = useState<Template | null>(null);
   const total = templates.length;
 
   useEffect(() => {
-    if (paused || modal || total === 0) return;
+    if (paused || total === 0) return;
     const id = setTimeout(() => setStart((s) => (s + 1) % total), 4500);
     return () => clearTimeout(id);
-  }, [start, paused, modal, total]);
+  }, [start, paused, total]);
 
   if (total === 0) return null;
   // Nhân đôi để trượt qua hết rồi reset mượt. translateX theo `start` (mỗi nấc 1 thẻ).
@@ -393,7 +391,7 @@ function Inspiration({ templates }: { templates: Template[] }) {
             <button
               type="button"
               key={`${t.id}-${i}`}
-              onClick={() => setModal(t)}
+              onClick={() => navigate(`/thiep/demo/${t.slug}`)}
               className={`insp-card ${i === start ? 'is-active' : ''}`}
               title={t.name}
             >
@@ -425,8 +423,6 @@ function Inspiration({ templates }: { templates: Template[] }) {
           </Button>
         </div>
       </ScrollReveal>
-
-      {modal && <TemplateModal t={modal} onClose={() => setModal(null)} />}
     </section>
   );
 }
