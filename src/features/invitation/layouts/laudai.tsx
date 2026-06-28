@@ -46,16 +46,27 @@ function LaudaiCover({ inv, guestName, onOpen, decorations, inline, editable, on
 }
 
 function LaudaiHeader({ inv, editMode, decorations, onDecoChange, selectedId, onSelect }: HeaderProps) {
-  // Khung cảnh (lâu đài/mây/cây) = decoration zone body, % toàn trang, kéo-thả được.
-  const bodyDecos = (decorations ?? []).filter((d) => (d.zone ?? 'body') !== 'cover');
-  const onBodyChange = onDecoChange ? (next: DecoConfig[]) => onDecoChange(next) : undefined;
+  // Khung cảnh lâu đài/mây = zone 'header' (% theo .ldx-header block, KHÔNG trôi xuống family).
+  // Hoa điểm xuyết = zone 'body' (% toàn trang).
+  const headerDecos = (decorations ?? []).filter((d) => d.zone === 'header');
+  const bodyDecos = (decorations ?? []).filter((d) => (d.zone ?? 'body') === 'body');
+  const onHeaderChange = onDecoChange
+    ? (next: DecoConfig[]) => onDecoChange([...next, ...bodyDecos, ...(decorations ?? []).filter(d => d.zone === 'cover')])
+    : undefined;
+  const onBodyChange = onDecoChange
+    ? (next: DecoConfig[]) => onDecoChange([...headerDecos, ...next, ...(decorations ?? []).filter(d => d.zone === 'cover')])
+    : undefined;
 
   return (
     <>
       <header className="ldx-header">
-        {/* WELCOME + ornament + divider — Ở TRÊN tên (giống ChungĐôi).
-            ornament/divider là ảnh nhưng đặt trong header (phần cố định trên cùng).
-            Vị trí khung cảnh (lâu đài/mây/cây) kéo-thả được qua DecorationLayer bên dưới. */}
+        {/* Khung cảnh (lâu đài/mây) — zone header, tọa độ % theo .ldx-header, KHÔNG đè family */}
+        <div className="ldx-deco-header">
+          <DecorationLayer editable={editMode} value={headerDecos} onChange={onHeaderChange}
+            selectedId={selectedId} onSelect={onSelect} />
+        </div>
+
+        {/* WELCOME + ornament + divider — Ở TRÊN tên (giống ChungĐôi) */}
         <div className="ldx-welcome">
           <img className="ldx-ornament" src="/invitation/laudai/ornament.webp" alt="" aria-hidden />
           <div className="ldx-welcome-row">
@@ -73,7 +84,7 @@ function LaudaiHeader({ inv, editMode, decorations, onDecoChange, selectedId, on
         </div>
       </header>
 
-      {/* Khung cảnh lâu đài (decoration) phủ TOÀN trang — tọa độ % theo inv-root */}
+      {/* Hoa điểm xuyết (zone body) phủ toàn trang */}
       <div className="inv-deco-root">
         <DecorationLayer editable={editMode} value={bodyDecos} onChange={onBodyChange}
           selectedId={selectedId} onSelect={onSelect} />

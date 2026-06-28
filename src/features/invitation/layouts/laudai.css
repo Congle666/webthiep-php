@@ -87,13 +87,19 @@
 .ldx-header {
   position: relative;
   z-index: 3;
-  min-height: 640px;
+  min-height: 720px;   /* đủ chứa khung cảnh lâu đài (zone header) — family nằm DƯỚI, không bị đè */
   padding: 40px 24px 24px;
   display: flex; flex-direction: column; align-items: center;
   gap: 10px;
   max-width: 600px; margin: 0 auto;
   overflow: visible;
 }
+
+/* Zone decoration của riêng header (lâu đài/mây) — tọa độ % theo .ldx-header, KHÔNG trôi xuống body */
+.ldx-deco-header { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.ldx-deco-header .deco-layer { position: absolute; inset: 0; }
+.ldx-deco-header .deco-layer--edit { z-index: 50; }
+.ldx-deco-header:has(.deco-layer--edit) { z-index: 50; }
 
 /* Tên cặp đôi script — z=30 luôn trên khung cảnh (deco max z=9) */
 .ldx-names {

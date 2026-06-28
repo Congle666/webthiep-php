@@ -100,7 +100,7 @@ upsertTemplate($pdo, 4, 'Hoa Mộc Xanh', 'hoa-moc-xanh', 'hoamoc', 'floral', 'T
 // Template 5: Lâu Đài Xanh — layout laudai, xanh rừng #3A5A2C, khung cảnh lâu đài watercolor (chateau+mây+cây+hoa).
 $ldxDeco = json_encode([
   // BODY — lâu đài FULL-WIDTH (chateau đã có sẵn mây+vườn+đài phun+cây) + hoa điểm xuyết 2 bên
-  ['id'=>'laudai-chateau','label'=>'Lâu đài (khung cảnh)','src'=>'/invitation/laudai/chateau.webp','top'=>8,'left'=>0,'width'=>100,'rotate'=>0,'flip'=>false,'z'=>2,'opacity'=>1,'zone'=>'body'],
+  ['id'=>'laudai-chateau','label'=>'Lâu đài (khung cảnh)','src'=>'/invitation/laudai/chateau.webp','top'=>30,'left'=>0,'width'=>100,'rotate'=>0,'flip'=>false,'z'=>1,'opacity'=>1,'zone'=>'header'],
   ['id'=>'laudai-hoa-bl','label'=>'Hoa trái dưới','src'=>'/invitation/laudai/hoanho2-1.webp','top'=>56,'left'=>-6,'width'=>24,'rotate'=>0,'flip'=>false,'z'=>3,'opacity'=>0.92,'zone'=>'body'],
   ['id'=>'laudai-hoa-br','label'=>'Hoa phải dưới','src'=>'/invitation/laudai/hoanho3-1.webp','top'=>56,'left'=>82,'width'=>24,'rotate'=>0,'flip'=>true,'z'=>3,'opacity'=>0.92,'zone'=>'body'],
   // COVER — ornament + 2 hoa góc card
@@ -116,9 +116,9 @@ $ldxTheme = json_encode([
   'bg'=>'#ffffff','paper'=>null,
 ], JSON_UNESCAPED_UNICODE);
 
-// Bố cục chữ RIÊNG cho Lâu Đài Xanh: family → couple → dressCode (lên sớm) → ceremony/reception,
-// album DỜI XUỐNG sau countdown. Minh chứng SECTION-ORDER SYSTEM (mỗi mẫu bố cục khác nhau như ChungĐôi).
-$ldxOrder = ['couplePhoto','intro','couple','dressCode','ceremony','reception','calendar','countdown','album','venue','family','schedule','gift','rsvp','guestbook','thanks','envelope'];
+// Bố cục chữ ĐO THẬT từ ChungĐôi lau-dai-xanh:
+// family → tên CD-CR + lễ → album → tiệc + lịch → venue → lịch trình → sổ lưu bút → QR.
+$ldxOrder = ['family','couple','ceremony','album','reception','calendar','countdown','venue','schedule','guestbook','gift','rsvp','thanks','envelope'];
 
 $ldxDesign = json_encode(['theme'=>json_decode($ldxTheme),'decorations'=>json_decode($ldxDeco),'sectionOrder'=>$ldxOrder], JSON_UNESCAPED_UNICODE);
 

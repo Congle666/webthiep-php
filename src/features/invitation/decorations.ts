@@ -65,7 +65,7 @@ export const DEFAULT_HOAMOC_COVER_DECORATIONS: DecoConfig[] = [
 export const DEFAULT_LAUDAI_DECORATIONS: DecoConfig[] = [
   // Lâu đài FULL-WIDTH (ảnh chateau đã có sẵn mây + vườn + đài phun + cây) — phủ ngang thiệp.
   // top âm để khung cảnh phủ lên cả vùng tên (tên z=30 nổi trên ảnh, như ChungĐôi).
-  { id: 'laudai-chateau', label: 'Lâu đài (khung cảnh)', src: '/invitation/laudai/chateau.webp', top: 8, left: 0, width: 100, rotate: 0, flip: false, z: 2, opacity: 1, zone: 'body' },
+  { id: 'laudai-chateau', label: 'Lâu đài (khung cảnh)', src: '/invitation/laudai/chateau.webp', top: 30, left: 0, width: 100, rotate: 0, flip: false, z: 1, opacity: 1, zone: 'header' },
   // Hoa nhỏ rải 2 bên (điểm xuyết, KHÔNG che giữa)
   { id: 'laudai-hoa-bl',  label: 'Hoa trái dưới', src: '/invitation/laudai/hoanho2-1.webp', top: 56, left: -6, width: 24, rotate: 0, flip: false, z: 3, opacity: 0.92, zone: 'body' },
   { id: 'laudai-hoa-br',  label: 'Hoa phải dưới', src: '/invitation/laudai/hoanho3-1.webp', top: 56, left: 82, width: 24, rotate: 0, flip: true,  z: 3, opacity: 0.92, zone: 'body' },
