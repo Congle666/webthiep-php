@@ -108,21 +108,30 @@
   text-transform: none; letter-spacing: 0.01em;
 }
 
-/* WELCOME TO OUR WEDDING + ornament */
+/* WELCOME TO OUR WEDDING + ornament + divider — Ở TRÊN tên (đầu header) */
 .ldx-welcome {
   position: relative; z-index: 30;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  margin-top: 4px;
-}
-.ldx-welcome-text {
-  font-family: 'Cormorant', serif;
-  font-size: 0.82rem; letter-spacing: 0.34em;
-  text-transform: uppercase; color: var(--ldx-green); opacity: 0.85;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  margin-bottom: 18px;
 }
 .ldx-ornament {
   width: clamp(90px, 26vw, 150px); height: auto;
   opacity: 0.95;
 }
+/* Hàng: mũi tên trái — WELCOME — mũi tên phải */
+.ldx-welcome-row {
+  display: flex; align-items: center; gap: 14px;
+}
+.ldx-welcome-text {
+  font-family: 'Cormorant', serif;
+  font-size: 0.82rem; letter-spacing: 0.30em;
+  text-transform: uppercase; color: var(--ldx-green); opacity: 0.9;
+  white-space: nowrap;
+}
+.ldx-arrow {
+  width: clamp(28px, 9vw, 52px); height: auto; opacity: 0.85;
+}
+.ldx-arrow--r { transform: scaleX(-1); }
 
 @media (max-width: 640px) {
   .ldx-gate-card { padding: 64px 22px 44px; }

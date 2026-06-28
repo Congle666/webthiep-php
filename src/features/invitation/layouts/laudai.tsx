@@ -53,17 +53,23 @@ function LaudaiHeader({ inv, editMode, decorations, onDecoChange, selectedId, on
   return (
     <>
       <header className="ldx-header">
-        {/* Tên cặp đôi script — z=30, luôn trên khung cảnh */}
+        {/* WELCOME + ornament + divider — Ở TRÊN tên (giống ChungĐôi).
+            ornament/divider là ảnh nhưng đặt trong header (phần cố định trên cùng).
+            Vị trí khung cảnh (lâu đài/mây/cây) kéo-thả được qua DecorationLayer bên dưới. */}
+        <div className="ldx-welcome">
+          <img className="ldx-ornament" src="/invitation/laudai/ornament.webp" alt="" aria-hidden />
+          <div className="ldx-welcome-row">
+            <img className="ldx-arrow ldx-arrow--l" src="/invitation/laudai/divider-arrow.webp" alt="" aria-hidden />
+            <span className="ldx-welcome-text">WELCOME TO OUR WEDDING</span>
+            <img className="ldx-arrow ldx-arrow--r" src="/invitation/laudai/divider-arrow.webp" alt="" aria-hidden />
+          </div>
+        </div>
+
+        {/* Tên cặp đôi script — DƯỚI welcome, z=30 luôn trên khung cảnh */}
         <div className="ldx-names">
           <h1 className="ldx-name ldx-name--header">{inv.groomName}</h1>
           <span className="ldx-amp">&</span>
           <h1 className="ldx-name ldx-name--header">{inv.brideName}</h1>
-        </div>
-
-        {/* WELCOME TO OUR WEDDING + ornament */}
-        <div className="ldx-welcome">
-          <span className="ldx-welcome-text">WELCOME TO OUR WEDDING</span>
-          <img className="ldx-ornament" src="/invitation/laudai/ornament.webp" alt="" aria-hidden />
         </div>
       </header>
 
