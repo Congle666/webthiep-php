@@ -44,6 +44,19 @@ Không cần code. Làm 100% qua Admin:
 
 → Mẫu mới ra trong vài phút, **không động code**.
 
+### 2b. ⚡ TEMPLATE FACTORY — preset vị trí (khi seed decoration bằng code)
+Khi cần định nghĩa `DEFAULT_*_DECORATIONS` cho layout mới, DÙNG `templatePresets.ts` thay vì gõ tay top/left/width:
+```ts
+import { deco, asset } from './templatePresets';
+export const DEFAULT_X_DECORATIONS = [
+  deco('hero',     asset('castle','blue-1'), 'fullScene', { z: 2 }),
+  deco('flower-tl', asset('flower','moc-1'), 'cornerTL',  { z: 3, opacity: 0.9 }),
+  deco('flower-br', asset('flower','moc-2'), 'cornerBR',  { z: 3, opacity: 0.9 }),
+];
+```
+**Preset có sẵn:** cornerTL/TR/BL/BR (4 góc hoa), sideL/sideR (cây/phượng 2 bên), fullScene (khung cảnh full-width), frameCenter (khung oval), bannerTop (dải ngang), heroTop, atmosphereTop. Chỉnh 1 chỗ trong PRESETS → mọi mẫu hưởng. KHÔNG gõ pixel tay.
+> Lợi ích: tạo decoration nhanh + nhất quán giữa các mẫu. KHÔNG refactor mẫu cũ đang chạy (YAGNI) — chỉ dùng cho mẫu MỚI.
+
 ---
 
 ## 3. Quy trình thêm 1 LAYOUT MỚI (bố cục khác hẳn) — KHI MẪU CẦN KHUNG RIÊNG
