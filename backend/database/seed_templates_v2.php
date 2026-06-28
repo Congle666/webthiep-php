@@ -120,4 +120,15 @@ $ldxDesign = json_encode(['theme'=>json_decode($ldxTheme),'decorations'=>json_de
 
 upsertTemplate($pdo, 5, 'Lâu Đài Xanh', 'lau-dai-xanh', 'laudai', 'luxury', 'Thiệp lâu đài xanh rừng phong cách watercolor, khung cảnh chateau lãng mạn giữa vườn cây.', 349000, $ldxDesign);
 
-echo "Seeded 4 templates OK\n";
+// Template 6: Hoa Mộc Hồng — TÁI DÙNG layout hoamoc + CÙNG decorations, CHỈ đổi theme sang HỒNG.
+// → Minh chứng template factory: 1 layout → nhiều mẫu, đổi màu = đổi mẫu, KHÔNG code mới.
+$hmhDeco = $hmxDeco; // tái dùng nguyên decorations của Hoa Mộc Xanh
+$hmhTheme = json_encode([
+  'red'=>'#b14a6e','redDeep'=>'#8a3354','redSoft'=>'rgba(177,74,110,0.10)',
+  'text'=>'#b14a6e','heading'=>'#b14a6e','muted'=>'#c98aa3',
+  'bg'=>'#fdf6f8','paper'=>null,
+], JSON_UNESCAPED_UNICODE);
+$hmhDesign = json_encode(['theme'=>json_decode($hmhTheme),'decorations'=>json_decode($hmhDeco)], JSON_UNESCAPED_UNICODE);
+upsertTemplate($pdo, 6, 'Hoa Mộc Hồng', 'hoa-moc-hong', 'hoamoc', 'floral', 'Thiệp hoa mộc tông hồng pastel ngọt ngào, ảnh cặp đôi nghiêng thanh lịch.', 299000, $hmhDesign);
+
+echo "Seeded 5 templates OK\n";

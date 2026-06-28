@@ -1,10 +1,6 @@
-/* ===== HOA MỘC XANH LAYOUT — xanh lá đậm #30530F (theo spec ChungĐôi hoa-moc-xanh) ===== */
-:root {
-  --hmx-green: #30530f;        /* màu chính rgb(48,83,15) */
-  --hmx-green-deep: #233c0a;
-  --hmx-cream: #f7f8f2;
-  --hmx-text: #30530f;
-}
+/* ===== HOA MỘC LAYOUT (tái dùng đa màu) =====
+   Màu LẤY TỪ THEME DB (--red/--heading/--bg) → 1 layout dùng cho nhiều mẫu (xanh/hồng/...).
+   Fallback xanh #30530F (mẫu Hoa Mộc Xanh gốc). */
 
 /* ---------- COVER GATE ---------- */
 .hmx-gate {
@@ -163,13 +159,12 @@
 /* ===== HOA MỘC XANH BODY OVERRIDES =====
    Dùng InvitationBody chung nhưng đổi sang tông xanh. */
 .inv-hoamoc {
-  --red:       var(--hmx-green);
-  --red-deep:  var(--hmx-green-deep);
-  --red-soft:  rgba(48, 83, 15, 0.10);
-  --heading:   var(--hmx-green);
-  --text:      var(--hmx-text);
-  --muted:     #6f8a52;
-  background:  #f7f8f2 !important;   /* nền kem trơn — KHÔNG nền giấy (chỉ Long Phụng dùng) */
+  /* hmx-* lấy từ theme DB (--red/--heading), fallback xanh. → đổi theme = đổi màu mẫu. */
+  --hmx-green:      var(--red, #30530f);
+  --hmx-green-deep: var(--red-deep, #233c0a);
+  --hmx-cream:      var(--bg, #f7f8f2);
+  --hmx-text:       var(--text, #30530f);
+  background:  var(--bg, #f7f8f2) !important;  /* nền kem/màu theme — KHÔNG nền giấy */
   background-image: none !important;
 }
 

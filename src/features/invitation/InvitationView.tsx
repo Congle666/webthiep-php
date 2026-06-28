@@ -18,6 +18,7 @@ export function themeStyle(design?: Inv['design']): CSSProperties {
     if (t.text) style['--text'] = t.text;
     if (t.heading) style['--heading'] = t.heading;
     if (t.muted) style['--muted'] = t.muted;
+    if (t.bg) style['--bg'] = t.bg;   // cho layout đọc màu nền từ theme (tái dùng đa màu)
     if (t.bg || t.paper) {
       const bg = t.bg || '#f5ead7';
       style.background = t.paper ? `${bg} url('${t.paper}')` : bg;
