@@ -3,6 +3,7 @@ import { CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'rea
 import { LAYOUTS } from '../invitation/layouts';
 import { InvitationBody } from '../invitation/InvitationBody';
 import { DecoConfig, decosByZone } from '../invitation/decorations';
+import { fontsetVars } from '../invitation/fontsets';
 import { sampleInvitation } from './sampleInvitation';
 import { TRANSLATIONS } from '../invitation/i18n';
 
@@ -17,14 +18,22 @@ interface Props {
   onChange: (list: DecoConfig[]) => void;   // nhận danh sách ĐẦY ĐỦ (cả 2 zone)
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  fontset?: string;
+  spacing?: { sectionGap?: number; headerMin?: number };
+  sectionOrder?: string[];
+  headerStyle?: string;
 }
 
-function themeVars(theme: Theme): CSSProperties {
-  return {
+function themeVars(theme: Theme, fontset?: string, spacing?: { sectionGap?: number; headerMin?: number }): CSSProperties {
+  const v: Record<string, string> = {
+    ...fontsetVars(fontset),
     '--red': theme.red, '--red-deep': theme.redDeep, '--red-soft': theme.redSoft,
     '--text': theme.text, '--heading': theme.heading, '--muted': theme.muted,
     background: theme.paper ? `${theme.bg} url('${theme.paper}')` : theme.bg,
-  } as CSSProperties;
+  };
+  if (spacing?.sectionGap != null) v['--inv-section-gap'] = `${spacing.sectionGap}px`;
+  if (spacing?.headerMin != null) v['--inv-header-min'] = `${spacing.headerMin}px`;
+  return v as CSSProperties;
 }
 
 const FRAME_W = 760; // width thật của .inv-root — render cố định rồi scale thu nhỏ
@@ -78,21 +87,30 @@ function ScaledFrame({ children, frameClass, style }: { children: React.ReactNod
   );
 }
 
-export function DesignerPreview({ layout, theme, decos, zone, onChange, selectedId, onSelect }: Props) {
+export function DesignerPreview({ layout, theme, decos, zone, onChange, selectedId, onSelect, fontset, spacing, sectionOrder, headerStyle }: Props) {
   const L = LAYOUTS[layout] ?? LAYOUTS.traditional;
-  const inv = sampleInvitation(layout);
-  // Tab "Nội dung" (body) hiển thị + chỉnh cả zone 'body' và 'header' (floral) — L.Header tự tách.
-  const zoneDecos =
+  const base = sampleInvitation(layout);
+  // Gắn sectionOrder + headerStyle (từ DB) vào inv.design → preview render ĐÚNG như demo/user, không lệch.
+  const inv = { ...base, design: { ...(base.design ?? {}), ...(sectionOrder ? { sectionOrder } : {}), ...(headerStyle ? { headerStyle: headerStyle as 'split' | 'stack' } : {}) } };
+  // Tab "Nội dung" (body): header nhận zone 'body'+'header' (L.Header tự tách); footer tách riêng → InvitationBody.
+  const headerDecos =
     zone === 'body'
-      ? (decos.filter((d) => (d.zone ?? 'body') !== 'cover'))
+      ? decos.filter((d) => { const z = d.zone ?? 'body'; return z !== 'cover' && z !== 'footer'; })
       : (decosByZone(decos, zone) ?? []);
+  const footerDecos = zone === 'body' ? decos.filter((d) => d.zone === 'footer') : [];
 
-  /** Ghép danh sách của zone hiện tại trở lại mảng đầy đủ (giữ nguyên zone kia). */
+  /** Ghép footer-deco đã sửa lại mảng đầy đủ. */
+  const handleFooterChange = (next: DecoConfig[]) => {
+    const others = decos.filter((d) => d.zone !== 'footer');
+    onChange([...others, ...next.map((d) => ({ ...d, zone: 'footer' as const }))]);
+  };
+
+  /** Ghép danh sách header của zone hiện tại trở lại mảng đầy đủ (giữ nguyên zone kia). */
   const handleZoneChange = (next: DecoConfig[]) => {
     if (zone === 'body') {
-      // 'next' đã giữ zone gốc ('body' hoặc 'header') của từng ảnh — chỉ cần ghép lại với cover.
-      const cover = decos.filter((d) => (d.zone ?? 'body') === 'cover');
-      onChange([...cover, ...next]);
+      // header-change KHÔNG đụng cover & footer; 'next' giữ zone gốc body/header.
+      const keep = decos.filter((d) => { const z = d.zone ?? 'body'; return z === 'cover' || z === 'footer'; });
+      onChange([...keep, ...next]);
       return;
     }
     const others = decos.filter((d) => (d.zone ?? 'body') !== zone);
@@ -101,14 +119,14 @@ export function DesignerPreview({ layout, theme, decos, zone, onChange, selected
 
   if (zone === 'cover') {
     return (
-      <ScaledFrame frameClass="dsn-frame dsn-frame--cover" style={themeVars(theme)}>
+      <ScaledFrame frameClass="dsn-frame dsn-frame--cover" style={themeVars(theme, fontset, spacing)}>
         <L.Cover
           inv={inv}
           guestName="Nguyễn Văn A"
           onOpen={() => {}}
           inline
           editable
-          decorations={zoneDecos}
+          decorations={headerDecos}
           onDecoChange={handleZoneChange}
           selectedId={selectedId}
           onSelect={onSelect}
@@ -118,10 +136,12 @@ export function DesignerPreview({ layout, theme, decos, zone, onChange, selected
   }
 
   return (
-    <ScaledFrame frameClass={`dsn-frame inv-root inv-${layout}`} style={themeVars(theme)}>
-      <L.Header inv={inv} editMode decorations={zoneDecos} onDecoChange={handleZoneChange}
+    <ScaledFrame frameClass={`dsn-frame inv-root inv-opened inv-${layout}`} style={themeVars(theme, fontset, spacing)}>
+      <L.Header inv={inv} editMode decorations={headerDecos} onDecoChange={handleZoneChange}
         selectedId={selectedId} onSelect={onSelect} />
-      <InvitationBody inv={inv} slug="preview" t={TRANSLATIONS.vi} />
+      <InvitationBody inv={inv} slug="preview" t={TRANSLATIONS.vi}
+        footerDecos={footerDecos} editMode onFooterDecoChange={handleFooterChange}
+        selectedDecoId={selectedId} onSelectDeco={onSelect} />
     </ScaledFrame>
   );
 }

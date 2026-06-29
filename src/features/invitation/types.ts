@@ -4,6 +4,12 @@ import type { DecoConfig } from './decorations';
 export interface InvitationDesign {
   theme?: Record<string, string>;
   decorations?: DecoConfig[];
+  /** Bộ font (key trong FONTSETS). Thiếu = 'classic-serif'. Đòn bẩy đa dạng. */
+  fontset?: string;
+  /** Kiểu header layout hoamoc: 'split' (ảnh + caption cạnh, so le — Hoa Mộc Xanh) | 'stack' (tên trên + 2 ảnh chồng — Hoa Mộc Hồng). Thiếu = 'split'. */
+  headerStyle?: 'split' | 'stack';
+  /** Khoảng cách body (chỉnh trong admin). sectionGap: padding dọc mỗi phần (px). headerMin: chiều cao header (px, cho khung hoa/lâu đài). */
+  spacing?: { sectionGap?: number; headerMin?: number };
   /**
    * Thứ tự + danh sách section THÂN của thiệp. Thiếu = dùng DEFAULT_ORDER (giữ nguyên bố cục hiện tại).
    * Keys hợp lệ: 'couplePhoto','intro','family','couple','album','ceremony','reception',
@@ -77,6 +83,8 @@ export interface InvitationExtra {
     venue?: string;       // "Tư gia nhà gái"
     address?: string;
   };
+  groomRank?: string;     // thứ bậc chú rể trong block lễ: "Trưởng Nam", "Thứ Nam"...
+  brideRank?: string;     // thứ bậc cô dâu: "Út Nữ", "Trưởng Nữ"...
   reception?: {           // Tiệc cưới — chi tiết bổ sung (ngày/venue dùng wedding_date + venue_*)
     welcomeTime?: string; // giờ đón khách "17:00"
     banquetTime?: string; // giờ khai tiệc "18:30"

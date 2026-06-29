@@ -52,11 +52,14 @@ class CatalogController
             ],
             // Tiệc cưới: giờ đón khách + khai tiệc
             'reception' => ['welcomeTime' => '17:30', 'banquetTime' => '18:00'],
+            'groomRank' => 'Trưởng Nam',
+            'brideRank' => 'Út Nữ',
             'showLunar' => true,
         ];
         if ($layout === 'hoamoc') {
-            $extra['groomPhoto'] = '/invitation/floral/hoamoc-couple-1.webp';
-            $extra['bridePhoto'] = '/invitation/floral/hoamoc-couple-2.webp';
+            // Demo dùng ẢNH RIÊNG từng người (chú rể / cô dâu) như ChungĐôi — KHÔNG dùng ảnh chụp chung.
+            $extra['groomPhoto'] = '/invitation/hoahong/groom.webp';
+            $extra['bridePhoto'] = '/invitation/hoahong/bride.webp';
         }
 
         Response::ok([
@@ -67,8 +70,8 @@ class CatalogController
             'venueAddress' => '194 Hoàng Văn Thụ, Phú Nhuận, TP.HCM',
             'mapUrl' => 'https://maps.google.com/?q=White+Palace',
             'coverPhoto' => null,
-            'groomFamily' => ['father' => 'Trần Văn Hùng', 'mother' => 'Phạm Thị Lan'],
-            'brideFamily' => ['father' => 'Nguyễn Văn Bình', 'mother' => 'Phan Thị Hương'],
+            'groomFamily' => ['title' => 'Ông Bà', 'father' => 'Trần Văn Hùng', 'mother' => 'Phạm Thị Lan', 'address' => '25 Lê Lợi, Hồng Bàng, Hải Phòng'],
+            'brideFamily' => ['title' => 'Ông Bà', 'father' => 'Nguyễn Văn Bình', 'mother' => 'Phan Thị Hương', 'address' => '78 Bạch Đằng, Ngô Quyền, Hải Phòng'],
             'giftQrGroom' => null, 'giftQrBride' => null,
             'bankGroom' => ['bank' => 'VCB', 'account' => '1022563248', 'name' => 'TRAN MINH QUAN'],
             'bankBride' => ['bank' => 'MB', 'account' => '1065958943', 'name' => 'NGUYEN THU HA'],

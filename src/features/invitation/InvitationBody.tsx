@@ -10,6 +10,8 @@ import { RsvpForm, GuestbookForm } from './InvitationForms';
 import type { InvI18n } from './i18n';
 import { splitBi } from './i18n';
 import { fmtLunarVi } from './lunar';
+import { DecorationLayer } from './DecorationLayer';
+import type { DecoConfig } from './decorations';
 
 /** Render text song ngữ thành 2 dòng: primary (to) + secondary (nhỏ, mờ). */
 function BiLine({ text, className }: { text: string; className?: string }) {
@@ -115,9 +117,15 @@ interface Props {
   t: InvI18n;
   staticMode?: boolean;
   guestToken?: string | null;
+  /** Ảnh trang trí vùng footer (zone='footer') — tọa độ % theo block .inv-footer, bám cuối trang. */
+  footerDecos?: DecoConfig[];
+  editMode?: boolean;
+  onFooterDecoChange?: (next: DecoConfig[]) => void;
+  selectedDecoId?: string | null;
+  onSelectDeco?: (id: string | null) => void;
 }
 
-export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) {
+export function InvitationBody({ inv, slug, t, staticMode, guestToken, footerDecos, editMode, onFooterDecoChange, selectedDecoId, onSelectDeco }: Props) {
   const reveal = staticMode ? revealNone : revealAnim;
   const gContainer = staticMode ? gridNone : gridContainer;
   const gItem = staticMode ? gridNone : gridItem;
@@ -173,8 +181,47 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
       ) : null,
 
     // ===== THÔNG TIN LỄ CƯỚI =====
+    // Block lễ ĐẦY ĐỦ khớp ChungĐôi (ông bà 2 cột → báo tin → tên CR/CD script + thứ bậc → "lễ thành hôn tại [tư gia] vào lúc [giờ]").
+    // Dùng cho laudai + floral (mai-lan-trang) — các mẫu có heading section + tên script như ChungĐôi.
     family: () =>
-      show('family') ? (
+      !show('family') ? null : (inv.layout === 'laudai' || inv.layout === 'floral' || inv.layout === 'hoamoc' || inv.layout === 'vanson') ? (
+        <motion.section className="inv-section inv-ldx-le" {...reveal}>
+          <h2 className="inv-h2"><BiLine text={t.familyTitle} /></h2>
+          <div className="inv-mini-divider" />
+          {/* Ông bà 2 cột */}
+          <div className="inv-ldx-parents">
+            <div className="inv-ldx-pcol">
+              {gf.title && <p className="inv-ldx-ptitle">{gf.title}</p>}
+              {gf.father && <p className="inv-ldx-pname">{gf.father}</p>}
+              {gf.mother && <p className="inv-ldx-pname">{gf.mother}</p>}
+              {gf.address && <p className="inv-ldx-paddr">{gf.address}</p>}
+            </div>
+            <div className="inv-ldx-pcol">
+              {bf.title && <p className="inv-ldx-ptitle">{bf.title}</p>}
+              {bf.father && <p className="inv-ldx-pname">{bf.father}</p>}
+              {bf.mother && <p className="inv-ldx-pname">{bf.mother}</p>}
+              {bf.address && <p className="inv-ldx-paddr">{bf.address}</p>}
+            </div>
+          </div>
+          {/* Báo tin */}
+          <p className="inv-ldx-announce">{t.coupleAnnounce}</p>
+          {/* Tên CR + thứ bậc */}
+          <h3 className="inv-ldx-cpname">{inv.groomName}</h3>
+          {ex.groomRank && <p className="inv-ldx-rank">{ex.groomRank}</p>}
+          {/* Dấu & giữa 2 tên */}
+          <span className="inv-ldx-amp">&</span>
+          {/* Tên CD + thứ bậc */}
+          <h3 className="inv-ldx-cpname">{inv.brideName}</h3>
+          {ex.brideRank && <p className="inv-ldx-rank">{ex.brideRank}</p>}
+          {/* Lễ thành hôn tại tư gia vào lúc ... */}
+          {(cer?.venue || cerDate) && (
+            <div className="inv-ldx-cer">
+              {cer?.venue && <p className="inv-ldx-cer-venue">Lễ thành hôn được cử hành tại<br /><strong>{cer.venue}</strong></p>}
+              {cerDate && <p className="inv-ldx-cer-time">Vào lúc {cerDate.time} • {cerDate.dow}, {cerDate.day}/{cerDate.month}/{cerDate.year}</p>}
+            </div>
+          )}
+        </motion.section>
+      ) : (
         <motion.section className="inv-section" {...reveal}>
           <h2 className="inv-h2"><BiLine text={t.familyTitle} /></h2>
           <div className="inv-mini-divider" />
@@ -195,7 +242,7 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
             </div>
           </div>
         </motion.section>
-      ) : null,
+      ),
 
     // ===== TÊN CÔ DÂU CHÚ RỂ =====
     // Traditional + Floral đã render tên ở HEADER (trên cùng / trong khung oval)
@@ -401,7 +448,16 @@ export function InvitationBody({ inv, slug, t, staticMode, guestToken }: Props) 
     <>
       {order.map((key) => <React.Fragment key={key}>{SECTIONS[key]?.()}</React.Fragment>)}
 
-      {/* ===== FOOTER (luôn cuối, ngoài order) ===== */}
+      {/* ===== VÙNG ĐỆM TRẮNG chứa ảnh trang trí cuối (đài phun nước...) — TRÊN dải footer xanh.
+           CHỈ hiện khi mẫu THỰC SỰ có ảnh footer (tránh khoảng trắng thừa ở mẫu không dùng). ===== */}
+      {!!footerDecos?.length && (
+        <div className="inv-footer-deco-band">
+          <DecorationLayer editable={!!editMode} value={footerDecos}
+            onChange={onFooterDecoChange} selectedId={selectedDecoId} onSelect={onSelectDeco} />
+        </div>
+      )}
+
+      {/* ===== FOOTER (dải xanh + chữ, luôn cuối) ===== */}
       <footer className="inv-footer">
         <p>{ex.thanks || t.footerDefault}</p>
         <p className="inv-footer-brand">{t.footerBrand}</p>

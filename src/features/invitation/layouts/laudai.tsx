@@ -17,7 +17,7 @@ function LaudaiCover({ inv, guestName, onOpen, decorations, inline, editable, on
   const t = useI18n(lang);
   return (
     <motion.div className={`ldx-gate ${inline ? 'ldx-gate--inline' : ''}`}
-      initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
+      initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.15 }} transition={{ duration: 0.8, ease: 'easeInOut' }}>
       <div className="ldx-gate-card">
         {(decorations || editable) && (
           <DecorationLayer editable={!!editable} value={decorations ?? []} onChange={onDecoChange}

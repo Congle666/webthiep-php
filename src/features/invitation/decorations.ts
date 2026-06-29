@@ -14,7 +14,7 @@ export interface DecoConfig {
   flip: boolean;       // lật ngang
   z: number;           // z-index
   opacity: number;
-  zone?: 'cover' | 'body' | 'header';  // vùng đặt ảnh: bìa (cover), nội dung (body), hoặc header floral (header — tọa độ % theo .flr-header block). Mặc định 'body'.
+  zone?: 'cover' | 'body' | 'header' | 'footer';  // vùng: bìa (cover), nội dung (body, % toàn trang), header (% theo block tên), footer (% theo block footer cuối trang). Mặc định 'body'.
 }
 
 /** Vị trí mặc định cho header thiệp (vùng nội dung/body). */
@@ -94,7 +94,7 @@ export const DEFAULT_COVER_DECORATIONS: DecoConfig[] = [
 ];
 
 /** Lọc danh sách trang trí theo vùng. Ảnh không có `zone` coi như 'body' (tương thích cũ). */
-export function decosByZone(list: DecoConfig[] | undefined, zone: 'cover' | 'body' | 'header'): DecoConfig[] | undefined {
+export function decosByZone(list: DecoConfig[] | undefined, zone: 'cover' | 'body' | 'header' | 'footer'): DecoConfig[] | undefined {
   if (!list) return undefined;
   const filtered = list.filter((d) => (d.zone ?? 'body') === zone);
   return filtered.length ? filtered : undefined;

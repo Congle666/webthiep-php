@@ -90,7 +90,15 @@ class AdminController
         $t = Database::one("SELECT id FROM templates WHERE id=?", [(int)$id]);
         if (!$t) Response::error('Không tìm thấy mẫu thiệp.', 404);
         $b = Request::body();
-        $design = ['theme' => $b['theme'] ?? new stdClass(), 'decorations' => $b['decorations'] ?? []];
+        // MERGE với design cũ để KHÔNG mất sectionOrder/field FE không gửi.
+        $old = Database::one("SELECT design FROM templates WHERE id=?", [(int)$id]);
+        $design = $old && !empty($old['design']) ? (json_decode($old['design'], true) ?: []) : [];
+        $design['theme'] = $b['theme'] ?? ($design['theme'] ?? new stdClass());
+        $design['decorations'] = $b['decorations'] ?? ($design['decorations'] ?? []);
+        if (isset($b['fontset'])) $design['fontset'] = $b['fontset'];   // bộ font theo mẫu
+        if (isset($b['spacing'])) $design['spacing'] = $b['spacing'];   // khoảng cách body (sectionGap/headerMin)
+        if (isset($b['sectionOrder'])) $design['sectionOrder'] = $b['sectionOrder'];
+        if (isset($b['headerStyle'])) $design['headerStyle'] = $b['headerStyle'];   // kiểu header hoamoc
         Database::run("UPDATE templates SET design=? WHERE id=?",
             [json_encode($design, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (int)$id]);
         Response::ok(null, 'Đã lưu thiết kế mẫu.');

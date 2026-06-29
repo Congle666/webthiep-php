@@ -18,7 +18,7 @@ function FloralCover({ inv, guestName, onOpen, decorations, inline, editable, on
   const t = useI18n(lang);
   return (
     <motion.div className={`flr-gate ${inline ? 'flr-gate--inline' : ''}`}
-      initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
+      initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.15 }} transition={{ duration: 0.8, ease: 'easeInOut' }}>
       <span className="flr-dot flr-dot--1" aria-hidden />
       <span className="flr-dot flr-dot--2" aria-hidden />
       <span className="flr-dot flr-dot--3" aria-hidden />

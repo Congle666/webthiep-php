@@ -1,0 +1,122 @@
+/* ===== VÂN SƠN LAYOUT — tranh thủy mặc Á Đông, chữ xanh rêu #3a4a3a ===== */
+:root {
+  --vsn-green: #3a4a3a;       /* xanh rêu đậm */
+  --vsn-green-deep: #2a382a;
+  --vsn-cream: #f3efe4;       /* nền kem giấy */
+}
+
+/* ---------- COVER GATE ---------- */
+.vsn-gate {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: var(--vsn-cream); overflow: hidden;
+}
+.vsn-gate--inline {
+  position: relative; inset: auto; z-index: 1;
+  padding: 24px; border-radius: 12px; background: var(--vsn-cream);
+  display: flex; align-items: center; justify-content: center; min-height: 520px;
+}
+.vsn-gate-card {
+  position: relative;
+  width: min(600px, 100%); aspect-ratio: 3 / 4;
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 14px 50px rgba(0,0,0,0.3);
+  display: flex; align-items: flex-start; justify-content: center;
+}
+/* Ảnh sơn thủy phủ bìa */
+.vsn-gate-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: var(--vsn-cream) url('/invitation/vanson/bia.webp') center/cover no-repeat;
+}
+
+/* Nội dung bìa — đặt ở TRÊN (vùng trời mờ), z trên ảnh */
+.vsn-gate-content {
+  position: relative; z-index: 10;
+  text-align: center; padding: 48px 24px 0; width: 100%;
+}
+.vsn-invite-top {
+  font-size: 0.74rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--vsn-green); opacity: 0.8; margin-bottom: 14px;
+}
+/* Tên — script trang trọng, bóng trắng nhẹ để nổi trên ảnh */
+.inv-root .vsn-name {
+  font-family: var(--font-name, 'Cormorant', serif);
+  font-size: clamp(2.2rem, 8vw, 3.2rem);
+  font-weight: 600; line-height: 1.1;
+  color: var(--vsn-green); margin: 2px 0;
+  text-shadow: 0 1px 10px rgba(243,239,228,0.95), 0 0 3px rgba(243,239,228,0.9);
+}
+.vsn-amp {
+  display: block; font-family: 'Cormorant', serif;
+  font-size: 1.4rem; color: var(--vsn-green); opacity: 0.6; margin: 2px 0;
+}
+.vsn-divider { width: 56px; height: 1px; margin: 16px auto; background: var(--vsn-green); opacity: 0.45; }
+.vsn-date { color: var(--vsn-green); font-size: 0.95rem; letter-spacing: 0.05em; text-shadow: 0 1px 8px rgba(243,239,228,0.9); }
+.vsn-guest {
+  font-family: 'Cormorant', serif; font-size: 1.2rem; font-weight: 600;
+  color: var(--vsn-green); margin: 10px 0;
+}
+.vsn-open-btn {
+  margin-top: 26px; padding: 12px 38px; border: none; cursor: pointer;
+  border-radius: 9999px; background: var(--vsn-green); color: #fff;
+  font-size: 0.92rem; letter-spacing: 0.06em;
+  box-shadow: 0 8px 22px rgba(58,74,58,0.4);
+  transition: transform 0.25s, background 0.25s;
+}
+.vsn-open-btn:hover { transform: translateY(-2px); background: var(--vsn-green-deep); }
+
+/* ---------- HEADER (sơn thủy ngang) ---------- */
+.vsn-header {
+  position: relative; z-index: 3;
+  min-height: var(--inv-header-min, 560px);
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 48px 24px 0; overflow: hidden;
+}
+.vsn-header-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: var(--vsn-cream) url('/invitation/vanson/header.webp') center top/cover no-repeat;
+}
+.vsn-names { position: relative; z-index: 10; text-align: center; }
+.vsn-welcome {
+  font-size: 0.76rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--vsn-green); opacity: 0.85; margin-bottom: 14px;
+  text-shadow: 0 1px 8px rgba(243,239,228,0.9);
+}
+.inv-root .vsn-name--header {
+  font-family: var(--font-name, 'Cormorant', serif);
+  font-size: clamp(2rem, 8vw, 3rem); font-weight: 600; font-style: italic;
+  color: var(--vsn-green); margin: 0;
+}
+
+@media (max-width: 640px) {
+  .vsn-gate-card { aspect-ratio: 9 / 14; }
+  .vsn-header { min-height: var(--inv-header-min, 440px); padding: 32px 14px 0; }
+}
+
+/* ===== VÂN SƠN BODY — nền kem giấy, tông xanh rêu ===== */
+.inv-vanson {
+  --red: var(--vsn-green); --red-deep: var(--vsn-green-deep);
+  --red-soft: rgba(58,74,58,0.10);
+  --heading: var(--vsn-green); --text: var(--vsn-green); --muted: #6b7a6b;
+  background: var(--vsn-cream) !important; background-image: none !important;
+}
+.inv-vanson::before { background: var(--vsn-cream) !important; }
+/* Ẩn phần traditional */
+.inv-vanson .inv-banner, .inv-vanson .inv-phoenix, .inv-vanson .inv-songhy,
+.inv-vanson .inv-flower, .inv-vanson .inv-header { display: none; }
+.inv-vanson .inv-section:first-of-type { padding-top: 40px; }
+/* Heading 20px in hoa căn giữa */
+.inv-vanson .inv-h2 {
+  font-size: 20px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 2px; text-align: center;
+}
+/* Family 1 cột */
+.inv-vanson .inv-family-grid {
+  grid-template-columns: 1fr; gap: 24px; max-width: 360px; margin: 0 auto; text-align: left;
+}
+/* Nút/map/footer xanh rêu */
+.inv-vanson .inv-submit { background: var(--vsn-green); }
+.inv-vanson .inv-submit:hover:not(:disabled) { background: var(--vsn-green-deep); filter: none; }
+.inv-vanson .inv-map-link { border-color: var(--vsn-green); color: var(--vsn-green); }
+.inv-vanson .inv-map-link:hover { background: var(--vsn-green); color: #fff; }
+.inv-vanson .inv-footer { background: var(--vsn-green-deep); }

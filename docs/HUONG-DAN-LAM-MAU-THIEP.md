@@ -12,10 +12,12 @@ Một "mẫu thiệp" = **2 phần tách biệt**, đừng trộn lẫn:
 | Phần | Là gì | Sửa ở đâu |
 |------|-------|-----------|
 | **Metadata** | tên, slug, giá, danh mục, badge | Admin → **Mẫu thiệp** (bảng `templates`) |
-| **Design** | giao diện thiệp sống: màu + ảnh trang trí | Admin → **Thiết kế mẫu** (cột `templates.design` JSON) |
+| **Design** | giao diện thiệp sống: màu + **font (fontset)** + ảnh trang trí | Admin → **Thiết kế mẫu** (cột `templates.design` JSON) |
 | **Layout** | bố cục/khung (cover gate + header) | **Code** — `templates.layout` chọn 1 trong các layout có sẵn |
 
-Công thức: **1 Layout (code) × 1 Theme (màu) × N Decorations (ảnh) = 1 mẫu**.
+Công thức: **1 Layout (code) × 1 Theme (màu) × 1 Fontset (font) × N Decorations (ảnh) = 1 mẫu**.
+
+> 💡 **ĐÒN BẨY ĐA DẠNG (như ChungĐôi):** ChungĐôi 10 mẫu DÙNG CHUNG 1 body — chỉ đổi **font + màu + ảnh + bật/tắt/thứ tự section**. KHÔNG cần body variant. Muốn mẫu trông khác hẳn → đổi **fontset** trước (mạnh nhất), rồi màu, rồi ảnh.
 
 ```
 Invitation.tsx (điều phối: fetch data, chọn layout)
@@ -89,17 +91,47 @@ interface DecoConfig {
   flip: boolean;       // lật ngang
   z: number;           // thứ tự lớp (0 = dưới cùng, cao = nổi trên)
   opacity: number;     // 0.1 - 1
-  zone?: 'cover' | 'body';  // bìa hay nội dung. Thiếu = 'body'
+  zone?: 'cover' | 'body' | 'header' | 'footer';  // Thiếu = 'body'
 }
 ```
 
-`design` lưu trong DB: `{ theme: {...}, decorations: DecoConfig[] }`.
+`design` lưu trong DB: `{ theme: {...}, fontset: '<key>', spacing?: {sectionGap, headerMin}, decorations: DecoConfig[], sectionOrder?: [...] }`.
 
-**Thứ tự lớp (z-index) — quy ước:**
-- Dải đỏ/banner: `z = 1`
-- Ảnh trang trí: `z = 2..9` (≥2 là nổi trước dải đỏ)
-- Chữ (tên, nội dung): `z = 30` (LUÔN trên cùng, không bao giờ bị ảnh đè)
-- Lớp edit (khi chỉnh trong admin): `z = 50` (để bấm/kéo được mọi ảnh)
+**Khoảng cách (spacing) — chỉnh trong admin (2 thanh trượt):**
+- `sectionGap` → CSS var `--inv-section-gap` (padding dọc mỗi `.inv-section`, mặc định 64px).
+- `headerMin` → CSS var `--inv-header-min` (chiều cao header laudai/floral — để khung hoa/lâu đài không đè family). Mặc định: floral 820, laudai 720, khác 480.
+- CSS dùng `var(--inv-header-min, <fallback>)` ở MỌI media query (mobile cũng dùng var, không hard-code).
+- Backend `updateDesign` MERGE design cũ → không mất sectionOrder khi lưu.
+
+**4 ZONE — tọa độ % tính theo block khác nhau (QUAN TRỌNG, tránh ảnh trôi):**
+| zone | % tính theo | dùng cho |
+|------|-------------|----------|
+| `cover` | thẻ bìa (gate-card) | ảnh trang trí màn "Mở thiệp" |
+| `header` | block tên/header layout | khung cảnh bám tên (lâu đài, khung hoa oval) — KHÔNG trôi xuống body |
+| `body` | TOÀN trang thiệp | hoa rải dọc thân (% trang dài → cẩn thận trôi) |
+| `footer` | block `.inv-footer` cuối | cụm hoa/đài phun nước cuối thiệp — bám footer dù trang dài ngắn. `top` âm = tràn LÊN trên footer |
+
+**⚠️ QUY ƯỚC Z-INDEX (RÀNG BUỘC — chống ảnh đè chữ):**
+- Chữ body (`.inv-section`) ở `z:3`, chữ footer ở `z:3`, chữ cover ở `z:60`.
+- Ảnh trang trí **zone body/header/footer: `z` TỐI ĐA = 2** (luôn DƯỚI chữ). Slider admin đã giới hạn max=2 cho các zone này.
+- Ảnh **zone cover**: `z` tới 9 (vì chữ cover ở z:60).
+- Lớp edit (admin): `z:50` để kéo được.
+- → KHÔNG bao giờ set ảnh body z≥3. Nếu thấy ảnh đè chữ = ảnh có z quá cao, hạ về ≤2.
+
+---
+
+## 4b. ⭐ FONTSET — bộ font theo mẫu (đòn bẩy đa dạng MẠNH NHẤT)
+
+File: `src/features/invitation/fontsets.ts`. Mỗi fontset map 3 CSS var:
+- `--font-heading` (tiêu đề section), `--font-name` (tên CD/CR), `--font-body` (nội dung).
+
+5 bộ sẵn: `classic-serif` (Playfair, mặc định) · `elegant` (Cormorant/Garamond) · `script-soft` (Dancing Script) · `romantic` (Great Vibes) · `modern-sans` (Be Vietnam Pro).
+
+**Cách dùng:** Admin → Thiết kế mẫu → dropdown **"Bộ font"** → chọn → Lưu. Lưu vào `design.fontset`.
+
+**Thêm fontset mới:** (1) thêm font vào `index.html` (phải có Vietnamese subset); (2) thêm 1 entry vào `FONTSETS`. Body tự đọc var, không cần sửa component.
+
+**Quy tắc:** CSS thiệp dùng `font-family: var(--font-heading, '<fallback>')` — KHÔNG hard-code font. Layout đặc thù (laudai dùng Cormorant cho tên) có thể giữ font riêng nếu cố ý.
 
 ---
 

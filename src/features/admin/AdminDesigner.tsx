@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2, Save, Upload, Camera } from 'lucide-react';
 import { catalogApi, adminApi } from '../../api/client';
 import type { Template } from '../../data/types';
 import { DecoConfig, DEFAULT_DECORATIONS, defaultDecosByLayout } from '../invitation/decorations';
+import { FONTSETS, DEFAULT_FONTSET } from '../invitation/fontsets';
 import { DesignerPreview, type Zone } from './DesignerPreview';
 import { useToast } from '../../components/common/Toast';
 import '../invitation/Invitation.css';
@@ -37,10 +38,16 @@ export default function AdminDesigner() {
   const [saving, setSaving] = useState(false);
   const [regenMsg, setRegenMsg] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+  const [fontset, setFontset] = useState<string>(DEFAULT_FONTSET);
+  const [spacing, setSpacing] = useState<{ sectionGap: number; headerMin: number }>({ sectionGap: 64, headerMin: 720 });
+  const [sectionOrder, setSectionOrder] = useState<string[] | undefined>(undefined);  // giữ thứ tự section từ DB → preview khớp demo
+  const [headerStyle, setHeaderStyle] = useState<string | undefined>(undefined);      // kiểu header hoamoc (split/stack) → preview khớp demo
   const [decos, setDecos] = useState<DecoConfig[]>(DEFAULT_DECORATIONS);
   const [layout, setLayout] = useState<string>('traditional');
+  const [activeSlug, setActiveSlug] = useState<string>('');
   const [zone, setZone] = useState<Zone>('body');
   const [selId, setSelId] = useState<string | null>(null);
+  const [showDemo, setShowDemo] = useState(false);                         // xem demo đầy đủ sau khi lưu
   const [library, setLibrary] = useState<{ url: string; name: string; group: string }[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -91,7 +98,14 @@ export default function AdminDesigner() {
     const d = detail?.design ?? null;
     const tplLayout = detail?.layout ?? 'traditional';
     setLayout(tplLayout);
+    setActiveSlug(detail?.slug ?? '');
+    setShowDemo(false);
     setTheme({ ...DEFAULT_THEME, ...(d?.theme ?? {}) });
+    setFontset(d?.fontset ?? DEFAULT_FONTSET);
+    const defHeader = tplLayout === 'floral' ? 820 : tplLayout === 'laudai' ? 720 : tplLayout === 'hoamoc' ? 760 : 480;
+    setSpacing({ sectionGap: d?.spacing?.sectionGap ?? 64, headerMin: d?.spacing?.headerMin ?? defHeader });
+    setSectionOrder(Array.isArray(d?.sectionOrder) && d.sectionOrder.length ? d.sectionOrder : undefined);
+    setHeaderStyle(d?.headerStyle);
     setDecos(Array.isArray(d?.decorations) && d.decorations.length ? d.decorations : defaultDecosByLayout(tplLayout));
     setSelId(null);
   };
@@ -118,7 +132,7 @@ export default function AdminDesigner() {
     if (activeId == null) return;
     setSaving(true);
     setRegenMsg(null);
-    const designPayload: { theme: Theme; decorations: DecoConfig[] } = { theme, decorations: decos };
+    const designPayload = { theme, decorations: decos, fontset, spacing, ...(sectionOrder ? { sectionOrder } : {}), ...(headerStyle ? { headerStyle } : {}) };
     const res = await adminApi.updateDesign(activeId, designPayload);
     if (!res.success) {
       setSaving(false);
@@ -134,8 +148,12 @@ export default function AdminDesigner() {
     else toast('Đã lưu. Tạo ảnh thất bại: ' + (regen.message ?? ''), 'error');
   };
 
-  const zoneDecos = decos.filter((d) => (d.zone ?? 'body') === zone);
-  const selected = decos.find((d) => d.id === selId && (d.zone ?? 'body') === zone) ?? null;
+  // Tab "Nội dung" (body) gồm CẢ ảnh zone 'header' (lâu đài) + 'footer' (đài phun nước cuối) —
+  // khớp DesignerPreview, để hiện trong danh sách + chỉnh kích thước. Tab "Bìa" chỉ cover.
+  const inZone = (d: DecoConfig) =>
+    zone === 'body' ? (d.zone ?? 'body') !== 'cover' : (d.zone ?? 'body') === zone;
+  const zoneDecos = decos.filter(inZone);
+  const selected = decos.find((d) => d.id === selId && inZone(d)) ?? null;
 
   return (
     <div className="dsn-root">
@@ -173,12 +191,29 @@ export default function AdminDesigner() {
               ))}
             </div>
 
+            <h3>Bộ font</h3>
+            <select className="dsn-fontset" value={fontset} onChange={(e) => setFontset(e.target.value)}>
+              {Object.values(FONTSETS).map((fs) => (
+                <option key={fs.key} value={fs.key}>{fs.label}</option>
+              ))}
+            </select>
+
+            <h3>Khoảng cách</h3>
+            <label>Cách giữa các phần: {spacing.sectionGap}px
+              <input type="range" min={16} max={120} value={spacing.sectionGap}
+                onChange={(e) => setSpacing((s) => ({ ...s, sectionGap: +e.target.value }))} />
+            </label>
+            <label>Chiều cao đầu thiệp: {spacing.headerMin}px
+              <input type="range" min={360} max={1100} step={10} value={spacing.headerMin}
+                onChange={(e) => setSpacing((s) => ({ ...s, headerMin: +e.target.value }))} />
+            </label>
+
             {selected && (
               <div className="dsn-edit">
                 <h3>Chỉnh ảnh đang chọn</h3>
                 <p className="dsn-edit-name">{selected.label ?? selected.id}</p>
                 <label>Kích thước: {selected.width}%
-                  <input type="range" min={3} max={130} value={selected.width} onChange={(e) => patchSel({ width: +e.target.value })} />
+                  <input type="range" min={3} max={200} value={selected.width} onChange={(e) => patchSel({ width: +e.target.value })} />
                 </label>
                 <label>Xoay: {selected.rotate}°
                   <input type="range" min={-180} max={180} value={selected.rotate} onChange={(e) => patchSel({ rotate: +e.target.value })} />
@@ -186,11 +221,13 @@ export default function AdminDesigner() {
                 <label>Trong suốt: {selected.opacity}
                   <input type="range" min={0.1} max={1} step={0.05} value={selected.opacity} onChange={(e) => patchSel({ opacity: +e.target.value })} />
                 </label>
+                {/* z-index: zone body/footer/header chữ ở z:3 → ảnh tối đa z:2 (luôn DƯỚI chữ, không đè).
+                    Cover chữ ở z:60 → ảnh cho tới z:9. */}
                 <label>Thứ tự lớp: {selected.z}
-                  <input type="range" min={0} max={20} value={selected.z} onChange={(e) => patchSel({ z: +e.target.value })} />
+                  <input type="range" min={0} max={zone === 'cover' ? 9 : 2} value={selected.z} onChange={(e) => patchSel({ z: +e.target.value })} />
                 </label>
                 <div className="dsn-edit-row">
-                  <button onClick={() => patchSel({ z: 9 })}>⬆ Đưa lên trên cùng</button>
+                  <button onClick={() => patchSel({ z: zone === 'cover' ? 9 : 2 })}>⬆ Đưa lên trên cùng</button>
                   <button onClick={() => patchSel({ z: 0 })}>⬇ Đưa xuống dưới cùng</button>
                 </div>
                 <div className="dsn-edit-row">
@@ -247,15 +284,23 @@ export default function AdminDesigner() {
 
           <div className="dsn-preview">
             <div className="dsn-zone-toggle" role="tablist">
-              <button role="tab" className={zone === 'cover' ? 'on' : ''} onClick={() => switchZone('cover')}>Bìa thiệp</button>
-              <button role="tab" className={zone === 'body' ? 'on' : ''} onClick={() => switchZone('body')}>Nội dung</button>
+              <button role="tab" className={!showDemo && zone === 'cover' ? 'on' : ''} onClick={() => { setShowDemo(false); switchZone('cover'); }}>Bìa thiệp</button>
+              <button role="tab" className={!showDemo && zone === 'body' ? 'on' : ''} onClick={() => { setShowDemo(false); switchZone('body'); }}>Nội dung</button>
+              <button role="tab" className={showDemo ? 'on' : ''} onClick={() => setShowDemo(true)} disabled={!activeSlug}>👁 Xem demo</button>
             </div>
             <p className="dsn-hint">
-              Kéo ảnh để di chuyển. Bấm ảnh để chọn rồi chỉnh ở bảng <b>bên trái</b>. Đang chỉnh vùng <b>{zone === 'cover' ? 'Bìa thiệp' : 'Nội dung'}</b>.
+              {showDemo
+                ? <>Xem thiệp HOÀN CHỈNH như khách thấy. Lưu trước để cập nhật. Thu nhỏ cửa sổ trình duyệt để xem mobile.</>
+                : <>Kéo ảnh để di chuyển. Bấm ảnh để chọn rồi chỉnh ở bảng <b>bên trái</b>. Đang chỉnh vùng <b>{zone === 'cover' ? 'Bìa thiệp' : 'Nội dung'}</b>.</>}
             </p>
             <div className="dsn-stage">
-              <DesignerPreview layout={layout} theme={theme} decos={decos} zone={zone} onChange={setDecos}
-                selectedId={selId} onSelect={setSelId} />
+              {showDemo ? (
+                <iframe className="dsn-demo-frame" title="Demo thiệp"
+                  src={`/thiep/demo/${activeSlug}`} key={activeSlug} />
+              ) : (
+                <DesignerPreview layout={layout} theme={theme} fontset={fontset} spacing={spacing} sectionOrder={sectionOrder} headerStyle={headerStyle} decos={decos} zone={zone} onChange={setDecos}
+                  selectedId={selId} onSelect={setSelId} />
+              )}
             </div>
           </div>
         </div>

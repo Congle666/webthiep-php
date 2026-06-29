@@ -87,7 +87,7 @@
 .ldx-header {
   position: relative;
   z-index: 3;
-  min-height: 720px;   /* đủ chứa khung cảnh lâu đài (zone header) — family nằm DƯỚI, không bị đè */
+  min-height: var(--inv-header-min, 720px);   /* chỉnh trong admin; đủ chứa khung cảnh lâu đài — family DƯỚI, không bị đè */
   padding: 40px 24px 24px;
   display: flex; flex-direction: column; align-items: center;
   gap: 10px;
@@ -112,6 +112,8 @@
   font-weight: 600; font-style: italic;
   color: var(--ldx-green); margin: 0;
   text-transform: none; letter-spacing: 0.01em;
+  /* Bóng trắng nhẹ → tên nổi rõ khi đè lên khung cảnh lâu đài */
+  text-shadow: 0 1px 8px rgba(255,255,255,0.9), 0 0 2px rgba(255,255,255,0.85);
 }
 
 /* WELCOME TO OUR WEDDING + ornament + divider — Ở TRÊN tên (đầu header) */
@@ -141,7 +143,7 @@
 
 @media (max-width: 640px) {
   .ldx-gate-card { padding: 64px 22px 44px; }
-  .ldx-header { min-height: 480px; padding: 28px 14px 18px; }
+  .ldx-header { min-height: var(--inv-header-min, 480px); padding: 28px 14px 18px; }
   .ldx-welcome-text { font-size: 0.72rem; letter-spacing: 0.26em; }
 }
 
@@ -170,6 +172,94 @@
 
 /* Khoảng cách thoáng giữa header và section đầu */
 .inv-laudai .inv-section:first-of-type { padding-top: 40px; }
+
+/* ===== BỐ CỤC BÊN TRONG — khớp SPEC ĐO THẬT ChungĐôi lau-dai-xanh =====
+   (KHÔNG chỉ đổi màu — đổi cách trình bày: heading Times 20px in hoa căn giữa,
+    family 1 cột căn TRÁI thay vì 2 cột, spacing thoáng.) */
+
+/* Heading H2 mọi section: Times New Roman, 20px, in hoa, letter-spacing 2px, căn giữa */
+.inv-laudai .inv-h2 {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 20px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  text-align: center; color: var(--ldx-green);
+}
+
+/* Family/Lễ: 1 CỘT căn TRÁI (ChungĐôi), KHÔNG phải 2 cột trái-phải */
+.inv-laudai .inv-family-grid {
+  grid-template-columns: 1fr;
+  gap: 24px;
+  max-width: 360px; margin: 0 auto;
+  text-align: left;
+}
+.inv-laudai .inv-family { text-align: left; }
+.inv-laudai .inv-family-label {
+  font-family: 'Times New Roman', Times, serif;
+  text-transform: uppercase; letter-spacing: 1.6px; font-weight: 600;
+  font-size: 15px;
+}
+.inv-laudai .inv-family p { font-weight: 300; font-size: 16px; line-height: 1.7; }
+
+/* ===== BLOCK LỄ THÀNH HÔN (family đầy đủ) — spec đo thật ChungĐôi ===== */
+.inv-ldx-le { text-align: center; padding-bottom: 56px; }
+
+/* Ông bà 2 cột nhỏ */
+.inv-ldx-parents {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; max-width: 380px; margin: 14px auto 0;
+}
+.inv-ldx-pcol { text-align: center; }
+.inv-ldx-ptitle {
+  font-family: Baskerville, 'Libre Baskerville', serif;
+  font-size: 13px; font-weight: 300; margin: 0 0 2px;
+}
+.inv-ldx-pname {
+  font-family: Baskerville, 'Libre Baskerville', serif;
+  font-size: 13px; font-weight: 600; line-height: 1.5; margin: 0;
+}
+.inv-ldx-paddr {
+  font-size: 12px; font-weight: 300; opacity: 0.8;
+  margin: 4px 0 0; line-height: 1.4;
+}
+
+/* Báo tin */
+.inv-ldx-announce {
+  font-family: Baskerville, 'Libre Baskerville', serif;
+  font-size: 14px; font-weight: 300; text-transform: uppercase;
+  letter-spacing: 0.5px; line-height: 1.6;
+  margin: 36px auto 0; max-width: 320px;
+}
+
+/* Tên cô dâu chú rể (script TO, đậm nét — khớp ChungĐôi ~43px) */
+.inv-root .inv-ldx-cpname {
+  font-family: 'Dancing Script', 'Cormorant', cursive;
+  font-size: clamp(38px, 11vw, 46px); font-weight: 600;
+  color: var(--ldx-green); line-height: 1.05;
+  margin: 24px 0 0;
+}
+.inv-ldx-rank {
+  font-family: Baskerville, 'Libre Baskerville', serif;
+  font-size: 12px; font-weight: 300; text-transform: uppercase;
+  letter-spacing: 2.4px; margin: 12px 0 0; opacity: 0.85;
+}
+/* Dấu & giữa 2 tên — lớn, nhạt (như ChungĐôi) */
+.inv-ldx-amp {
+  display: block; font-family: 'Cormorant', serif;
+  font-size: 30px; color: var(--ldx-green); opacity: 0.5;
+  margin: 18px 0 0;
+}
+
+/* Lễ thành hôn tại tư gia */
+.inv-ldx-cer { margin-top: 32px; }
+.inv-ldx-cer-venue {
+  font-family: Baskerville, 'Libre Baskerville', serif;
+  font-size: 16px; font-weight: 400; line-height: 1.6; margin: 0;
+}
+.inv-ldx-cer-venue strong { font-weight: 600; }
+.inv-ldx-cer-time {
+  font-family: Baskerville, 'Libre Baskerville', serif;
+  font-size: 16px; font-weight: 400; margin: 14px 0 0;
+}
 
 /* Nút submit / map / footer: màu xanh */
 .inv-laudai .inv-submit { background: var(--ldx-green); }

@@ -97,9 +97,11 @@
 .flr-header {
   position: relative;
   z-index: 3;
-  min-height: 600px; /* đủ cao chứa khung oval (width 70% → cao ~tỷ lệ) + hoa đáy */
+  /* Khung oval cao 1.77× rộng. width 58% × 760 ≈ 440px → cao ~780px. Header phải đủ cao
+     để khung + hoa góc nằm TRỌN trong header, KHÔNG tràn xuống đè "THÔNG TIN LỄ CƯỚI". */
+  min-height: var(--inv-header-min, 820px);   /* chỉnh trong admin; đủ chứa khung hoa oval — family DƯỚI, không bị đè */
   display: flex; align-items: center; justify-content: center;
-  padding: 60px 16px 80px;
+  padding: 60px 16px 120px;
   overflow: visible; /* PHẢI visible để khung oval (decoration) tràn ra ngoài đẹp */
 }
 
@@ -146,12 +148,12 @@
 }
 
 @media (max-width: 800px) {
-  .flr-header { min-height: 480px; }
+  .flr-header { min-height: var(--inv-header-min, 480px); }
   .flr-frame-names { max-width: 64%; }
 }
 @media (max-width: 640px) {
   .flr-gate-card { padding: 64px 22px 44px; }
-  .flr-header { min-height: 380px; }
+  .flr-header { min-height: var(--inv-header-min, 380px); }
   .flr-frame-names { max-width: 70%; }
   .flr-frame-name { font-size: clamp(2.4rem, 12vw, 3.2rem); }
 }
@@ -167,6 +169,18 @@
   --muted:     #8c9b7a;
   background:  var(--flr-cream) url('/invitation/paper-bg.jpg');
   background-size: 700px;
+}
+
+/* Bố cục body khớp ChungĐôi mai-lan-trang: heading 20px in hoa căn giữa (Baskerville qua fontset),
+   family 1 cột căn trái. Dùng chung block lễ đầy đủ (.inv-ldx-le) với laudai. */
+.inv-floral .inv-h2 {
+  font-size: 20px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  text-align: center;
+}
+.inv-floral .inv-family-grid {
+  grid-template-columns: 1fr; gap: 24px;
+  max-width: 360px; margin: 0 auto; text-align: left;
 }
 
 /* Banner đỏ của traditional không có ở floral — ẩn đi */
